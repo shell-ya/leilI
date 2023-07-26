@@ -1,0 +1,218 @@
+package com.linkwin.activity.domain;
+
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import com.linkwin.common.annotation.Excel;
+import com.linkwin.common.core.domain.BaseEntity;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+/**
+ * 兑奖核销管理对象 exchange_prize
+ * 
+ * @author ruoyi
+ * @date 2022-06-01
+ */
+public class ExchangePrize extends BaseEntity
+{
+    private static final long serialVersionUID = 1L;
+
+    /** $column.columnComment */
+    private Long id;
+
+    /** 中奖码 */
+    @NotBlank(message = "中奖码不能为空")
+    @Excel(name = "中奖码")
+    private String code;
+
+    /** 是否兑换 0=未兑换 1=已兑换 */
+    @Excel(name = "是否兑换 0=未兑换 1=已兑换")
+    private Integer exchange;
+
+    /** 核销人id */
+    @Excel(name = "核销人id")
+    private Long checkPeople;
+
+    /** 核销地点 */
+    @Excel(name = "核销地点")
+    private String checkAddress;
+
+    /** 核销时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:dd")
+    @Excel(name = "核销时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date checkTime;
+
+    /** 核销人名称 */
+    @Excel(name = "核销人名称")
+    private String checkPeopleName;
+
+    /** 兑换奖品 */
+    @NotBlank(message = "奖品不能为空")
+    @Excel(name = "兑换奖品")
+    private String prize;
+
+
+    private String phone;
+
+    @NotBlank(message = "openId不能为空")
+    private String openId;
+
+    /**  参加活动条码 */
+    @NotBlank(message = "营销码不能为空")
+    private String markCode;
+
+    /**  奖项配置id */
+    @NotNull(message = "奖项配置id")
+    private Long luckdrawPrizeId;
+
+    /**  奖项配置id */
+    @Excel(name = "奖项配置id")
+    private Long activityId;
+
+    /**  奖项配置id */
+    @Excel(name = "奖项配置id")
+    private String activityName;
+
+
+
+
+    public void setId(Long id) 
+    {
+        this.id = id;
+    }
+
+    public Long getId() 
+    {
+        return id;
+    }
+    public void setCode(String code) 
+    {
+        this.code = code;
+    }
+
+    public String getCode() 
+    {
+        return code;
+    }
+    public void setExchange(Integer exchange) 
+    {
+        this.exchange = exchange;
+    }
+
+    public Integer getExchange() 
+    {
+        return exchange;
+    }
+    public void setCheckPeople(Long checkPeople)
+    {
+        this.checkPeople = checkPeople;
+    }
+
+    public Long getCheckPeople()
+    {
+        return checkPeople;
+    }
+    public void setCheckAddress(String checkAddress)
+    {
+        this.checkAddress = checkAddress;
+    }
+
+    public String getCheckAddress()
+    {
+        return checkAddress;
+    }
+    public void setCheckTime(Date checkTime) 
+    {
+        this.checkTime = checkTime;
+    }
+
+    public Date getCheckTime() 
+    {
+        return checkTime;
+    }
+    public void setCheckPeopleName(String checkPeopleName)
+    {
+        this.checkPeopleName = checkPeopleName;
+    }
+
+    public String getCheckPeopleName()
+    {
+        return checkPeopleName;
+    }
+    public void setPrize(String prize) 
+    {
+        this.prize = prize;
+    }
+
+    public String getPrize() 
+    {
+        return prize;
+    }
+
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
+    }
+
+    public String getMarkCode() {
+        return markCode;
+    }
+
+    public void setMarkCode(String markCode) {
+        this.markCode = markCode;
+    }
+
+    public Long getLuckdrawPrizeId() {
+        return luckdrawPrizeId;
+    }
+
+    public void setLuckdrawPrizeId(Long luckdrawPrizeId) {
+        this.luckdrawPrizeId = luckdrawPrizeId;
+    }
+
+    public Long getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(Long activityId) {
+        this.activityId = activityId;
+    }
+
+
+    public String getActivityName() {
+        return activityName;
+    }
+
+    public void setActivityName(String activityName) {
+        this.activityName = activityName;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
+            .append("id", getId())
+            .append("code", getCode())
+            .append("exchange", getExchange())
+            .append("checkPople", getCheckPeople())
+            .append("chechAddress", getCheckAddress())
+            .append("checkTime", getCheckTime())
+            .append("checkPopleName", getCheckPeopleName())
+            .append("prize", getPrize())
+            .toString();
+    }
+}

@@ -1,0 +1,223 @@
+package com.linkwin.web.controller.apply;
+
+import java.util.Date;
+import java.util.List;
+
+import com.linkwin.apply.domain.BarCodeApply;
+import com.linkwin.apply.domain.BoxCodeApplyStatusMenu;
+import com.linkwin.apply.service.IBarCodeApplyService;
+import com.linkwin.basedata.domain.ProductOrgan;
+import com.linkwin.basedata.service.IProductOrganService;
+import com.linkwin.common.exception.ServiceException;
+import com.linkwin.common.utils.MessageUtils;
+import com.linkwin.common.utils.ShiroUtils;
+import com.linkwin.common.utils.file.FileUtils;
+import com.linkwin.system.service.ISysConfigService;
+import com.linkwin.utils.ConfConst;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.enums.BusinessType;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.utils.poi.ExcelUtil;
+import com.linkwin.common.core.page.TableDataInfo;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * 字母码申请记录Controller
+ * 
+ * @author ruoyi
+ * @date 2022-05-19
+ */
+@Slf4j
+@Controller
+@RequestMapping("/apply/barApply")
+public class BarCodeApplyController extends BaseController
+{
+    private String prefix = "apply/barApply";
+
+    @Autowired
+    private IBarCodeApplyService barCodeApplyService;
+
+    @Autowired
+    private ISysConfigService sysConfigService;
+
+    @Autowired
+    private IProductOrganService productOrganService;
+
+    @RequiresPermissions("apply:barcode:view")
+    @GetMapping()
+    public String apply()
+    {
+        return prefix + "/apply";
+    }
+
+    /**
+     * 查询字母码申请记录列表
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public TableDataInfo list(BarCodeApply barCodeApply)
+    {
+        startPage();
+        List<BarCodeApply> list = barCodeApplyService.selectBarCodeApplyList(barCodeApply);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出字母码申请记录列表
+     */
+    @Log(title = "字母码申请记录", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    @ResponseBody
+    public AjaxResult export(BarCodeApply barCodeApply)
+    {
+        List<BarCodeApply> list = barCodeApplyService.selectBarCodeApplyList(barCodeApply);
+        ExcelUtil<BarCodeApply> util = new ExcelUtil<BarCodeApply>(BarCodeApply.class);
+        return util.exportExcel(list, "子母码申请记录数据");
+    }
+
+    /**
+     * 新增字母码申请记录
+     */
+    @GetMapping("/add")
+    public String add()
+    {
+        return prefix + "/add";
+    }
+
+    /**
+     * 新增保存字母码申请记录
+     */
+    @Log(title = "字母码申请记录", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult addSave(BarCodeApply barCodeApply)
+    {
+        return addAfter(barCodeApply);
+    }
+
+    /**
+     * 修改字母码申请记录
+     */
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    {
+        BarCodeApply barCodeApply = barCodeApplyService.selectBarCodeApplyById(id);
+        mmap.put("barCodeApply", barCodeApply);
+        return prefix + "/edit";
+    }
+
+    /**
+     * 修改保存字母码申请记录
+     */
+    @Log(title = "字母码申请记录", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult editSave(BarCodeApply barCodeApply)
+    {
+        return toAjax(barCodeApplyService.updateBarCodeApply(barCodeApply));
+    }
+
+    /**
+     * 删除字母码申请记录
+     */
+    @Log(title = "字母码申请记录", businessType = BusinessType.DELETE)
+    @PostMapping( "/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids)
+    {
+        return toAjax(barCodeApplyService.deleteBarCodeApplyByIds(ids));
+    }
+
+
+    @Log(title = "下载条码", businessType = BusinessType.EXPORT)
+    @GetMapping("/downLoad")
+    @ResponseBody
+    public void downLoad(Long id, HttpServletRequest request, HttpServletResponse response){
+        try {
+            BarCodeApply barCodeApply = barCodeApplyService.selectBarCodeApplyById(id);
+            if (barCodeApply.getIsDownload().equals("0")){
+                barCodeApply.setIsDownload("1");//改为已下载
+            }
+            if (barCodeApply.getDownloadNum()>=barCodeApply.getDownloadMaxNum()){
+                return;
+            }
+            barCodeApply.setDownloadNum(barCodeApply.getDownloadNum()+1);//下载次数+1
+            barCodeApplyService.updateBarCodeApply(barCodeApply);
+            String path=barCodeApply.getFilePath();
+            String dir = sysConfigService.selectConfigByKey(ConfConst.BAR_CODE_FILE_PATH);
+            path=dir+path;
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition",
+                    "attachment;fileName=" + FileUtils.setFileDownloadHeader(request, barCodeApply.getFileName()));
+            FileUtils.writeBytes(path, response.getOutputStream());
+        }catch (Exception e){
+            log.error("BarCodeApplyController downLoad is error",e);
+        }
+    }
+
+    @PostMapping("/queryPassword")
+    @ResponseBody
+    public AjaxResult queryPassword(Long id){
+        BarCodeApply barCodeApply = barCodeApplyService.selectBarCodeApplyById(id);
+        if (!barCodeApply.getCreator().equals(ShiroUtils.getSysUser().getUserName())){
+//            return AjaxResult.error("您没有权限查看该码包密码");
+            return AjaxResult.error(MessageUtils.message("error.msg.nothavepermission"));
+        }
+        return AjaxResult.ok(barCodeApply.getPassword(),MessageUtils.message("success"));
+    }
+
+    @PostMapping("/setMaxDown")
+    @ResponseBody
+    public AjaxResult queryPassword(BarCodeApply barCodeApply){
+        return toAjax(barCodeApplyService.updateBarCodeApply(barCodeApply));
+    }
+
+    public AjaxResult addAfter(BarCodeApply barCodeApply){
+        int applyMax=200000;//母码申请数量
+        barCodeApply.setCreator(ShiroUtils.getSysUser().getUserName());
+        barCodeApply.setCreateTime(new Date());
+        double bumaRate = barCodeApply.getBumaRate().doubleValue() / 100;
+        if (bumaRate<0||bumaRate>1){
+//            return AjaxResult.error("请输入正确补码率");
+            return AjaxResult.error(MessageUtils.message("error.msg.entercorrectrate"));
+        }
+        barCodeApply.setBumaNum((int) Math.round(bumaRate * barCodeApply.getApplyNum()));//补码数量
+        barCodeApply.setTotalNum(barCodeApply.getApplyNum()+ barCodeApply.getBumaNum());//申请总数
+        if (barCodeApply.getTotalNum()>applyMax){
+//            return AjaxResult.error(String.format("申请条码总数量不可超过%d条", applyMax));
+            return AjaxResult.error(String.format(MessageUtils.message("error.msg.totalnumber"), applyMax));
+        }
+        barCodeApply.setStatus(BoxCodeApplyStatusMenu.HANDLE_STATUS_NONE.getValue());//未生成
+        barCodeApply.setIsDownload("0");//下载状态
+        barCodeApply.setDownloadNum(0);//已下载次数
+        barCodeApply.setExistNum(0);//已生成数量
+        barCodeApply.setDownloadMaxNum(1);//最大下载次数
+        return toAjax(barCodeApplyService.insertBarCodeApply(barCodeApply));
+    }
+
+    public void test(){
+        try {
+            ProductOrgan productOrgan=new ProductOrgan();
+            productOrgan.setOrganCode("testOrganCode111");
+            productOrgan.setPdCode("testPdCode111");
+            productOrganService.insertProductOrgan(productOrgan);
+            String tet=null;
+            tet.equals("");
+        }catch (Exception e){
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
+
+
+}

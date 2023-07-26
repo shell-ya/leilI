@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.WarehouseRecordMapper">
+    
+    <resultMap type="WarehouseRecord" id="WarehouseRecordResult">
+        <result property="id"    column="id"    />
+        <result property="productid"    column="productid"    />
+        <result property="productname"    column="productname"    />
+        <result property="spec"    column="spec"    />
+        <result property="batch"    column="batch"    />
+        <result property="inventoryquantity"    column="inventoryquantity"    />
+        <result property="unit"    column="unit"    />
+        <result property="creator"    column="creator"    />
+        <result property="createtime"    column="createtime"    />
+        <result property="updator"    column="updator"    />
+        <result property="updatetime"    column="updatetime"    />
+        <result property="isdelete"    column="isdelete"    />
+        <result property="remark"    column="remark"    />
+        <result property="changeflag"    column="changeflag"    />
+        <result property="changenumber"    column="changenumber"    />
+        <result property="warehouseId"    column="warehouse_id"    />
+        <result property="reason"    column="reason"    />
+        <result property="warehouseName"    column="warehouse_name"    />
+    </resultMap>
+
+    <sql id="selectWarehouseRecordVo">
+        select id, productid, productname, spec, batch, inventoryquantity, unit, creator, createtime, updator, updatetime, isdelete, remark, changeflag, changenumber, warehouse_id, reason, warehouse_name from warehouse_record
+    </sql>
+
+    <select id="selectWarehouseRecordList" parameterType="WarehouseRecord" resultMap="WarehouseRecordResult">
+        <include refid="selectWarehouseRecordVo"/>
+        <where>  
+            <if test="productid != null  and productid != ''"> and productid = #{productid}</if>
+            <if test="productname != null  and productname != ''"> and productname like concat('%', #{productname}, '%')</if>
+            <if test="batch != null  and batch != ''"> and batch = #{batch}</if>
+            <if test="changenumber != null "> and changenumber = #{changenumber}</if>
+            <if test="warehouseId != null  and warehouseId != ''"> and warehouse_id = #{warehouseId}</if>
+            <if test="warehouseName != null  and warehouseName != ''"> and warehouse_name like concat('%', #{warehouseName}, '%')</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectWarehouseRecordById" parameterType="Long" resultMap="WarehouseRecordResult">
+        <include refid="selectWarehouseRecordVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWarehouseRecord" parameterType="WarehouseRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into warehouse_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productid != null">productid,</if>
+            <if test="productname != null">productname,</if>
+            <if test="spec != null">spec,</if>
+            <if test="batch != null">batch,</if>
+            <if test="inventoryquantity != null">inventoryquantity,</if>
+            <if test="unit != null">unit,</if>
+            <if test="creator != null">creator,</if>
+            <if test="createtime != null">createtime,</if>
+            <if test="updator != null">updator,</if>
+            <if test="updatetime != null">updatetime,</if>
+            <if test="isdelete != null">isdelete,</if>
+            <if test="remark != null">remark,</if>
+            <if test="changeflag != null">changeflag,</if>
+            <if test="changenumber != null">changenumber,</if>
+            <if test="warehouseId != null">warehouse_id,</if>
+            <if test="reason != null">reason,</if>
+            <if test="warehouseName != null">warehouse_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productid != null">#{productid},</if>
+            <if test="productname != null">#{productname},</if>
+            <if test="spec != null">#{spec},</if>
+            <if test="batch != null">#{batch},</if>
+            <if test="inventoryquantity != null">#{inventoryquantity},</if>
+            <if test="unit != null">#{unit},</if>
+            <if test="creator != null">#{creator},</if>
+            <if test="createtime != null">#{createtime},</if>
+            <if test="updator != null">#{updator},</if>
+            <if test="updatetime != null">#{updatetime},</if>
+            <if test="isdelete != null">#{isdelete},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="changeflag != null">#{changeflag},</if>
+            <if test="changenumber != null">#{changenumber},</if>
+            <if test="warehouseId != null">#{warehouseId},</if>
+            <if test="reason != null">#{reason},</if>
+            <if test="warehouseName != null">#{warehouseName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWarehouseRecord" parameterType="WarehouseRecord">
+        update warehouse_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productid != null">productid = #{productid},</if>
+            <if test="productname != null">productname = #{productname},</if>
+            <if test="spec != null">spec = #{spec},</if>
+            <if test="batch != null">batch = #{batch},</if>
+            <if test="inventoryquantity != null">inventoryquantity = #{inventoryquantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="creator != null">creator = #{creator},</if>
+            <if test="createtime != null">createtime = #{createtime},</if>
+            <if test="updator != null">updator = #{updator},</if>
+            <if test="updatetime != null">updatetime = #{updatetime},</if>
+            <if test="isdelete != null">isdelete = #{isdelete},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="changeflag != null">changeflag = #{changeflag},</if>
+            <if test="changenumber != null">changenumber = #{changenumber},</if>
+            <if test="warehouseId != null">warehouse_id = #{warehouseId},</if>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="warehouseName != null">warehouse_name = #{warehouseName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWarehouseRecordById" parameterType="Long">
+        delete from warehouse_record where id = #{id}
+    </delete>
+
+    <delete id="deleteWarehouseRecordByIds" parameterType="String">
+        delete from warehouse_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectCountNumByWarehouse" resultType="Double">
+        select count(inventoryquantity) from warehouse_record where warehouse_id = #{warehouseCode}
+    </select>
+
+
+
+
+</mapper>

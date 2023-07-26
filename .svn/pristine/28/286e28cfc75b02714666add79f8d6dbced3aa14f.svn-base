@@ -1,0 +1,547 @@
+package com.linkwin.task.impl;
+
+import com.linkwin.apply.domain.*;
+import com.linkwin.apply.mapper.BarCodeApplyMapper;
+import com.linkwin.apply.mapper.BarCodeMapper;
+import com.linkwin.apply.mapper.SubCodeMapper;
+import com.linkwin.apply.service.IBarCodeSeedService;
+import com.linkwin.apply.service.IQrCodePreService;
+import com.linkwin.common.exception.ServiceException;
+import com.linkwin.common.utils.file.FileUtil;
+import com.linkwin.system.service.ISysConfigService;
+import com.linkwin.task.IDealBarCodeApplyTaskService;
+import com.linkwin.utils.CodeUtils;
+import com.linkwin.utils.ConfConst;
+import com.linkwin.utils.TableUtils;
+import lombok.extern.slf4j.Slf4j;
+import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.session.SqlSession;
+import org.joda.time.DateTime;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Slf4j
+@Service
+public class DealBarCodeApplyTaskServiceImpl implements IDealBarCodeApplyTaskService {
+
+
+    @Autowired
+    private BarCodeApplyMapper barCodeApplyMapper;
+
+    @Autowired
+    private BarCodeMapper barCodeMapper;
+
+    @Autowired
+    private IBarCodeSeedService barCodeSeedService;
+
+    @Autowired
+    private SubCodeMapper subCodeMapper;
+
+    @Autowired
+    private ISysConfigService sysConfigService;
+
+    @Autowired
+    private IQrCodePreService qrCodePreService;
+
+    @Resource
+    private SqlSessionTemplate sqlSessionTemplate;
+
+
+    @Override
+    public void dealApply() {
+        BarCodeApply oneApply = getOneApply();
+        if (oneApply==null){
+            return;
+        }
+        try {
+            generate(oneApply);
+            dealStatus(oneApply.getId(),BoxCodeApplyStatusMenu.HANDLE_STATUS_COMPLETED.getValue());
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("生成箱码异常");
+            dealStatus(oneApply.getId(),BoxCodeApplyStatusMenu.HANDLE_STATUS_FAILED.getValue());
+        }
+    }
+
+
+    @Transactional
+    public BarCodeApply getOneApply() throws RuntimeException{
+        BarCodeApply barCodeApply=null;
+        try {
+            BarCodeApply barCode=new BarCodeApply();
+            barCode.setStatus(BoxCodeApplyStatusMenu.HANDLE_STATUS_NONE.getValue());
+            barCodeApply = barCodeApplyMapper.getOneByWhere(barCode);//获取待处理的
+            if (barCodeApply==null){
+                log.info("没有需要处理的箱码申请");
+                return null;
+            }
+            int i = barCodeApplyMapper.changeStatus(barCodeApply.getId(), BoxCodeApplyStatusMenu.HANDLE_STATUS_RUNNING.getValue(),
+                    barCodeApply.getStatus());
+            if (i!=1){
+                log.info(String.format("申请记录Id[%d]状态修改失败%s->%s", barCodeApply.getId(), barCodeApply.getStatus(), BoxCodeApplyStatusMenu.HANDLE_STATUS_RUNNING.getValue()));
+                return null;
+            }
+            barCodeApply.setStatus(BoxCodeApplyStatusMenu.HANDLE_STATUS_RUNNING.getValue());
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("BoxCodeApplyTaskServiceImpl getOneApply 获取申请记录异常", e);
+            throw new RuntimeException(e.getMessage());
+        }
+        return barCodeApply;
+    }
+
+    @Transactional
+    public void generate(BarCodeApply barCodeApply) throws RuntimeException{
+        try {
+            Integer totalNum = barCodeApply.getTotalNum();
+            final int year = new DateTime(barCodeApply.getCreateTime()).getYear();
+            final String yearFix = String.valueOf(year).substring(2); //截掉年份前两位,取后两位作为年份标识
+            String tableName = TableUtils.getBarTableByYear(year);
+            String subTableName = TableUtils.getSubTableByYear(year);
+            int exitsNum = barCodeMapper.selectExitsNum(barCodeApply.getId(), tableName);
+            int randomLength=11;//随机部分长度
+            final long randomMax = (long) Math.pow(10, randomLength);//随机数最大值
+            Random random = new Random();
+
+
+
+            Set<String> set=new LinkedHashSet<>();
+            List<String> randomCodes=new ArrayList<>();
+            List<String> subCodeList=new ArrayList<>();
+            StringBuilder randomVal = new StringBuilder();
+            String s=String.valueOf(year);
+            String prefix=s.substring(s.length()-2,s.length()-1);
+            List<BarCode> barCodeList=new ArrayList<>();
+            List<SubCode> subCodeList1=new ArrayList<>();
+
+
+            //test
+            StringBuffer endStrSB=new StringBuffer();
+            endStrSB.append(String.valueOf(barCodeApply.getProportion()-1));
+            while (endStrSB.length()<3){
+                endStrSB.insert(0,"0");
+            }
+            StringBuffer serialSB=new StringBuffer();
+            StringBuffer markSB=new StringBuffer();
+
+
+            if (exitsNum<totalNum){
+                totalNum-=exitsNum;
+                int dealMaxNum=500;
+                while (totalNum>0){
+                    if (totalNum>dealMaxNum){
+//                        if (generateCode(prefix,randomVal,set,randomCodes,subCodeList,barCodeList,subCodeList1,barCodeApply,tableName,subTableName,dealMaxNum,random,randomMax)){
+//                            totalNum-=dealMaxNum;
+//                        }
+                        generateCodeTest("000",endStrSB.toString(),0,barCodeApply.getProportion()-1,barCodeApply,tableName,subTableName,dealMaxNum,serialSB,markSB);
+                        totalNum-=dealMaxNum;
+                    }else {
+                        generateCodeTest("000",endStrSB.toString(),0,barCodeApply.getProportion()-1,barCodeApply,tableName,subTableName,totalNum,serialSB,markSB);
+                        break;
+//                        if (generateCode(prefix,randomVal,set,randomCodes,subCodeList,barCodeList,subCodeList1,barCodeApply,tableName,subTableName,totalNum,random,randomMax)){
+//                            break;
+//                        }
+                    }
+                }
+            }
+            //生成文件
+            generateFile(barCodeApply,tableName,subTableName);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServiceException(e.getMessage());
+        }
+
+    }
+
+    @Transactional
+    public Boolean generateCodeTest(
+            String startStr,String endStr,Integer startNum,Integer endNum,
+            BarCodeApply barCodeApply,String tableName,String subTableName,int dealNum,
+            StringBuffer serialSB,
+            StringBuffer markSb
+    ) throws RuntimeException {
+        final int year =  DateTime.now().getYear();
+        qrCodePreService.updateQrCodePreApplyId(barCodeApply.getId(),year,dealNum);//标记
+        qrCodePreService.insertBarCode(barCodeApply.getId(),year,tableName,startStr,endStr,startNum,endNum);//迁移
+        //生成子码
+        QrCodePre qrCodePre=new QrCodePre();
+        qrCodePre.setApplyId(barCodeApply.getId());
+        List<QrCodePre> qrCodeList = qrCodePreService.selectByApplyId(barCodeApply.getId());
+        List<SubCode> subCodeList=new ArrayList<>();
+        if (qrCodeList!=null&&qrCodeList.size()>0){
+            for (int i=0;i<qrCodeList.size();i++){
+                for (int j=0;j<=endNum;j++){
+                    serialSB.append(j);
+                    while (serialSB.length()<3){
+                        serialSB.insert(0,"0");
+                    }
+                    SubCode subCode=new SubCode();
+                    subCode.setSubCode(qrCodeList.get(i).getCode()+serialSB.toString());
+                    serialSB.setLength(0);
+                    subCode.setApplyId(barCodeApply.getId());
+                    subCode.setSeed(qrCodeList.get(i).getSeed());
+                    subCode.setSerialNum(j);
+                    subCode.setPrefixCode(qrCodeList.get(i).getCode());
+                    subCode.setCreateTime(new Date());
+                    if (barCodeApply.getApplyType()==1){
+                        subCode.setMarkCode(generateMarkCode(subCode.getSubCode(),markSb));
+                    }
+                    markSb.setLength(0);
+                    subCodeList.add(subCode);
+                }
+            }
+        }
+        if (subCodeList.size()>0){
+            //插入到子码表
+            subCodeMapper.batchInsertSubCodeList(subTableName,subCodeList);
+        }
+        qrCodePreService.deleteByApplyId(barCodeApply.getId());//删除二维码预生成表
+        barCodeApplyMapper.updateExitsAndEndNum(barCodeApply.getId(),dealNum);
+        return true;
+    }
+
+
+
+
+
+    @Transactional
+    public Boolean generateCode(
+            String prefix,
+            StringBuilder randomVal,
+            Set<String> set,
+            List<String> randomCodes,
+            List<String> subCodeList,
+            List<BarCode> barCodeList,
+            List<SubCode> subCodeList1,
+            BarCodeApply barCodeApply,String tableName,String subTableName,int dealNum,Random random,
+        long randomMax
+    ) throws RuntimeException{
+        BarCode barCode=new BarCode();
+        SubCode subCode=new SubCode();
+        try {
+            long applyId=barCodeApply.getId();
+            //获取一个种子
+            BarCodeSeed seedIfNullAdd = barCodeSeedService.getSeedIfNullAdd();
+            int randomLength=11;//随机部分长度
+            randomVal = new StringBuilder();
+            StringBuffer startSB=new StringBuffer();
+            StringBuffer endSB=new StringBuffer();
+            BarCodeSeed updateSeed=new BarCodeSeed();
+            updateSeed.setId(seedIfNullAdd.getId());
+            int start = seedIfNullAdd.getStartNum();
+            int startNum=barCodeApplyMapper.selectEndNumById(barCodeApply.getId());
+            int step=1000;
+            final int year =  DateTime.now().getYear();
+//            String s=String.valueOf(year);
+//            String prefix=s.substring(s.length()-2,s.length()-1);
+            for (int i=0;i<dealNum;i++){
+                start+= random.nextInt(step);
+                if (start>=randomMax){
+                    updateSeed.setIsEnd(BoxCodeSeedEnum.IS_COMPLETED_COMPLETED.getValue());
+                    return false;
+                }
+                randomVal.append(start);
+                //长度不足补0
+                while(randomVal.length() < randomLength){
+                    randomVal.insert(0, "0");
+                }
+                randomVal.insert(0,seedIfNullAdd.getSeed());
+                randomVal.insert(0,prefix);
+                try {
+                    generateSubCode(subCodeList1,randomVal.toString(),seedIfNullAdd.getSeed(),barCodeApply.getProportion(),startNum,applyId);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                endSB.append(String.valueOf(barCodeApply.getProportion()-1));
+                while (endSB.length()<3){
+                    endSB.insert(0,"0");
+                }
+                BarCode barCode1=new BarCode();
+                barCode1.setPrefixCode(randomVal.toString());
+                randomVal.append("000"+endSB.toString());
+                barCode1.setBarCode(randomVal.toString());
+                barCode1.setSeed(seedIfNullAdd.getSeed());
+                barCode1.setStartNum(0);
+                barCode1.setEndNum(barCodeApply.getProportion()-1);
+                barCode1.setApplyId(barCodeApply.getId());
+
+                barCodeList.add(barCode1);
+//                set.add(randomVal.toString());
+                randomVal.setLength(0);
+                startSB.setLength(0);
+                endSB.setLength(0);
+                start++;
+            }
+            barCodeApplyMapper.updateExitsAndEndNum(barCodeApply.getId(),dealNum);
+            updateSeed.setStartNum(start);
+            updateSeed.setModifyTime(new Date());
+            updateSeed.setYear(year);
+            updateSeed.setSeed(seedIfNullAdd.getSeed());
+            int i = barCodeSeedService.updateBarCodeSeed(updateSeed);
+
+
+
+
+
+            randomCodes.addAll(set);
+            //保存子母码到表中
+//            barCode.setRandomCodeList(randomCodes);
+//            barCode.setCreateTime(new Date());
+//            barCode.setSeed(seedIfNullAdd.getSeed());
+//            barCode.setApplyId(barCodeApply.getId());
+//            Map<String,Object> params=new HashMap<>();
+//            params.put("tableName",tableName);
+//            barCode.setParams(params);
+            //批量更新母码
+//            subCode.setRandomCodeList(subCodeList);
+//            subCode.setSeed(seedIfNullAdd.getSeed());
+//            subCode.setApplyId(barCodeApply.getId());
+//            subCode.setCreateTime(new Date());
+//            Map<String,Object> subParams=new HashMap<>();
+//            subParams.put("tableName",subTableName);
+//            subCode.setParams(subParams);
+            //批量更新子码数据
+            barCodeMapper.batchInsertBarCodeList(tableName,barCodeList);
+            subCodeMapper.batchInsertSubCodeList(subTableName,subCodeList1);
+//            barCodeMapper.batchInsertBarCode(barCode);
+//            subCodeMapper.batchInsertSubCode(subCode);
+        }catch (Exception e){
+            log.error("DealBarCodeApplyTaskServiceImpl generateCode is error",e);
+            throw new RuntimeException(e.getMessage());
+        }finally {
+            if (set!=null){
+                set.clear();
+            }
+            if (randomCodes!=null){
+                randomCodes.clear();
+            }
+            if (subCodeList!=null){
+                subCodeList.clear();
+            }
+            if (barCodeList!=null){
+                barCodeList.clear();
+            }
+            if (subCodeList1!=null){
+                subCodeList1.clear();
+            }
+
+            barCode=null;
+            subCode=null;
+        }
+        return true;
+    }
+
+
+    @Transactional
+    public void generateFile(BarCodeApply barCodeApply,String barTableName,String subTableName) throws Exception {
+        try {
+            String fileFormat = barCodeApply.getFileFormat();
+            String barCodeFilePath = sysConfigService.selectConfigByKey(ConfConst.BAR_CODE_FILE_PATH);
+            final String dateStr = new SimpleDateFormat("yyyyMMddHHmmss").format(barCodeApply.getCreateTime());
+            String fileName=getFileName(barCodeApply.getId(),dateStr,barCodeApply.getTotalNum());
+            File folder = getCodeFolder(barCodeFilePath, dateStr);
+            File file=null;
+            if ("1".equals(fileFormat)) { //生成txt文件
+                String path=folder.getCanonicalPath() + File.separator + fileName + ".txt";
+                file = new File(path);
+                //如果文件存在，删除
+                if (file.exists()) {
+                    file.delete();
+                }
+            } else { //生成mdb文件
+
+            }
+            readData(barCodeApply,barTableName,subTableName,file);
+            generateZipFile(file,fileName,barCodeApply,dateStr);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServiceException(e.getMessage());
+        }
+
+    }
+
+    public void readData(BarCodeApply barCodeApply,String barTableName,String subTableName,File file ) throws Exception{
+        List<BarCode> barCodeList=null;
+        try {
+            long startTime=System.currentTimeMillis();
+            System.out.println("二维码申请，开始写入文件，申请id:"+barCodeApply.getId());
+//            barCodeList = barCodeMapper.selectByApplyId(barCodeApply.getId());
+            Integer totalNum = barCodeApply.getTotalNum();
+            int page=(totalNum/1000)+1;
+            int pageSize = 1000 * barCodeApply.getProportion();
+            try (FileOutputStream fos = new FileOutputStream(file, true);
+                 OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
+                 BufferedWriter out = new BufferedWriter(osw)) {
+            long endTime=System.currentTimeMillis();
+            System.out.println("查询生成数据所需时间"+(endTime-startTime));
+            String url=sysConfigService.selectConfigByKey(ConfConst.GONGZHONGHAO_URL);
+//            writeFile(barCodeApply,file,barCodeList,url);
+            StringBuffer sb=new StringBuffer();
+            for (int i=0;i<page;i++){
+                barCodeList = barCodeMapper.selectByApplyId(barTableName,subTableName,barCodeApply.getId(),i*pageSize,pageSize);
+                writeFileTest(barCodeApply,file,barCodeList,url,out,sb);
+                barCodeList.clear();
+            }
+            }
+
+        }catch (Exception e){
+            throw new ServiceException(e.getMessage());
+        }finally {
+            if (barCodeList!=null){
+                barCodeList=null;
+            }
+        }
+    }
+
+    @Transactional
+    public void generateZipFile(File file, String fileName, BarCodeApply barCodeApply, String dateStr) throws ZipException, IOException {
+        int zipPwdLength = Integer.parseInt(sysConfigService.selectConfigByKey(ConfConst.BAR_CODE_ZIP_PWD_LENGTH));//码包压缩文件密码长度
+        String zipPassword; //压缩文件密码
+        if (zipPwdLength > 0) {
+            if (zipPwdLength > 10) zipPwdLength = 10; //压缩文件密码最大10位(数据库字段长度限制)
+            zipPassword = RandomStringUtils.randomAlphanumeric(zipPwdLength);
+        } else {
+            zipPassword = null;
+        }
+        log.info("开始压缩文件");
+        long start = System.currentTimeMillis();
+        FileUtil.encryptZipFile(file, fileName, zipPassword);
+        log.info(String.format("压缩文件 结束。耗时: %d 秒", (System.currentTimeMillis() - start) / 1000));
+        BarCodeApply upApply = new BarCodeApply();
+        upApply.setId(barCodeApply.getId());
+        upApply.setFilePath("/" + dateStr + "/" + fileName + ".zip");
+        upApply.setPassword(zipPassword);
+        upApply.setFileName(fileName + ".zip");
+        barCodeApplyMapper.updateBarCodeApply(upApply);
+    }
+
+    public void writeFileTest(BarCodeApply barCodeApply,File file,List<BarCode> barCodeList,String url,BufferedWriter out,StringBuffer sb) throws Exception{
+        Integer applyType = barCodeApply.getApplyType();
+//        try (FileOutputStream fos = new FileOutputStream(file, true);
+//             OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
+//             BufferedWriter out = new BufferedWriter(osw)) {
+            barCodeList.forEach(barCode -> {
+                sb.append(barCode.getBarCode());
+                barCode.getSubList().forEach(subCode -> {
+                    sb.append(",");
+                    sb.append(url);
+                    sb.append("code=");
+                    sb.append(subCode.getSubCode());
+                    if (applyType==1){
+                        sb.append("|");
+                        sb.append(subCode.getMarkCode());
+                    }
+                });
+                sb.append("\n");
+            });
+            out.write(sb.toString());
+            out.flush();
+            sb.setLength(0);
+//        }
+    }
+
+    public void writeFile(BarCodeApply barCodeApply,File file,List<BarCode> barCodeList,String url) throws Exception{
+        Integer applyType = barCodeApply.getApplyType();
+        try (FileOutputStream fos = new FileOutputStream(file, true);
+             OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
+             BufferedWriter out = new BufferedWriter(osw)) {
+            StringBuffer sb = new StringBuffer();
+            barCodeList.forEach(barCode -> {
+                sb.append(barCode.getBarCode());
+                barCode.getSubList().forEach(subCode -> {
+                    sb.append(",");
+                    sb.append(url);
+                    sb.append("code=");
+                    sb.append(subCode.getSubCode());
+                    if (applyType==1){
+                        sb.append("|");
+                        sb.append(subCode.getMarkCode());
+                    }
+                });
+                sb.append("\n");
+            });
+            out.write(sb.toString());
+            out.flush();
+        }
+    }
+
+    //创建目录
+    private File getCodeFolder(String folderStr, String dateStr) {
+        File folder = new File(folderStr);
+        if (!folder.exists()){
+            folder.mkdirs();
+        }
+        folder = new File(folderStr + File.separator + dateStr);
+        if (!folder.exists()){
+            folder.mkdirs();
+        }
+        return folder;
+    }
+
+    /**
+     *
+     * @param
+     * @param prefix 非随机码部分
+     * @param seed 使用种子
+     * @param proportion 子母码比例
+     */
+    public void generateSubCode(List<SubCode> subCodeList ,String prefix,String seed,int proportion,int startNum,long applyId){
+        StringBuffer sb=new StringBuffer();
+        for (int i=0;i<proportion;i++){
+            int num=i+1000;
+            String s = String.valueOf(num);
+            String serial=s.substring(1);
+            Integer serialNum = Integer.valueOf(serial);
+            SubCode subCode=new SubCode();
+            subCode.setApplyId(applyId);
+            subCode.setSeed(seed);
+            subCode.setMarkCode(generateMarkCode(prefix+serial,sb));
+            subCode.setPrefixCode(prefix);
+            subCode.setSerialNum(serialNum);
+            subCode.setSubCode(prefix+serial);
+            subCodeList.add(subCode);
+            sb.setLength(0);
+        }
+    }
+
+    public String generateMarkCode(String subCode,StringBuffer sb){
+        sb.append(subCode);
+        for (char c:CodeUtils.randomCode(6).toCharArray()){
+            int num= (int)(Math.random()*sb.length()+1);
+            sb.insert(num,c);
+        }
+        return sb.toString();
+    }
+
+
+
+
+    public static String getFileName(long applyId,String dateStr,int applyNum){
+        return applyId+"_"+dateStr+"_"+applyNum;
+    }
+
+    private void dealStatus(long id,Integer status){
+        if (status.equals(BoxCodeApplyStatusMenu.HANDLE_STATUS_COMPLETED.getValue())){
+            log.info("处理成功");
+            barCodeApplyMapper.changeStatus(id,
+                    BoxCodeApplyStatusMenu.HANDLE_STATUS_COMPLETED.getValue(),
+                    BoxCodeApplyStatusMenu.HANDLE_STATUS_RUNNING.getValue());
+        }else {
+            log.error("处理失败");
+            barCodeApplyMapper.changeStatus(id,
+                    BoxCodeApplyStatusMenu.HANDLE_STATUS_FAILED.getValue(),
+                    BoxCodeApplyStatusMenu.HANDLE_STATUS_RUNNING.getValue());
+        }
+    }
+
+
+}

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.WhstockMapper">
+    
+    <resultMap type="Whstock" id="WhstockResult">
+        <result property="id"    column="id"    />
+        <result property="productid"    column="productid"    />
+        <result property="productname"    column="productname"    />
+        <result property="spec"    column="spec"    />
+        <result property="batch"    column="batch"    />
+        <result property="inventoryquantity"    column="inventoryquantity"    />
+        <result property="unit"    column="unit"    />
+        <result property="creator"    column="creator"    />
+        <result property="createtime"    column="createtime"    />
+        <result property="updator"    column="updator"    />
+        <result property="updatetime"    column="updatetime"    />
+        <result property="isdelete"    column="isdelete"    />
+        <result property="remark"    column="remark"    />
+        <result property="warehouseCode"    column="warehouse_code"    />
+        <result property="weight"    column="weight"    />
+        <result property="itemquantity"    column="itemquantity"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="warehouseName"    column="warehouse_name"    />
+        <result property="cartonweight"    column="cartonweight"    />
+    </resultMap>
+
+    <sql id="selectWhstockVo">
+        select id, productid, productname, spec, batch, inventoryquantity, unit, creator, createtime, updator, updatetime, isdelete, remark, warehouse_code, weight, itemquantity, order_no, warehouse_name, cartonweight from whstock
+    </sql>
+
+    <select id="selectWhstockList" parameterType="Whstock" resultMap="WhstockResult">
+        <include refid="selectWhstockVo"/>
+        <where>  
+            <if test="productid != null  and productid != ''"> and productid = #{productid}</if>
+            <if test="productname != null  and productname != ''"> and productname like concat('%', #{productname}, '%')</if>
+            <if test="batch != null  and batch != ''"> and batch = #{batch}</if>
+            <if test="weight != null "> and weight = #{weight}</if>
+            <if test="warehouseName != null  and warehouseName != ''"> and warehouse_name like concat('%', #{warehouseName}, '%')</if>
+            <if test="warehouseCode != null  and warehouseCode != ''"> and warehouse_code = #{warehouseCode}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectWhstockById" parameterType="Long" resultMap="WhstockResult">
+        <include refid="selectWhstockVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWhstock" parameterType="Whstock" useGeneratedKeys="true" keyProperty="id">
+        insert into whstock
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productid != null and productid != ''">productid,</if>
+            <if test="productname != null">productname,</if>
+            <if test="spec != null">spec,</if>
+            <if test="batch != null">batch,</if>
+            <if test="inventoryquantity != null">inventoryquantity,</if>
+            <if test="unit != null">unit,</if>
+            <if test="creator != null">creator,</if>
+            <if test="createtime != null">createtime,</if>
+            <if test="updator != null">updator,</if>
+            <if test="updatetime != null">updatetime,</if>
+            <if test="isdelete != null">isdelete,</if>
+            <if test="remark != null">remark,</if>
+            <if test="warehouseCode != null">warehouse_code,</if>
+            <if test="weight != null">weight,</if>
+            <if test="itemquantity != null">itemquantity,</if>
+            <if test="orderNo != null">order_no,</if>
+            <if test="warehouseName != null">warehouse_name,</if>
+            <if test="cartonweight != null">cartonweight,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productid != null and productid != ''">#{productid},</if>
+            <if test="productname != null">#{productname},</if>
+            <if test="spec != null">#{spec},</if>
+            <if test="batch != null">#{batch},</if>
+            <if test="inventoryquantity != null">#{inventoryquantity},</if>
+            <if test="unit != null">#{unit},</if>
+            <if test="creator != null">#{creator},</if>
+            <if test="createtime != null">#{createtime},</if>
+            <if test="updator != null">#{updator},</if>
+            <if test="updatetime != null">#{updatetime},</if>
+            <if test="isdelete != null">#{isdelete},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="warehouseCode != null">#{warehouseCode},</if>
+            <if test="weight != null">#{weight},</if>
+            <if test="itemquantity != null">#{itemquantity},</if>
+            <if test="orderNo != null">#{orderNo},</if>
+            <if test="warehouseName != null">#{warehouseName},</if>
+            <if test="cartonweight != null">#{cartonweight},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWhstock" parameterType="Whstock">
+        update whstock
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productid != null and productid != ''">productid = #{productid},</if>
+            <if test="productname != null">productname = #{productname},</if>
+            <if test="spec != null">spec = #{spec},</if>
+            <if test="batch != null">batch = #{batch},</if>
+            <if test="inventoryquantity != null">inventoryquantity = #{inventoryquantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="creator != null">creator = #{creator},</if>
+            <if test="createtime != null">createtime = #{createtime},</if>
+            <if test="updator != null">updator = #{updator},</if>
+            <if test="updatetime != null">updatetime = #{updatetime},</if>
+            <if test="isdelete != null">isdelete = #{isdelete},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="warehouseCode != null">warehouse_code = #{warehouseCode},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="itemquantity != null">itemquantity = #{itemquantity},</if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="warehouseName != null">warehouse_name = #{warehouseName},</if>
+            <if test="cartonweight != null">cartonweight = #{cartonweight},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWhstockById" parameterType="Long">
+        delete from whstock where id = #{id}
+    </delete>
+
+    <delete id="deleteWhstockByIds" parameterType="String">
+        delete from whstock where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectList" parameterType="Whstock" resultMap="WhstockResult">
+        <include refid="selectWhstockVo"/>
+        <where>
+            <if test="productid != null  and productid != ''"> and productid = #{productid} </if>
+            <if test="productname != null  and productname != ''"> and productname like concat('%', #{productname}, '%')</if>
+            <if test="batch != null  and batch != ''"> and batch = #{batch}</if>
+            <if test="inventoryquantity != null "> and inventoryquantity = #{inventoryquantity}</if>
+            <if test="orderNo != null "> and order_no = #{orderNo}</if>
+            <if test="warehouseCode != null  and warehouseCode != ''"> and warehouse_code = #{warehouseCode}</if>
+            <if test="warehouseName != null  and warehouseName != ''"> and warehouse_name like concat('%', #{warehouseName}, '%')</if>
+        </where>
+    </select>
+
+
+    <select id="selectWhstockNumByWarehouse" resultType="decimal">
+        select sum(inventoryquantity) from whstock where warehouse_code = #{warehouseCode}
+    </select>
+
+
+    <select id="selectInCountByWarehouseCode" resultType="decimal">
+        select sum(b.case_quantity) from bill_order o
+                   left join bill_order_detail d
+                          on o.order_no = d.order_no
+                   left join bill_order_barcode b
+                          on d.id = b.detail_id
+        where o.order_type = #{orderType} and b.case_quantity is not null
+        <if test="orderType != null and orderType == 0">and o.rceive_warehouse_code = #{warehouseCode}</if>
+        <if test="orderType != null and orderType == 1"> and o.send_warehouse_code = #{warehouseCode}</if>
+    </select>
+
+    <select id="selectWhstockListByWarehouse" resultMap="WhstockResult">
+        <include refid="selectWhstockVo"/>
+        <where>
+            <if test="whstock.productid != null  and whstock.productid != ''"> and productid = #{whstock.productid} </if>
+            <if test="whstock.productname != null  and whstock.productname != ''"> and productname like concat('%', #{whstock.productname}, '%')</if>
+            <if test="whstock.batch != null  and whstock.batch != ''"> and batch = #{whstock.batch}</if>
+            <if test="whstock.inventoryquantity != null "> and inventoryquantity = #{whstock.inventoryquantity}</if>
+            <if test="whstock.orderNo != null "> and order_no = #{whstock.orderNo}</if>
+            <if test="deptIds != null  and deptIds.size() != 0">
+                and warehouse_code in
+                <foreach item="deptId" collection="deptIds" open="(" separator="," close=")">
+                    #{deptId}
+                </foreach>
+            </if>
+            <if test="whstock.warehouseName != null  and whstock.warehouseName != ''"> and warehouse_name like concat('%', #{whstock.warehouseName}, '%')</if>
+        </where>
+    </select>
+
+</mapper>

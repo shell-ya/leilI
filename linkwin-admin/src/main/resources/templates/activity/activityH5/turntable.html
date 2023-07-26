@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <th:block th:include="include :: footer" />
+<!--    <script th:src="@{/js/turntable.js}"></script>-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.rotate.js"></script>
+    <style>
+        .award{position: relative;width: 400px;height: 400px;margin:100px auto;}
+        .award img{width: 400px;}
+        .btn{position: absolute;left: 0px;top:-10px;}
+    </style>
+    <title>转盘抽奖</title>
+</head>
+<body>
+<div class="award">
+    <img  th:src="@{/img/back.jpg}" class="turntable" id="turntable">
+    <div class="btn">
+        <img th:src="@{/img/point.jpg}" onclick="start()">
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    function start(){
+        console.log("点击指针")
+        // $('.turntable').rotate({
+        //     bind: {
+        //         mouseover: function () {
+        //             $(this).rotate({ animateTo: 180 });
+        //         },
+        //         mouseout: function () {
+        //             $(this).rotate({ animateTo: 0 });
+        //         }
+        //     }
+        // });
+        var award = 1;//模拟接口返回中奖号码
+        var angleArr = [0, 45, 90, 135, 180, 225, 270, 315];
+        isture = true;
+        $('.turntable').rotate({
+            angle: 0, //旋转的角度数
+            duration: 2000, //旋转时间
+            animateTo: angleArr[award] + 1440,
+            callback: function(){
+                alert("恭喜您，已获得奖品" + award);
+            }
+        });
+    }
+
+
+    // //抽奖代码
+    // $(function() {
+    //     $(".btn").click(function(){
+    //         console.log("点击指针")
+    //         var award = 1;//模拟接口返回中奖号码
+    //         var angleArr = [0, 45, 90, 135, 180, 225, 270, 315];
+    //         isture = true;
+    //         $('.turntable').rotate({
+    //             angle: 0, //旋转的角度数
+    //             duration: 2000, //旋转时间
+    //             animateTo: angleArr[award] + 1440,
+    //             callback: function(){
+    //                 alert("恭喜您，已获得奖品" + award);
+    //             }
+    //         });
+    //     })
+    // });
+</script>
+</html>

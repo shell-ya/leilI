@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改单据')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-order-edit" th:object="${billOrder}">
+            <h4 class="form-header h4" th:text="#{Outbound.Document.Information.Document.Information}">单据信息</h4>
+            <input name="id" th:field="*{id}" type="hidden">
+            <div class="form-group">
+                <div id="element" class="row">
+                    <label class="col-sm-2 control-label" >[[#{Inbound.Document.Information.Stock-in.doc.Number}]]：</label>
+                    <div class="col-sm-4">
+                        <div name="orderNo"th:text="*{orderNo}" class=" form-control-static m-b" ></div>
+                    </div>
+
+                    <label class="col-sm-2 control-label">[[#{Outbound.Document.Information.The.NameOf.Client}]]：</label>
+                    <div class="col-sm-4">
+                        <div  id = "customer" name="customer" th:text="*{customerName}" class="customerName form-control-static m-b"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <!--            <p>简单联动示例。</p>-->
+                <div id="element2" class="row">
+                    <label class="col-sm-2 control-label is-required">[[#{Outbound.Document.Information.Shipping.Agency}]]：</label>
+                    <div class="col-sm-4">
+                        <div  id = "sendOrganCode" name="sendOrganCode" th:text="*{sendOrganName}" class="sendOrganCode form-control-static m-b">
+
+                        </div>
+                    </div>
+                    <label class="col-sm-2 control-label is-required">发货仓库：</label>
+                    <div class="col-sm-4">
+                        <div  id = "sendWarehouseCode" name="sendWarehouseCode" th:text="*{sendWarehouseName}" class="sendWarehouseCode form-control-static m-b">
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="form-group">    
+                <label class="col-sm-2 control-label">[[#{activity.Remark}]]：</label>
+                <div class="col-sm-10">
+                    <div  id = "remark" name="remark" th:text="*{remark}" class="remark form-control-static m-b">
+
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="form-header h4" th:text="#{Outbound.Document.Information.Document.Details}">单据明细信息</h4>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "order/order";
+        $("#form-order-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            var data = { "code": 0,"msg": "成功"};
+            $.operate.successCallback(data);
+        }
+
+        $("input[name='billCreatetime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $("input[name='reviewerTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $(function() {
+            var options = {
+                data: [[${billOrder.billOrderDetailList}]],
+                pagination: false,
+                showSearch: false,
+                showRefresh: false,
+                showToggle: false,
+                showColumns: false,
+                sidePagination: "client",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'index',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Serial.Number}]],
+                    formatter: function (value, row, index) {
+                    	var columnIndex = $.common.sprintf("<input type='hidden' name='index' value='%s'>", $.table.serialNumber(index));
+                    	return columnIndex + $.table.serialNumber(index);
+                    }
+                },
+
+
+                {
+                    field: 'pdCode',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Product.Name}]]
+                    formatter: function(value, row, index) {
+                        var datas = [[${pdCode}]];
+                         var html = $.common.dictToSelectforPDdisplay(datas, value, $.common.sprintf("billOrderDetailList[%s].pdCode", index));
+                        return html;
+                    }
+                },
+
+
+                {
+                    field: 'quantity',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Quantity}]],
+
+                },
+
+                {
+                    field: 'unit',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Unit}]],
+
+                },
+
+                {
+                    field: 'pdBatch',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Batch.Number}]],
+
+                },
+
+                {
+                    field: 'auxiliaryProperties',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Auxiliary.Attribute}]],
+
+                },
+
+                {
+                    field: 'spec',
+                    align: 'center',
+                    title: [[#{Outbound.Document.Information.Specification.Number}]],
+
+                },
+
+                {
+                    field: 'sendWarehouse',
+                    align: 'center',
+                    title: '发货仓库',
+
+                },
+
+                {
+                    field: 'remark',
+                    align: 'center',
+                    title: [[#{activity.Remark}]],
+
+                },{
+                        field: 'id',
+                        align: 'center',
+                        width: '0',
+                        formatter: function (value, row, index) {
+                            var html = $.common.sprintf("<input type='hidden' class='form-control' name='billOrderDetailList[%s].id' value='%s'>", index, value);
+
+                            return html;
+                        }
+                    },
+
+                {
+                    title: [[#{boxcode.Operate}]],
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+
+                        actions.push('<a class="btn btn-info btn-xs" href="#" onclick="selectBatch(\'' + row.id + '\')"><i class="fa fa-search"></i>选择批次</a> ');
+                        return actions.join('');
+
+                    }
+                },
+
+                ]
+            };
+            $.table.init(options);
+        });
+
+        function addRow() {
+            var count = $("#" + table.options.id).bootstrapTable('getData').length;
+            var row = {
+                index: $.table.serialNumber(count),
+                pdCode: "",
+                pdName: "",
+                weight: "",
+                quantity: "",
+                unit: "",
+                pdBatch: "",
+                createTime: "",
+                reviewerId: "",
+                reviewer: "",
+                reviewerTime: "",
+                auxiliaryProperties: "",
+                spec: "",
+                sendWarehouse: "",
+                remark: "",
+            }
+            sub.addRow(row);
+        }
+        function refresh() {
+
+            location.reload();
+
+        }
+        function selectBatch(id){
+            var orderNo= [[${billOrder.orderNo}]];
+
+            var url = prefix + "/selectBatch/"+id;
+            $.modal.openOnlyframe([[#{Outbound.Document.Information.Manual.Picking}]] + ":"+orderNo, url, refresh);}
+
+
+    </script>
+</body>
+</html>

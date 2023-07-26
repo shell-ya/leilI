@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改产品信息')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-product-edit" th:object="${product}">
+            <input name="id" th:field="*{id}" type="hidden">
+            <div class="text-center">
+                <p class="user-info-head"  ><img class="img-circle img-lg" th:src="(${#strings.isEmpty(img)}) ? @{/img/profile.jpg} : @{${img}}" th:onerror="'this.src=\'' + @{'/img/logo.png'} + '\''"></p>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">产品编码：</label>
+                <div class="col-sm-8">
+                    <input name="code" th:field="*{code}" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">产品名称：</label>
+                <div class="col-sm-8">
+                    <input name="name" th:field="*{name}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">规格：</label>
+                <div class="col-sm-8">
+                    <input name="specification" th:field="*{specification}" class="form-control" type="text">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">箱重（Kg/L）：</label>
+                <div class="col-sm-8">
+                    <input name="cartonWeight" th:field="*{cartonWeight}"class="form-control" type="text"  maxlength="10"   oninput="value=value.match(/[0-9]{1,10}\.?[0-9]{0,6}/)" onchange="checkNum(this)"  required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">通用名：</label>
+                <div class="col-sm-8">
+                    <input name="commonName" th:field="*{commonName}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">登记证号：</label>
+                <div class="col-sm-8">
+                    <input name="registrationNumber" th:field="*{registrationNumber}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">剂型：</label>
+                <div class="col-sm-8">
+                    <input name="dosageForm" th:field="*{dosageForm}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">主要成分：</label>
+                <div class="col-sm-8">
+                    <input name="mainComponents" th:field="*{mainComponents}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">业绩系数：</label>
+                <div class="col-sm-8">
+                    <input name="performanceCoefficient" th:field="*{performanceCoefficient}" class="form-control" type="text">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">使用方式：</label>
+                <div class="col-sm-8">
+                    <input name="usemethod" th:field="*{usemethod}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">执行标准：</label>
+                <div class="col-sm-8">
+                    <input name="standard" th:field="*{standard}"  class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">产品介绍：</label>
+                <div class="col-sm-8">
+                    <input name="proexplain" th:field="*{proexplain}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">常规/定制：</label>
+                <div class="col-sm-8">
+                    <select name="routineFlag" class="form-control m-b" th:with="type=${@dict.getType('routine_flag')}">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{routineFlag}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">备注：</label>
+                <div class="col-sm-8">
+                    <input name="remarks" th:field="*{remarks}" class="form-control" type="text">
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "basedata/product";
+        $("#form-product-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            alert(123);
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-product-edit').serialize());
+            }
+        }
+
+        var sendOrganid = $("#id").val();
+        function checkNum(t) {
+
+            let reg = /\.$/g;
+            if (reg.test(t.value)) {
+                t.value = t.value + '0';
+            }
+        }
+        function avatar() {
+            var url = ctx + 'basedata/product/avatar/'+sendOrganid;
+            top.layer.open({
+                type: 2,
+                area: [$(window).width() + 'px', $(window).height() + 'px'],
+                fix: false,
+                //不固定
+                maxmin: true,
+                shade: 0.3,
+                title: "修改头像",
+                content: url,
+                btn: ['确定', '关闭'],
+                // 弹层外区域关闭
+                shadeClose: true,
+                yes: function(index, layero) {
+                    var iframeWin = layero.find('iframe')[0];
+                    var res= iframeWin.contentWindow.submitHandler(index, layero);
+                    let qrLastSix = res.imgurl;
+                    console.info("123456"+res);
+
+
+                    productData=""
+                    var res2= layero.find("iframe")[0].contentWindow.callBackData();//执行子页面保存事件
+                    productData=res;
+
+                    console.info("123"+res2);
+
+
+                },
+                cancel: function(index) {
+                    return true;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

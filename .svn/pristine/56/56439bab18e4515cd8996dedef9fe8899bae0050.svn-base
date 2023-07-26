@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/fwQuery.css" th:href="@{/css/exchangeLogin.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('雷力-经销商登录')" />
+</head>
+<body class="scan" >
+<div class="signinpanel">
+    <div class="containers1">
+        <div class="row center-block" style="position: fixed">
+            <input id="checkAddress" name="checkAddress" type="hidden" th:value="*{checkAddress}"/>
+            <!--            <div class="logo-image" style="position:fixed;border-radius:20%;width:70px;height:70px">-->
+            <div class="row" align="center" style="">
+                <img   th:src="@{/img/logo.jpg}" class="img-responsive center" alt="User Image">
+            </div>
+            <!--            </div>-->
+            <div id="ibox-content" style="margin-top: 30px;">
+                <div id="exchangeForm">
+                    <input type="text"     id="user" name="user" class="form-control"  style="margin-top: 10px;"   placeholder="用户名"    />
+                    <input type="password" id="pwd" name="pwd" class="form-control"  style="margin-top: 10px"  placeholder="密码"    />
+                    <button class="btn btn-success btn-block" id="zqpLogin" style="margin-top: 10px" data-loading="正在验证登录，请稍候..." onclick="loginExchange()">登录
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+</body>
+<script type="text/javascript">
+
+    function loginExchange(){
+        var user=$("#user").val();
+        var pwd=$("#pwd").val();
+        var url=ctx + 'app/exchangeLogin';
+        $.operate.post(url, {
+            "username": user,
+            "password": pwd,
+        }, function (result) {
+            console.log(result)
+            if (result.code!=0){
+                $.modal.msgError(result.msg)
+            }else {
+                var checkAddress = $('input[name="checkAddress"]').val();
+                console.log(checkAddress)
+                cookieHandler.set("token",result.data.token)
+                location.href = ctx + 'exchangePrizeH5/exchangePrize?checkAddress='+checkAddress;
+            }
+        });
+    }
+
+    var cookieHandler = {
+        path: "/",
+        get: function(cookie_name, default_value) {
+            var reg = '(/(^|;| )' + cookie_name + '=([^;]*)(;|$)/g)';
+            var temp = eval(reg).exec(document.cookie);
+            if (temp != null) {
+                var value = temp[2];
+                return escape(value);
+            }
+            return default_value;
+        },
+        set: function(name, value, day) {
+            day = day == undefined ? 30 : day;
+            var str = name + '=' + value + '; ';
+            if (day) {
+                var date = new Date();
+                date.setTime(date.getTime() + day * 24 * 3600 * 1000);
+                str += 'expires=' + date.toGMTString() + '; ';
+            }
+            str += "path=" + this.path;
+            document.cookie = str;
+        },
+        del: function(name) {
+            this.set(name, null, -1);
+        }
+    };
+
+
+</script>
+</html>

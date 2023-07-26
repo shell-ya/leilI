@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.activity.mapper.ExchangePrizeMapper">
+    
+    <resultMap type="ExchangePrize" id="ExchangePrizeResult">
+        <result property="id"    column="id"    />
+        <result property="code"    column="code"    />
+        <result property="exchange"    column="exchange"    />
+        <result property="checkPeople"    column="check_people"    />
+        <result property="checkAddress"    column="check_address"    />
+        <result property="checkTime"    column="check_time"    />
+        <result property="checkPeopleName"    column="check_people_name"    />
+        <result property="prize"    column="prize"    />
+        <result property="phone"    column="phone"    />
+        <result property="openId"    column="open_id"    />
+        <result property="markCode"    column="mark_code"    />
+        <result property="luckdrawPrizeId"    column="luckdraw_prize_id"    />
+        <result property="activityId"    column="activity_id"    />
+        <result property="activityName"    column="activity_name"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectExchangePrizeVo">
+        select id, code, exchange, check_people, check_address, check_time, check_people_name, prize,phone,open_id,mark_code,luckdraw_prize_id,activity_id,create_time from exchange_prize
+    </sql>
+
+    <sql id="baseSql">
+        select s.id, s.code, s.exchange, s.check_people, s.check_address, s.check_time, s.check_people_name,
+               s.prize,s.phone,s.open_id,s.mark_code,s.luckdraw_prize_id,s.activity_id,s.create_time,m.title as activity_name from exchange_prize s
+    </sql>
+
+    <select id="selectExchangePrizeList" parameterType="ExchangePrize" resultMap="ExchangePrizeResult">
+        select s.id, code, s.exchange, s.check_people, s.check_address, s.check_time, s.check_people_name,
+        s.prize,s.phone,s.open_id,s.mark_code,s.luckdraw_prize_id,s.activity_id,s.create_time,m.title as activity_name from exchange_prize s
+        left join activity_manager m
+        on m.id = s.activity_id
+        <where>  
+            <if test="code != null  and code != ''"> and s.code = #{code}</if>
+            <if test="exchange != null "> and s.exchange = #{exchange}</if>
+            <if test="checkPeople != null "> and s.check_people = #{checkPeople}</if>
+            <if test="checkAddress != null  and checkAddress != ''"> and s.check_address = #{checkAddress}</if>
+            <if test="checkTime != null "> and s.check_time = #{checkTime}</if>
+            <if test="checkPeopleName != null  and checkPeopleName != ''"> and s.check_people_name like concat('%', #{checkPeopleName}, '%')</if>
+            <if test="prize != null  and prize != ''"> and s.prize = #{prize}</if>
+            <if test="phone != null  and phone != ''"> and s.phone = #{phone}</if>
+            <if test="openId != null  and openId != ''"> and s.open_id = #{openId}</if>
+            <if test="markCode != null  and markCode != ''"> and s.mark_code = #{markCode}</if>
+            <if test="luckdrawPrizeId != null"> and s.luckdraw_prize_id = #{luckdrawPrizeId}</if>
+            <if test="activityId != null "> and s.activity_id = #{activityId}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectExchangePrizeById" parameterType="Long" resultMap="ExchangePrizeResult">
+        <include refid="selectExchangePrizeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertExchangePrize" parameterType="ExchangePrize">
+        insert into exchange_prize
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="code != null">code,</if>
+            <if test="exchange != null">exchange,</if>
+            <if test="checkPeople != null">check_people,</if>
+            <if test="checkAddress != null">check_address,</if>
+            <if test="checkTime != null">check_time,</if>
+            <if test="checkPeopleName != null">check_people_name,</if>
+            <if test="prize != null">prize,</if>
+            <if test="phone != null">phone,</if>
+            <if test="openId != null">open_id,</if>
+            <if test="markCode != null">mark_code,</if>
+            <if test="luckdrawPrizeId != null">luckdraw_prize_id,</if>
+            <if test="activityId != null">activity_id,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="code != null">#{code},</if>
+            <if test="exchange != null">#{exchange},</if>
+            <if test="checkPeople != null">#{checkPeople},</if>
+            <if test="checkAddress != null">#{checkAddress},</if>
+            <if test="checkTime != null">#{checkTime},</if>
+            <if test="checkPeopleName != null">#{checkPeopleName},</if>
+            <if test="prize != null">#{prize},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="openId != null">#{openId},</if>
+            <if test="markCode != null">#{markCode},</if>
+            <if test="luckdrawPrizeId != null">#{luckdrawPrizeId},</if>
+            <if test="activityId != null">#{activityId},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateExchangePrize" parameterType="ExchangePrize">
+        update exchange_prize
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null">code = #{code},</if>
+            <if test="exchange != null">exchange = #{exchange},</if>
+            <if test="checkPeople != null">check_people = #{checkPeople},</if>
+            <if test="checkAddress != null">check_address = #{checkAddress},</if>
+            <if test="checkTime != null">check_time = #{checkTime},</if>
+            <if test="checkPeopleName != null">check_people_name = #{checkPeopleName},</if>
+            <if test="prize != null">prize = #{prize},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="openId != null">open_id = #{openId},</if>
+            <if test="markCode != null">mark_code = #{markCode},</if>
+            <if test="luckdrawPrizeId != null">luckdraw_prize_id = #{luckdrawPrizeId},</if>
+            <if test="activityId != null">activity_id = #{activityId},</if>
+            <if test="createTime != null">create_time= #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteExchangePrizeById" parameterType="Long">
+        delete from exchange_prize where id = #{id}
+    </delete>
+
+    <delete id="deleteExchangePrizeByIds" parameterType="String">
+        delete from exchange_prize where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByCode" resultMap="ExchangePrizeResult">
+        <include refid="selectExchangePrizeVo"></include>
+        where code= #{code}
+    </select>
+
+    <select id="selectByMarkCode" resultMap="ExchangePrizeResult">
+        <include refid="selectExchangePrizeVo"></include>
+        where mark_code = #{markCode}
+    </select>
+
+
+    <select id="selectByOpenId" resultMap="ExchangePrizeResult">
+        select s.id, s.code, s.exchange, s.check_people, s.check_address, s.check_time, s.check_people_name,
+        s.prize,s.phone,s.open_id,s.mark_code,s.luckdraw_prize_id,s.activity_id,s.create_time from exchange_prize s
+        left join luckdraw_prize p
+        on p.id = s.luckdraw_prize_id
+        where s.luckdraw_prize_id is not null and s.open_id = #{openId} and is_material = '1'
+    </select>
+
+    <select id="selectExchangePrizeListByDeptIds" resultMap="ExchangePrizeResult">
+        select s.id, s.code, s.exchange, s.check_people, s.check_address, s.check_time, s.check_people_name,
+        s.prize,s.phone,s.open_id,s.mark_code,s.luckdraw_prize_id,s.activity_id,s.create_time,m.title as activity_name from exchange_prize s
+        left join activity_manager m
+        on m.id = s.activity_id
+        left join consumer_log c
+        on c.code = s.code
+        <where>
+            <if test="exchangePrize.code != null  and exchangePrize.code != ''"> and s.code = #{exchangePrize.code}</if>
+            <if test="exchangePrize.exchange != null "> and s.exchange = #{exchangePrize.exchange}</if>
+            <if test="exchangePrize.checkPeople != null "> and s.check_people = #{exchangePrize.checkPeople}</if>
+            <if test="exchangePrize.checkAddress != null  and exchangePrize.checkAddress != ''"> and s.check_address = #{exchangePrize.checkAddress}</if>
+            <if test="exchangePrize.checkTime != null "> and s.check_time = #{exchangePrize.checkTime}</if>
+            <if test="exchangePrize.checkPeopleName != null  and exchangePrize.checkPeopleName != ''"> and s.check_people_name like concat('%', #{exchangePrize.checkPeopleName}, '%')</if>
+            <if test="exchangePrize.prize != null  and exchangePrize.prize != ''"> and s.prize = #{exchangePrize.prize}</if>
+            <if test="exchangePrize.phone != null  and exchangePrize.phone != ''"> and s.phone = #{exchangePrize.phone}</if>
+            <if test="exchangePrize.openId != null  and exchangePrize.openId != ''"> and s.open_id = #{exchangePrize.openId}</if>
+            <if test="exchangePrize.markCode != null  and exchangePrize.markCode != ''"> and s.mark_code = #{exchangePrize.markCode}</if>
+            <if test="exchangePrize.luckdrawPrizeId != null"> and s.luckdraw_prize_id = #{exchangePrize.luckdrawPrizeId}</if>
+            <if test="exchangePrize.activityId != null "> and s.activity_id = #{exchangePrize.activityId}</if>
+            <if test="deptIds != null and deptIds.size() > 0">
+                and c.organ_code in
+                <foreach collection="deptIds" item="dept" open="(" separator="," close=")">
+                    #{dept}
+                </foreach>
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+</mapper>

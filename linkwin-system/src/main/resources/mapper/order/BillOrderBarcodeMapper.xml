@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.order.mapper.BillOrderBarcodeMapper">
+    
+    <resultMap type="BillOrderBarcode" id="BillOrderBarcodeResult">
+        <result property="id"    column="id"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="pdName"    column="pd_name"    />
+        <result property="sapProductCode"    column="sap_product_code"    />
+        <result property="productBatch"    column="product_batch"    />
+        <result property="barCode"    column="bar_code"    />
+        <result property="startLogisticsCode"    column="start_logistics_code"    />
+        <result property="endLogisticsCode"    column="end_logistics_code"    />
+        <result property="barCodeType"    column="bar_code_type"    />
+        <result property="caseQuantity"    column="case_quantity"    />
+        <result property="containerNo"    column="container_no"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="detailId"    column="detail_id"    />
+        <result property="isChecked"    column="is_checked"    />
+        <result property="reviewerId"    column="reviewer_id"    />
+        <result property="reviewer"    column="reviewer"    />
+        <result property="reviewerTime"    column="reviewer_time"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectBillOrderBarcodeVo">
+        select id, pd_code, pd_name, sap_product_code, product_batch, bar_code, start_logistics_code, end_logistics_code, bar_code_type, case_quantity, container_no, order_no, detail_id, is_checked, reviewer_id, reviewer, reviewer_time, create_time from bill_order_barcode
+    </sql>
+
+    <select id="selectBillOrderBarcodeList" parameterType="BillOrderBarcode" resultMap="BillOrderBarcodeResult">
+        <include refid="selectBillOrderBarcodeVo"/>
+        <where>  
+            <if test="pdCode != null  and pdCode != ''"> and pd_code = #{pdCode}</if>
+            <if test="pdName != null  and pdName != ''"> and pd_name like concat('%', #{pdName}, '%')</if>
+            <if test="productBatch != null  and productBatch != ''"> and product_batch = #{productBatch}</if>
+            <if test="barCode != null  and barCode != ''"> and bar_code = #{barCode}</if>
+            <if test="startLogisticsCode != null  and startLogisticsCode != ''"> and start_logistics_code = #{startLogisticsCode}</if>
+            <if test="endLogisticsCode != null  and endLogisticsCode != ''"> and end_logistics_code = #{endLogisticsCode}</if>
+            <if test="barCodeType != null "> and bar_code_type = #{barCodeType}</if>
+            <if test="caseQuantity != null "> and case_quantity = #{caseQuantity}</if>
+            <if test="containerNo != null  and containerNo != ''"> and container_no = #{containerNo}</if>
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="detailId != null "> and detail_id = #{detailId}</if>
+            <if test="isChecked != null "> and is_checked = #{isChecked}</if>
+            <if test="reviewerId != null "> and reviewer_id = #{reviewerId}</if>
+            <if test="reviewer != null  and reviewer != ''"> and reviewer = #{reviewer}</if>
+            <if test="reviewerTime != null "> and reviewer_time = #{reviewerTime}</if>
+        </where>
+    </select>
+
+
+    <select id="selectBillOrderBarcodeListByArray"  resultMap="BillOrderBarcodeResult">
+        <include refid="selectBillOrderBarcodeVo"/>
+        where bar_code in
+        <foreach item="code" collection="codeArray" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+        <if test="isChecked != null "> and is_checked = #{isChecked}</if>
+    </select>
+
+    
+    <select id="selectBillOrderBarcodeById" parameterType="Long" resultMap="BillOrderBarcodeResult">
+        <include refid="selectBillOrderBarcodeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertBillOrderBarcode" parameterType="BillOrderBarcode" useGeneratedKeys="true" keyProperty="id">
+        insert into bill_order_barcode
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pdCode != null">pd_code,</if>
+            <if test="pdName != null">pd_name,</if>
+            <if test="sapProductCode != null">sap_product_code,</if>
+            <if test="productBatch != null">product_batch,</if>
+            <if test="barCode != null">bar_code,</if>
+            <if test="startLogisticsCode != null">start_logistics_code,</if>
+            <if test="endLogisticsCode != null">end_logistics_code,</if>
+            <if test="barCodeType != null">bar_code_type,</if>
+            <if test="caseQuantity != null">case_quantity,</if>
+            <if test="containerNo != null">container_no,</if>
+            <if test="orderNo != null">order_no,</if>
+            <if test="detailId != null">detail_id,</if>
+            <if test="isChecked != null">is_checked,</if>
+            <if test="reviewerId != null">reviewer_id,</if>
+            <if test="reviewer != null">reviewer,</if>
+            <if test="reviewerTime != null">reviewer_time,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="pdName != null">#{pdName},</if>
+            <if test="sapProductCode != null">#{sapProductCode},</if>
+            <if test="productBatch != null">#{productBatch},</if>
+            <if test="barCode != null">#{barCode},</if>
+            <if test="startLogisticsCode != null">#{startLogisticsCode},</if>
+            <if test="endLogisticsCode != null">#{endLogisticsCode},</if>
+            <if test="barCodeType != null">#{barCodeType},</if>
+            <if test="caseQuantity != null">#{caseQuantity},</if>
+            <if test="containerNo != null">#{containerNo},</if>
+            <if test="orderNo != null">#{orderNo},</if>
+            <if test="detailId != null">#{detailId},</if>
+            <if test="isChecked != null">#{isChecked},</if>
+            <if test="reviewerId != null">#{reviewerId},</if>
+            <if test="reviewer != null">#{reviewer},</if>
+            <if test="reviewerTime != null">#{reviewerTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <insert id="insertbarcodeList">
+        insert into bill_order_barcode(  pd_code, bar_code,pd_name, order_no,detail_id,start_logistics_code,end_logistics_code,bar_code_type,case_quantity,is_checked,create_time) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (  #{item.pdCode},#{item.barCode}, #{item.pdName},  #{item.orderNo},#{item.detailId},#{item.startLogisticsCode},#{item.endLogisticsCode},#{item.barCodeType},#{item.caseQuantity},#{item.isChecked},sysdate() )
+        </foreach>
+    </insert>
+    <update id="updateBillOrderBarcode" parameterType="BillOrderBarcode">
+        update bill_order_barcode
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+            <if test="sapProductCode != null">sap_product_code = #{sapProductCode},</if>
+            <if test="productBatch != null">product_batch = #{productBatch},</if>
+            <if test="barCode != null">bar_code = #{barCode},</if>
+            <if test="startLogisticsCode != null">start_logistics_code = #{startLogisticsCode},</if>
+            <if test="endLogisticsCode != null">end_logistics_code = #{endLogisticsCode},</if>
+            <if test="barCodeType != null">bar_code_type = #{barCodeType},</if>
+            <if test="caseQuantity != null">case_quantity = #{caseQuantity},</if>
+            <if test="containerNo != null">container_no = #{containerNo},</if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="detailId != null">detail_id = #{detailId},</if>
+            <if test="isChecked != null">is_checked = #{isChecked},</if>
+            <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
+            <if test="reviewer != null">reviewer = #{reviewer},</if>
+            <if test="reviewerTime != null">reviewer_time = #{reviewerTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBillOrderBarcodeById" parameterType="Long">
+        delete from bill_order_barcode where id = #{id}
+    </delete>
+
+    <delete id="deleteBillOrderBarcodeByCode" parameterType="String">
+        delete from bill_order_barcode where bar_code = #{code}
+    </delete>
+    <delete id="deleteBillOrderBarcodeByIds" parameterType="String">
+        delete from bill_order_barcode where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectByOrderNoAndPdCode" resultMap="BillOrderBarcodeResult">
+        <include refid="selectBillOrderBarcodeVo"></include>
+        where order_no = #{orderNo} and pd_code = #{pdCode} and detail_id= #{detailId}
+    </select>
+
+
+    <select id="selectOrganByCode">
+
+    </select>
+
+    <update id="updateBillOrderBarcodeByorderNo" parameterType="BillOrderBarcode">
+        update bill_order_barcode
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+            <if test="sapProductCode != null">sap_product_code = #{sapProductCode},</if>
+            <if test="productBatch != null">product_batch = #{productBatch},</if>
+            <if test="barCode != null">bar_code = #{barCode},</if>
+            <if test="startLogisticsCode != null">start_logistics_code = #{startLogisticsCode},</if>
+            <if test="endLogisticsCode != null">end_logistics_code = #{endLogisticsCode},</if>
+            <if test="barCodeType != null">bar_code_type = #{barCodeType},</if>
+            <if test="caseQuantity != null">case_quantity = #{caseQuantity},</if>
+            <if test="containerNo != null">container_no = #{containerNo},</if>
+             <if test="isChecked != null">is_checked = #{isChecked},</if>
+            <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
+            <if test="reviewer != null">reviewer = #{reviewer},</if>
+            <if test="reviewerTime != null">reviewer_time = #{reviewerTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where order_no = #{orderNo}
+    </update>
+
+
+</mapper>

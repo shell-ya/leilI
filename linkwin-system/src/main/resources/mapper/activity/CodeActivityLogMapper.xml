@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.activity.mapper.CodeActivityLogMapper">
+    
+    <resultMap type="CodeActivityLog" id="CodeActivityLogResult">
+        <result property="id"    column="id"    />
+        <result property="markCode"    column="mark_code"    />
+        <result property="activityType"    column="activity_type"    />
+        <result property="activityTime"    column="activity_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="codeType"    column="code_type"    />
+        <result property="address"    column="address"    />
+    </resultMap>
+
+    <sql id="selectCodeActivityLogVo">
+        select id, mark_code, activity_type, activity_time, create_time, remark, code_type,address from code_activity_log
+    </sql>
+
+    <select id="selectCodeActivityLogList" parameterType="CodeActivityLog" resultMap="CodeActivityLogResult">
+        <include refid="selectCodeActivityLogVo"/>
+        <where>  
+            <if test="markCode != null  and markCode != ''"> and mark_code = #{markCode}</if>
+            <if test="activityType != null  and activityType != ''"> and activity_type = #{activityType}</if>
+            <if test="activityTime != null "> and activity_time = #{activityTime}</if>
+            <if test="codeType != null "> and code_type = #{codeType}</if>
+            <if test="address != null and address !='' "> and address = #{address}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectCodeActivityLogById" parameterType="Long" resultMap="CodeActivityLogResult">
+        <include refid="selectCodeActivityLogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCodeActivityLog" parameterType="CodeActivityLog">
+        insert into code_activity_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="markCode != null">mark_code,</if>
+            <if test="activityType != null">activity_type,</if>
+            <if test="activityTime != null">activity_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="codeType != null">code_type,</if>
+            <if test="address != null">address,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="markCode != null">#{markCode},</if>
+            <if test="activityType != null">#{activityType},</if>
+            <if test="activityTime != null">#{activityTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="codeType != null">#{codeType},</if>
+            <if test="address != null">#{address},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCodeActivityLog" parameterType="CodeActivityLog">
+        update code_activity_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="markCode != null">mark_code = #{markCode},</if>
+            <if test="activityType != null">activity_type = #{activityType},</if>
+            <if test="activityTime != null">activity_time = #{activityTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="codeType != null">code_type = #{codeType},</if>
+            <if test="address != null">address = #{address},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCodeActivityLogById" parameterType="Long">
+        delete from code_activity_log where id = #{id}
+    </delete>
+
+    <delete id="deleteCodeActivityLogByIds" parameterType="String">
+        delete from code_activity_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByCode" resultMap="CodeActivityLogResult">
+        <include refid="selectCodeActivityLogVo"></include>
+        where mark_code = #{markCode}
+    </select>
+
+<!--    <select id="">-->
+<!--        select id, code, activity_type, activity_time, create_time, remark, code_type,address-->
+<!--            from code_activity_log s-->
+<!--            left join exchange_prize e-->
+<!--            on s.code=e.mark_code-->
+<!--            -->
+<!--            -->
+
+
+
+<!--    </select>-->
+
+
+</mapper>

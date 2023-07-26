@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.DeptMapper">
+
+    <resultMap type="SysDept" id="SysDeptResult">
+        <result property="code"    column="code"    />
+
+        <result property="name"    column="name"    />
+
+    </resultMap>
+
+    <resultMap id="SysDeptWarehouseResult" type="ManageOrganizations" extends="SysDeptResult">
+        <collection property="warehouseList" notNullColumn="organ_code" javaType="java.util.List" resultMap="WarehouseResult" />
+    </resultMap>
+
+    <resultMap type="WarehouseVO" id="WarehouseResult">
+
+        <result property="wareHouseCode"    column="sub_ware_house_code"    />
+        <result property="name"    column="sub_name"    />
+
+    </resultMap>
+
+
+
+
+
+    <select id="selectManageOrganizationList" parameterType="SysDept"  resultMap="SysDeptWarehouseResult">
+        select a.dept_id as code , a.dept_name as name,  b.ware_house_code as sub_ware_house_code, b.name as sub_name,b.organ_code
+        from sys_dept a
+                 left join warehouse b on b.organ_code = a.dept_id
+            where del_flag = 0
+    </select>
+
+
+
+    <resultMap type="Warehouse" id="newWarehouseResult">
+        <result property="id"    column="id"    />
+        <result property="wareHouseCode"    column="ware_house_code"    />
+        <result property="name"    column="name"    />
+        <result property="whProperty"    column="wh_property"    />
+        <result property="responsor"    column="responsor"    />
+        <result property="wareHouseBatchRule"    column="ware_house_batch_rule"    />
+        <result property="isAutomateReceive"    column="is_automate_receive"    />
+        <result property="organCode"    column="organ_code"    />
+        <result property="remark"    column="remark"    />
+
+    </resultMap>
+
+    <sql id="selectWarehouseVo">
+        select id, ware_house_code, name, wh_property, responsor, ware_house_batch_rule, is_automate_receive, organ_code, remark  from warehouse
+    </sql>
+
+    <select id="selectWarehouseList" parameterType="Warehouse" resultMap="newWarehouseResult">
+        <include refid="selectWarehouseVo"/>
+        <where>
+            <if test="wareHouseCode != null  and wareHouseCode != ''"> and ware_house_code = #{wareHouseCode}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="whProperty != null  and whProperty != ''"> and wh_property = #{whProperty}</if>
+            <if test="responsor != null  and responsor != ''"> and responsor = #{responsor}</if>
+            <if test="wareHouseBatchRule != null  and wareHouseBatchRule != ''"> and ware_house_batch_rule = #{wareHouseBatchRule}</if>
+            <if test="isAutomateReceive != null  and isAutomateReceive != ''"> and is_automate_receive = #{isAutomateReceive}</if>
+            <if test="organCode != null  and organCode != ''"> and organ_code = #{organCode}</if>
+        </where>
+    </select>
+
+    <select id="selectByCode" resultMap="newWarehouseResult">
+        <include refid="selectWarehouseVo"></include>
+        where ware_house_code = #{code}
+    </select>
+
+    <select id="selectByOrganCode" resultMap="newWarehouseResult">
+        <include refid="selectWarehouseVo"></include>
+        where organ_code = #{organCode}
+        limit 1
+    </select>
+
+    <insert id="insertByPdname" >
+        insert into `product_organ`(pd_code,organ_code)
+       select code ,#{code} from product where name =
+             #{id}
+     </insert>
+
+    <select id="selectdeptidDesc" resultType="Integer">
+        select dept_id from sys_dept
+        order by dept_id desc limit 1
+    </select>
+
+
+
+
+</mapper>

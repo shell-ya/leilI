@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增箱码申请记录')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-apply-add">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">[[#{boxcode.Format.Of.Generated.Files}]]:</label>
+                        <div class="col-sm-8">
+                            <select name="fileFormat" class="form-control m-b"
+                                    th:with="type=${@dict.getType('bar_code_format',#locale.language+'_'+#locale.country)}"
+                                    required>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">[[#{boxcode.Application.Amount}]]:</label>
+                        <div class="col-sm-8">
+                            <input name="applyNum" class="form-control" type="text" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">[[#{boxcode.Complement.Rate}]]：</label>
+                        <div class="col-sm-8">
+                            <input name="bumaRate" class="form-control" type="text" value="0" min="0" max="100" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "apply/boxApply"
+        // $("#form-apply-add").validate({
+        //     focusCleanup: true
+        // });
+
+        $("#form-apply-add").validate({
+            rules: {
+                applyNum: "required",
+                bumaRate: "required",
+            },
+            messages: {
+                applyNum: [[#{required}]],
+                bumaRate: [[#{required}]],
+
+            }
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-apply-add').serialize());
+            }
+        }
+
+        $("input[name='modifyTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+
+
+    </script>
+</body>
+</html>

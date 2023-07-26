@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('活动管理列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>[[#{activity.Id}]]：</label>
+                                <input type="text" name="id"/>
+                            </li>
+                            <li>
+                                <label>[[#{activity.Title}]]：</label>
+                                <input type="text" name="title"/>
+                            </li>
+                            <li>
+                                <label>[[#{boxcode.Creator}]]：</label>
+                                <input type="text" name="createName"/>
+                            </li>
+<!--                            <li>活动类型：<select id="activityType" name="activityType" class="form-control m-b required" data-first-title="请选择" th:with="type=${@dict.getType('activity_type')}"-->
+<!--                                        required>-->
+<!--                                    <option value="">请选择</option>-->
+<!--                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"-->
+<!--                                            th:value="${dict.dictValue}"></option>-->
+<!--                                </select>-->
+<!--                            </li>-->
+                            <li>
+                                [[#{activity.Type.Of.Activity}]]：<select name="activityType" th:with="type=${@dict.getType('activity_type',#locale.language+'_'+#locale.country)}">
+                                <option value="">[[#{activity.Type.All}]]</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search" th:text="#{boxcode.Search}"></i>&nbsp;</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh" th:text="#{boxcode.Reset}"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="addActivity()" shiro:hasPermission="activity:manager:add">
+                    <i class="fa fa-plus"></i> <label th:text="#{boxcode.Add}" />
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.editByPrefix(tablename)" shiro:hasPermission="activity:manager:edit">
+                    <i class="fa fa-edit"></i>  <label th:text="#{boxcode.Modify}" />
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="activity:manager:remove">
+                    <i class="fa fa-remove"></i> <label th:text="#{boxcode.Delete}" />
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var confFlag = [[${@permission.hasPermi('activity:manager:conf')}]];
+        var editFlag = [[${@permission.hasPermi('activity:manager:edit')}]];
+        var activityTypeDict = [[${@dict.getType('activity_type',#locale.language+'_'+#locale.country)}]];
+
+        var tablename = [[#{boxcode.Modify}]] + " ";
+
+        var prefix = ctx + "activity/manager";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: [[#{activity.Management}]],
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: [[#{activity.Id}]],
+                    visible: true
+                },
+                {
+                    field: 'title',
+                    title: [[#{activity.Title}]]
+                },
+                {
+                    field: 'activityType',
+                    title: [[#{activity.Type.Of.Activity}]],
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(activityTypeDict, value);
+                    }
+                },
+                {
+                    field: 'status',
+                    title: [[#{activity.Status}]],
+                    formatter: function (value, row, index) {
+                        return statusTools(row);
+                    }
+                },
+                {
+                    field: 'createName',
+                    title: [[#{boxcode.Creator}]]
+                },
+                {
+                    field: 'remark',
+                    title: [[#{activity.Remark}]]
+                },
+                {
+                    field: 'introduction',
+                    title: [[#{activity.Description}]],
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value, 10, "open");
+                    },
+                },
+                {
+                    field: 'pdCode',
+                    title: [[#{activity.Product.Code}]],
+                },
+                {
+                    field: 'pdName',
+                    title: [[#{activity.Product.Name}]]
+                },
+                {
+                    field: 'startTime',
+                    title: [[#{activity.Starting.Time}]]
+                },
+                {
+                    field: 'endTime',
+                    title: [[#{activity.End.Time}]]
+                },
+                {
+                    field: 'createTime',
+                    title: [[#{boxcode.Creation.Time}]]
+                },
+                {
+                    title: [[#{boxcode.Operate}]],
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs ' + confFlag + '" href="javascript:void(0)" onclick="detail(\'' + row.id + '\')"><i class="fa fa-edit"></i>[[#{activity.Configuration}]]</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="subBill(\'' + row.id + '\')"><i class="fa fa-edit"></i>[[#{activity.Edit}]]</a> ');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+
+        /* 用户状态显示 */
+        function statusTools(row) {
+            console.log(row.status)
+            if (row.status == 0) {
+                return '<i class=\"fa fa-toggle-off text-info fa-2x\" onclick="enable(\'' + row.id + '\')"></i> ';
+            } else {
+                return '<i class=\"fa fa-toggle-on text-info fa-2x\" onclick="disable(\'' + row.id + '\')"></i> ';
+            }
+        }
+
+        function addActivity(){
+            // table.set();
+            $.modal.open([[#{boxcode.Add}]] + " " + table.options.modalName, prefix+'/add',800,($(window).height() - 50));
+        }
+
+        function modifyActivity() {
+            var row = $("#" + table.options.id).bootstrapTreeTable('getSelections')[0];
+            console.log(row)
+            if ($.common.isEmpty(row)) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var url = table.options.updateUrl.replace("{id}", row[table.options.uniqueId]);
+            $.modal.open([[#{boxcode.Modify}]] + " " + table.options.modalName, url);
+        }
+
+
+
+        /* 活动管理-停用 */
+        function disable(id) {
+            $.modal.confirm([[#{activity.confirm.disable}]], function() {
+            // $.modal.confirm("确认要停用活动吗？", function() {
+                $.operate.post(prefix + "/changeStatus", { "id": id, "status": 0 });
+            })
+        }
+
+        /* 活动管理启用 */
+        function enable(id) {
+            $.modal.confirm([[#{activity.confirm.enable}]], function() {
+                // $.modal.confirm("确认要启用活动吗？", function() {
+                $.operate.post(prefix + "/changeStatus", { "id": id, "status": 1 },function (res){
+                    if (res.code!=0){
+                        $.modal.alertError(res.msg);
+                    }
+                });
+            })
+        }
+        function detail(dictId) {
+            var url = prefix + '/detail/' + dictId;
+            $.modal.openTab([[#{activity.configuration}]], url);
+            // $.modal.openTab("活动基础配置", url);
+
+        }
+
+
+        function subBill(id) {
+            var url = prefix + "/editimg/"+id;
+            $.modal.open([[#{boxcode.Modify}]] + " "+ table.options.modalName, url);
+
+
+        }
+
+    </script>
+</body>
+</html>

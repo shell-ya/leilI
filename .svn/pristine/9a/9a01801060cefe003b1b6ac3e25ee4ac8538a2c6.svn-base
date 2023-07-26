@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改产品信息')" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-product-edit" th:object="${activityManager}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <div class="text-center">
+            <p class="user-info-head" onclick="avatar()"><img class="img-circle img-lg" th:src="(${#strings.isEmpty(truntablePath)}) ? @{/img/logo.png} : @{${truntablePath}}" th:onerror="'this.src=\'' + @{'/img/logo.png'} + '\''"></p>
+            <p><a href="javascript:avatar()">[[#{activity.Edit.Edit.Activity.Image}]]</a></p>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">[[#{activity.Title}]]：</label>
+            <div class="col-sm-8">
+                <div name="title" th:text="*{title}" class="form-control" type="text"></div>
+            </div>
+        </div>
+
+    </form>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var prefix = ctx + "activity/manager";
+    $("#form-product-edit").validate({
+        rules:{
+            integral:{
+                digits:true
+            },
+            needIntegral:{
+                digits:true
+            },
+        },
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        // if ($.validate.form()) {
+        //     $.operate.save(prefix + "/edit", $('#form-product-edit').serialize());
+        // }
+        var data = { "code": 0,"msg": "成功"};
+        $.operate.successCallback(data);
+    }
+    var sendOrganid = $("#id").val();
+    function avatar() {
+        var url = ctx + 'activity/manager/avatar/'+sendOrganid;
+        top.layer.open({
+            type: 2,
+            area: [$(window).width() + 'px', $(window).height() + 'px'],
+            fix: false,
+            //不固定
+            maxmin: true,
+            shade: 0.3,
+            title: "修改图片",
+            content: url,
+            btn: ['确定', '关闭'],
+            // 弹层外区域关闭
+            shadeClose: true,
+            yes: function(index, layero) {
+                var iframeWin = layero.find('iframe')[0];
+                var res= iframeWin.contentWindow.submitHandler(index, layero);
+
+
+            },
+            cancel: function(index) {
+                return true;
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>

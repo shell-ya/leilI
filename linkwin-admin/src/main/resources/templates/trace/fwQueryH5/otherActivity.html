@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/otherActivity.css" th:href="@{/css/otherActivity.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('可参加活动')" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0， maximum-scale=1.0,minimum-scale=1.0, user-scalable=no">
+</head>
+<body class="scan" >
+<div align="center">
+    <img th:src="@{/img/logo04.png}" style="height: 175px;width: 300px;margin-top: 50px">
+</div>
+<div align="center" class="product center-block" style="width: 350px"  th:object="${data}">
+    <br />
+    <div class="row"  align="left" style="font-size: 18px;margin-left: 10px;margin-right: 10px">可参加活动：
+        <a id="title" style="font-size: 18px;" th:text="*{title}"></a>
+        <hr color="blue"  style="margin-left: 10px;margin-right: 10px;"/>
+    </div>
+    <div class="row"  align="left" style="font-size: 18px;margin-left: 10px;margin-right: 10px">活动介绍：
+        <a id="introduction" style="font-size: 18px;" th:text="*{introduction}"></a>
+        <hr color="blue" size="10px" style="margin-left: 10px;margin-right: 10px;"/>
+    </div>
+    <div class="bottom-align-text" align="center" style="margin-left: 10px;margin-right: 10px">
+        <h4 style="color: #FF5151">*可在公众号处扫描内层营销码参加活动</h4>
+        <br />
+    </div>
+</div>
+<br />
+<th:block th:include="include :: footer" />
+</body>
+<script type="text/javascript">
+
+
+</script>
+</html>

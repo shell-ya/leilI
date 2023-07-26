@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.apply.mapper.QrCodePreMapper">
+    
+    <resultMap type="QrCodePre" id="QrCodePreResult">
+        <result property="id"    column="id"    />
+        <result property="code"    column="code"    />
+        <result property="applyId"    column="apply_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="seed"    column="seed"    />
+    </resultMap>
+
+    <resultMap type="SubCode" id="SubCodeResult">
+        <result property="id"    column="id"    />
+        <result property="subCode"    column="code"    />
+        <result property="applyId"    column="apply_id"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectQrCodePreVo">
+        select id, code, apply_id, create_time, seed from qr_code_pre
+    </sql>
+
+    <select id="selectQrCodePreList" parameterType="QrCodePre" resultMap="QrCodePreResult">
+        <include refid="selectQrCodePreVo"/>
+        <where>  
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="applyId != null "> and apply_id = #{applyId}</if>
+            <if test="seed != null  and seed != ''"> and seed = #{seed}</if>
+        </where>
+    </select>
+    
+    <select id="selectQrCodePreById" parameterType="Long" resultMap="QrCodePreResult">
+        <include refid="selectQrCodePreVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertQrCodePre" parameterType="QrCodePre">
+        insert into qr_code_pre
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="code != null">code,</if>
+            <if test="applyId != null">apply_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="seed != null">seed,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="code != null">#{code},</if>
+            <if test="applyId != null">#{applyId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="seed != null">#{seed},</if>
+         </trim>
+    </insert>
+
+    <update id="updateQrCodePre" parameterType="QrCodePre">
+        update qr_code_pre
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null">code = #{code},</if>
+            <if test="applyId != null">apply_id = #{applyId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="seed != null">seed = #{seed},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteQrCodePreById" parameterType="Long">
+        delete from qr_code_pre where id = #{id}
+    </delete>
+
+    <delete id="deleteQrCodePreByIds" parameterType="String">
+        delete from qr_code_pre where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="getCount" resultType="Integer">
+            select count(0) from qr_code_pre
+    </select>
+
+
+    <select id="batchInsertQrCodePre">
+        insert  into qr_code_pre (code,seed,create_time,`year`) values
+        <foreach collection="barCodeList" item="item" index="index" separator="," >
+            (#{item.code},#{item.seed},now(),#{item.year})
+        </foreach>
+
+    </select>
+
+
+    <update id="updateQrCodePreApplyId">
+        update qr_code_pre set apply_id=#{applyId},modify_time=now() where apply_id is null and `year` = #{year} limit #{count}
+    </update>
+
+    <insert id="insertBarCode">
+        INSERT INTO ${tableName} (apply_id,prefix_code, bar_code, create_time,start_num,end_num) (
+            SELECT
+                b.apply_id,
+                b.code,
+                concat(b.code, #{startStr}, #{endStr}),
+                now(),
+                #{startNum},
+                #{endNum}
+            FROM qr_code_pre b WHERE b.apply_id = #{applyId} AND b.`year` = #{year}
+        )
+    </insert>
+
+    <delete id="deleteByApplyId">
+        delete from qr_code_pre where apply_id = #{applyId}
+    </delete>
+
+    <select id="selectByApplyId" resultMap="QrCodePreResult">
+        select id, code, apply_id, create_time from qr_code_pre where apply_id = #{applyId}
+    </select>
+
+
+</mapper>

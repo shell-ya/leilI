@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('库存列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>[[#{inventory.Product.Number}]]：</label>
+                                <input type="text" name="productid"/>
+                            </li>
+                            <li>
+                                <label>[[#{inventory.Product.Name}]]：</label>
+                                <input type="text" name="productname"/>
+                            </li>
+                            <li>
+                                <label>[[#{inventory.Warehouse.Name}]]：</label>
+                                <input type="text" name="warehouseName"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()" th:text="#{boxcode.Search}"><i class="fa fa-search"></i>&nbsp;</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()" th:text="#{boxcode.Reset}"><i class="fa fa-refresh"></i>&nbsp;</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-danger single disabled" onclick="setwareminus()" shiro:hasPermission="warehouse:whstock:loss">
+                    <i class="fa fa-minus"></i> [[#{inventory.Inventory.Loss}]]
+                </a>
+                <a class="btn btn-primary single disabled" onclick="setwareadd()" shiro:hasPermission="warehouse:whstock:profit">
+                    <i class="fa fa-plus"></i> [[#{inventory.Inventory.Surplus}]]
+                </a>
+<!--                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="basedata:whstock:add">-->
+<!--                    <i class="fa fa-plus"></i> 添加-->
+<!--                </a>-->
+<!--                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="basedata:whstock:edit">-->
+<!--                    <i class="fa fa-edit"></i> 修改-->
+<!--                </a>-->
+<!--                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="basedata:whstock:remove">-->
+<!--                    <i class="fa fa-remove"></i> 删除-->
+<!--                </a>-->
+<!--                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="basedata:whstock:export">-->
+<!--                    <i class="fa fa-download"></i> 导出-->
+<!--                </a>-->
+            </div>
+            <div class="modal inmodal fade" id="addCodeModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-sm" style="height:50px;width: 500px" >
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                            <h4 class="modal-title"> [[#{inventory.Inventory.Loss}]]  </h4>
+                        </div>
+                        <div class="modal-body ve">
+                            <form class="form-horizontal m" id="saveCodeForm">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="col-sm-8" >
+
+                                            <input type="text" id="number" name="number"  th:placeholder="#{inventory.Inventory.Quantity}" placeholder="盘亏数量" required>
+
+                                        </div>
+                                    </div>
+<!--                                    <div class="col-sm-6">-->
+<!--                                        <div class="col-sm-8">-->
+<!--                                            <label>单位：</label>-->
+<!--                                            <select id="unit" th:with="type=${@dict.getType('whstockunit')}">-->
+<!--                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+<!--                                            </select>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="delsaveCode()" th:text="#{inventory.Deficit.Preservation}">盘亏保存</button>
+                            <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal inmodal fade" id="delCodeModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-sm" style="height:50px;width: 500px" >
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                            <h4 class="modal-title">  [[#{inventory.Inventory.Surplus}]]  </h4>
+                        </div>
+                        <div class="modal-body ve">
+                            <form class="form-horizontal m" id="delCodeForm">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="col-sm-8" >
+
+                                            <input type="text" id="codes" name="codes" th:placeholder="#{inventory.Overage.Amount}" placeholder="盘盈数量" required>
+                                        </div>
+                                    </div>
+<!--                                    <div class="col-sm-6">-->
+<!--                                        <div class="col-sm-8">-->
+<!--                                            <label>单位：</label>-->
+<!--                                            <select id="addunit" th:with="type=${@dict.getType('whstockunit')}">-->
+<!--                                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+<!--                                            </select>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="saveCode()" th:text="#{inventory.Surplus.Preservation}">盘盈保存</button>
+                            <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('basedata:whstock:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('basedata:whstock:remove')}]];
+        var prefix = ctx + "basedata/whstock";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "库存",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: [[#{Outbound.Document.Information.Serial.Number}]],
+                    visible: false
+                },
+                    {
+                        field: 'productid',
+                        title: [[#{inventory.Product.Number}]]
+                    },
+
+                {
+                    field: 'productname',
+                    title: [[#{inventory.Product.Name}]]
+                },
+                {
+                    field: 'warehouseCode',
+                    title: [[#{Dealer.Information.Warehouse.Code}]]
+                },
+                {
+                    field: 'warehouseName',
+                    title: [[#{inventory.Warehouse.Name}]]
+                },
+                {
+                    field: 'batch',
+                    title: [[#{inventory.Batch}]]
+                },
+                {
+                    field: 'inventoryquantity',
+                    title: [[#{inventory.Stock.Quantity/Box}]]
+                },
+                {
+                    field: 'weight',
+                    title: [[#{inventory.Weight}]]
+                },
+                {
+                    field: 'updatetime',
+                    title: [[#{inventory.Update.Time}]]
+                }
+
+
+                // ,
+                // {
+                //     title: '操作',
+                //     align: 'center',
+                //     formatter: function(value, row, index) {
+                //         var actions = [];
+                //         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                //         return actions.join('');
+                //     }
+                // }
+                ]
+            };
+            $.table.init(options);
+        });
+
+        //盘亏界面
+        function setwareminus(){
+            var data= $('#bootstrap-table').bootstrapTable('getSelections');
+
+            if (data.length==0){
+                $.modal.alertError("请选择一条记录");
+                return;
+            }else if (data.length>1){
+                $.modal.alertError("每次只能设置一条记录");
+                return;
+            }
+            ids= data[0].id;
+
+
+            $("#number").val('');
+            $("#unit").val('0');
+            $("#addCodeModal").modal({backdrop: false, keyboard: false,show:true});  //手动开启
+
+        }
+
+        //盘亏保存
+        function delsaveCode(){
+
+            $.modal.confirm("确认将库存盘亏吗?", function() {
+                // layer.load(0, {shade: false}); // 0代表加载的风格，支持0-2
+                var number=$("#number").val();
+                if (number.length > 10) {
+
+                    $.modal.alertError("'数量不能超过10个字符'");
+                    return;
+                }
+                if (number.length == 0) {
+                    $.modal.alertError("'数量不能为空'");
+                    return;
+                }
+                var isnum = /^[0-9]*([\.][0-9]{1,2})?$/.test(number)
+                if(!isnum){
+                    $.modal.alertError("'数量为整数或小数'");
+                    return;
+                }
+                var unit=$("#unit").val();
+                var data={"number":number,"id":ids,'flag':'-'}
+                $.operate.post(prefix + "/whstockDel", data,function (result){
+                    if (result==500){
+                        $.modal.error(result.msg);
+                    }else {
+                        $.modal.msg(result.msg);
+                    }
+                    $.table.refresh();
+                });
+                $('#addCodeModal').modal('hide');
+            });
+
+
+            $.table.refresh();
+        }
+
+
+
+
+
+
+
+
+        //盘盈打开界面
+        function setwareadd(){
+            var data= $('#bootstrap-table').bootstrapTable('getSelections');
+
+            if (data.length==0){
+                $.modal.alertError("请选择一条记录");
+                return;
+            }else if (data.length>1){
+                $.modal.alertError("每次只能设置一条记录");
+                return;
+            }
+            ids= data[0].id;
+
+
+            $("#codes").val('');
+            $("#addunit").val('0');
+            $("#delCodeModal").modal({backdrop: false, keyboard: false,show:true});  //手动开启
+
+
+        }
+
+        //盘盈保存
+        function saveCode(){
+
+            $.modal.confirm("确认将库存盘盈吗?", function() {
+                var number=$("#codes").val();
+
+                if (number.length > 10) {
+
+                    $.modal.alertError("'数量不能超过10个字符'");
+                    return;
+                }
+                if (number.length == 0) {
+                    $.modal.alertError("'数量不能为空'");
+                    return;
+                }
+                var isnum = /^[0-9]*([\.][0-9]{1,2})?$/.test(number)
+                if(!isnum){
+                    $.modal.alertError("'数量为整数或小数'");
+                    return;
+                }
+                var unit=$("#addunit").val();
+                var data={"number":number,"id":ids,'flag':'+'}
+                $.operate.post(prefix + "/whstockAdd", data,function (result){
+                    if (result==500){
+                        $.modal.error(result.msg);
+                    }else {
+                        $.modal.msg(result.msg);
+                    }
+                    $.table.refresh();
+                });
+                $("#delCodeModal").modal('hide');
+            });
+        }
+
+
+
+    </script>
+</body>
+</html>

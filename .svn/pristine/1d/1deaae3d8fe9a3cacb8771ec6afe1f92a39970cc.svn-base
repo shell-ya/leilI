@@ -1,0 +1,258 @@
+package com.linkwin.web.controller.system;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import cn.hutool.core.lang.Validator;
+import com.linkwin.Integral.domain.IntegralPerson;
+import com.linkwin.Integral.service.IIntegralPersonService;
+import com.linkwin.common.core.domain.entity.SysRole;
+import com.linkwin.common.core.domain.entity.SysUser;
+import com.linkwin.common.enums.UserStatus;
+import com.linkwin.common.utils.CacheUtils;
+
+import com.linkwin.common.utils.MessageUtils;
+import com.linkwin.framework.jwt.utils.JwtUtils;
+import com.linkwin.framework.shiro.service.SysPasswordService;
+import com.linkwin.mail.IMailService;
+import com.linkwin.system.service.ISysRoleService;
+import com.linkwin.system.service.ISysUserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
+import org.aspectj.weaver.loadtime.Aj;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.core.text.Convert;
+import com.linkwin.common.utils.ServletUtils;
+import com.linkwin.common.utils.StringUtils;
+import com.linkwin.framework.web.service.ConfigService;
+
+import java.util.*;
+
+/**
+ * 登录验证
+ *
+ * @author ruoyi
+ */
+@Controller
+public class SysLoginController extends BaseController {
+
+    @Autowired
+    private ISysUserService userService;
+    @Autowired
+    private SysPasswordService passwordService;
+
+    @Autowired
+    private ISysRoleService roleService;
+
+    @Autowired
+    private IIntegralPersonService iIntegralPersonService;
+
+    @Autowired
+    private IMailService mailService;
+    /**
+     * 是否开启记住我功能
+     */
+    @Value("${shiro.rememberMe.enabled: false}")
+    private boolean rememberMe;
+
+    @Autowired
+    private ConfigService configService;
+
+    @GetMapping("/login")
+    public String login(HttpServletRequest request, HttpServletResponse response, ModelMap mmap) {
+        // 如果是Ajax请求，返回Json字符串。
+        if (ServletUtils.isAjaxRequest(request)) {
+//            return ServletUtils.renderString(response, "{\"code\":\"1\",\"msg\":\"未登录或登录超时。请重新登录\"}");
+            return ServletUtils.renderString(response, "{\"code\":\"1\",\"msg\":"+ MessageUtils.message("login.expired") +"}");
+        }
+        // 是否开启记住我
+        mmap.put("isRemembered", rememberMe);
+        // 是否开启用户注册
+        mmap.put("isAllowRegister", Convert.toBool(configService.getKey("sys.account.registerUser"), false));
+        return "login";
+    }
+
+    @PostMapping("/login")
+    @ResponseBody
+    public AjaxResult ajaxLogin(String username, String password, Boolean rememberMe) {
+        UsernamePasswordToken token = new UsernamePasswordToken(username, password, rememberMe);
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            subject.login(token);
+            return success();
+        } catch (AuthenticationException e) {
+//            String msg = "用户或密码错误";
+            String msg = MessageUtils.message("login.error");
+            return error(msg);
+        }
+    }
+
+    @GetMapping("/unauth")
+    public String unauth() {
+        return "error/unauth";
+    }
+
+    @PostMapping("/app/login")
+    @ResponseBody
+    public AjaxResult jwtLogin(String username, String password) {
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            return AjaxResult.error("账号和密码不能为空!");
+        }
+
+        SysUser user = userService.selectUserByLoginName(username);
+        if (user == null) {
+            return AjaxResult.error("用户不存在/密码错误!");
+        }
+
+        if (UserStatus.DELETED.getCode().equals(user.getDelFlag())) {
+            return AjaxResult.error("对不起，您的账号已被删除!");
+        }
+
+        if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
+            return AjaxResult.error("用户已封禁，请联系管理员!");
+        }
+
+        if (!passwordService.matches(user, password)) {
+            return AjaxResult.error("用户不存在/密码错误!");
+        }
+        String token = JwtUtils.createToken(username, user.getPassword());
+
+        SysUser sysUser = userService.selectUserByLoginName(username);
+        logger.info("登录用户信息：{}",sysUser.toString());
+        boolean flag = false;
+        List<SysRole> roles = sysUser.getRoles();
+        for (SysRole role : roles) {
+            if ("distribution".equals(role.getRoleKey()) || "admin".equals(role.getRoleKey())) {
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            return AjaxResult.error("该账户没有权限登录！");
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("username", username);
+        map.put("password", password);
+        CacheUtils.put(token, map);
+        System.out.println("测试" + AjaxResult.success("返回数据" + token.toString()));
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        return AjaxResult.success("登录成功", data);
+    }
+
+
+    @PostMapping("/app/exchangeLogin")
+    @ResponseBody
+    public AjaxResult exchangeLogin(String username, String password) {
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            return AjaxResult.error("账号和密码不能为空!");
+        }
+
+        SysUser user = userService.selectUserByLoginName(username);
+        if (user == null) {
+            return AjaxResult.error("用户不存在/密码错误!");
+        }
+
+        if (UserStatus.DELETED.getCode().equals(user.getDelFlag())) {
+            return AjaxResult.error("对不起，您的账号已被删除!");
+        }
+
+        if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
+            return AjaxResult.error("用户已封禁，请联系管理员!");
+        }
+
+        if (!passwordService.matches(user, password)) {
+            return AjaxResult.error("用户不存在/密码错误!");
+        }
+        String token = JwtUtils.createToken(username, user.getPassword());
+
+        SysUser sysUser = userService.selectUserByLoginName(username);
+        boolean flag = false;
+        List<SysRole> roles = sysUser.getRoles();
+        for (SysRole role : roles) {
+            if ("exchangePrize".equals(role.getRoleKey()) || "admin".equals(role.getRoleKey())) {
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            return AjaxResult.error("该账户没有权限登录！");
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("username", username);
+        map.put("password", password);
+        CacheUtils.put(token, map);
+        System.out.println("测试" + AjaxResult.success("返回数据" + token.toString()));
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        return AjaxResult.success("登录成功", data);
+    }
+
+
+    @PostMapping("/app/externalLogin")
+    @ResponseBody
+    public AjaxResult userLogin(String email, @RequestParam(required = false) String code,ModelMap mmap) {
+        if (StringUtils.isEmpty(email)) {
+            return AjaxResult.error("Email cannot be empty!");
+        }
+        if (!Validator.isEmail(email)) {
+            return AjaxResult.error("Please enter a valid email.");
+        }
+        //1.校验邮箱是否已在数据库中
+        IntegralPerson integralPerson = iIntegralPersonService.selectByOpenId(email);
+        if (Objects.isNull(integralPerson) && StringUtils.isEmpty(code)) {
+            //2.不存在 发送验证码
+            try {
+                mailService.sendMail2Code(email, "login");
+            } catch (MessagingException e) {
+                return AjaxResult.error("Failed to send email, please try again later");
+            }
+            Map<String, Object> data = new HashMap<>();
+            data.put("codeDisable", Boolean.TRUE);
+            return AjaxResult.error("Please enter the verification code to log in again", data);
+        }
+        //3.code 不为空 第一次创建 在 integral_person 表维护记录
+        if (StringUtils.isNotEmpty(code)) {
+            String cacheCode = (String)CacheUtils.get(email);
+            if (!cacheCode.equals(code)){
+                return AjaxResult.error("Incorrect verification code, please check.");
+            }
+            integralPerson = new IntegralPerson();
+            integralPerson.setPhone(email);
+            integralPerson.setOpenId(email);
+            integralPerson.setIntegral(0);
+            integralPerson.setCreateTime(new Date());
+            iIntegralPersonService.insertIntegralPerson(integralPerson);
+        }
+
+        if (integralPerson.getOpenId().equals(email) && integralPerson.getPhone().equals(email)) {
+            String token = JwtUtils.createToken(email, email);
+            Map<String, Object> map = new HashMap<>();
+            map.put("username", email);
+            map.put("code", code);
+            CacheUtils.put(token, map);
+//            System.out.println("测试" + AjaxResult.success("返回数据" + token.toString()));
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("email", email);
+            return AjaxResult.success("Login Success", data);
+        }
+
+        return AjaxResult.error("Unknown error.");
+    }
+
+}

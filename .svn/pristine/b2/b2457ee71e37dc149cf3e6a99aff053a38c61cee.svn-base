@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/fwQuery.css" th:href="@{/css/exchangePrize.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('雷力-经销商兑奖')" />
+</head>
+<body class="scan" >
+
+<div class="signinpanel">
+    <div class="containers1">
+        <div class="row center-block" style="position: fixed">
+            <input id="checkAddress" name="checkAddress" type="hidden" th:value="*{checkAddress}"/>
+            <div class="row" align="center" style="">
+                <img   th:src="@{/img/logo.jpg}" class="img-responsive center" alt="User Image">
+            </div>
+            <div id="ibox-content">
+                <div id="exchangeForm" class="col-sm-6">
+                    <div class="">
+                        <input type="text"  align="center" style="width: 200px;"  id="prizeCode" name="prizeCode" class="form-control"     placeholder="兑奖码"    />
+                        <div style="margin-top: 10px">
+                            <button class="btn btn-success " type="button" onclick="query()"><i class="fa fa-search"></i>&nbsp;&nbsp;<span class="bold">查询</span>
+                            <button class="btn btn-primary " style="margin-left: 40px" type="button" onclick="exchange()"><i class="fa fa-check"></i>&nbsp;核销</button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 35px">
+                        <div class="row"  style="font-size: 20px;margin-left: 10px">     奖品：
+                            <a id="prize"></a>
+                        </div>
+                        <div class="row" style="font-size: 20px;margin-top:10px;margin-left: 10px">是否兑换：
+                            <a id="exchange"></a>
+                        </div>
+                        <div class="row" style="font-size: 20px;margin-left: 10px;margin-top:10px;width: 200px">返回结果：
+                            <a style="word-wrap: break-word" id="resultMsg"></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+</body>
+<script type="text/javascript">
+
+    function exchange(){
+        var prizeCode = $('input[name="prizeCode"]').val();
+        var url=ctx + 'exchangePrizeH5/exchange';
+        var checkAddress = $('input[name="checkAddress"]').val();
+        submit(url,'post','json',{
+            "code": prizeCode,
+            "checkAddress":checkAddress
+        },function (result){
+            if (result.status=='success'){
+                $("#exchange").css("color",'blue');
+                $("#exchange").text("已兑换");
+                $("#resultMsg").text(result.msg);
+                $.modal.msg(result.msg)
+            }else {
+                $("#resultMsg").text(result.msg);
+                $.modal.msgError(result.msg)
+            }
+        })
+    }
+
+
+    function query(){
+        var prizeCode = $('input[name="prizeCode"]').val();
+        var url=ctx + 'exchangePrizeH5/queryExchangeByCode';
+        var checkAddress = $('input[name="checkAddress"]').val();
+        $("#prize").text('');
+        $("#exchange").text("");
+        $("#resultMsg").text('');
+        submit(url,'post','json',{
+            "code": prizeCode,
+            "checkAddress":checkAddress
+        },function (result){
+            if (result.status=='success'){
+                $("#prize").text(result.data.prize);
+                if (result.data.exchange==0){
+                    $("#exchange").css("color",'blue');
+                    $("#exchange").text("未兑换");
+                }else {
+                    $("#exchange").css("color",'red');
+                    $("#exchange").text("已兑换");
+                }
+            }else {
+                if (result.msg=='该中奖码已经兑换过！'){
+                    $("#resultMsg").text(result.msg);
+                    $("#prize").text(result.data.prize);
+                    if (result.data.exchange==0){
+                        $("#exchange").css("color",'blue');
+                        $("#exchange").text("未兑换");
+                    }else {
+                        $("#exchange").css("color",'red');
+                        $("#exchange").text("已兑换");
+                    }
+                }else {
+                    $.modal.msgError(result.msg)
+                }
+            }
+            console.log(result)
+        })
+    }
+
+
+    function submit(url, type, dataType, data, callback){
+        var config = {
+            url: url,
+            type: type,
+            dataType: dataType,
+            data: data,
+            headers:{
+                "token":cookieHandler.get("token")
+            },
+            beforeSend: function () {
+                $.modal.loading("正在处理中，请稍候...");
+            },
+            success: function(result) {
+                if (typeof callback == "function") {
+                    callback(result);
+                }
+                $.operate.ajaxSuccess(result);
+            }
+        };
+        $.ajax(config)
+    }
+
+
+
+    var cookieHandler = {
+        path: "/",
+        get: function(cookie_name, default_value) {
+            var reg = '(/(^|;| )' + cookie_name + '=([^;]*)(;|$)/g)';
+            var temp = eval(reg).exec(document.cookie);
+            if (temp != null) {
+                var value = temp[2];
+                return escape(value);
+            }
+            return default_value;
+        },
+        set: function(name, value, day) {
+            day = day == undefined ? 30 : day;
+            var str = name + '=' + value + '; ';
+            if (day) {
+                var date = new Date();
+                date.setTime(date.getTime() + day * 24 * 3600 * 1000);
+                str += 'expires=' + date.toGMTString() + '; ';
+            }
+            str += "path=" + this.path;
+            document.cookie = str;
+        },
+        del: function(name) {
+            this.set(name, null, -1);
+        }
+    };
+
+
+
+</script>
+</html>

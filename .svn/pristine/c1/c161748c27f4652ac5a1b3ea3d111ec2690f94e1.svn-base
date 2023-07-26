@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/otherActivity.css" th:href="@{/css/otherActivity.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('积分兑换')" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0， maximum-scale=1.0,minimum-scale=1.0, user-scalable=no">
+</head>
+<body class="scan" >
+<div align="center">
+    <img th:src="@{/img/logo04.png}" style="height: 175px;width: 300px;margin-top: 50px">
+</div>
+<div align="center" class="product center-block" style="width: 350px"  th:object="${data}">
+    <br />
+    <p id="msg" align="left" th:text="*{msg}"
+       style="font-size:20px;margin-left: 10px;margin-right: 10px"></p>
+        <div class="row" align="left" style="font-size: 20px;margin-left: 10px;margin-right: 10px">关联手机：
+            <a id="phone" style="font-size: 20px" th:text="*{phone}"></a>
+        </div>
+        <br />
+        <p id="integral" align="center" th:text="'积分+'+*{integral}"
+           style="font-size:30px;margin-left: 10px;margin-right: 10px"></p>
+        <p id="integralTotal"   align="center" th:text="'总积分:'+*{integralTotal}+'分'"
+           style="font-size:20px;margin-left: 10px;margin-right: 10px"></p>
+        <div class="bottom-align-text"  align="center" style="width: 300px;margin-top: 30px">
+            <h5 style="color: #FF5151">*您获得的积分可参与积分兑换活动，兑换相应的积分产品，兑换入口请点击公众号积分兑换</h5>
+        </div>
+        <br />
+        <br />
+
+</div>
+
+
+<!--<div class="signinpanel">-->
+<!--    <div class="containers1">-->
+<!--        <div class="row center-block" style="position: fixed">-->
+<!--            &lt;!&ndash;            <div class="logo-image" style="position:fixed;border-radius:20%;width:70px;height:70px">&ndash;&gt;-->
+<!--            <div class="row" align="center" style="">-->
+<!--                <img   th:src="@{/img/logo.jpg}" class="img-responsive center" alt="User Image">-->
+<!--            </div>-->
+<!--            &lt;!&ndash;            </div>&ndash;&gt;-->
+<!--            <div id="ibox-content" style="width: 350px">-->
+<!--                <div id="vertical-timeline" class="">-->
+<!--                    <div class="vertical-timeline-block" >-->
+<!--                        <p id="msg" th:text="*{msg}"-->
+<!--                           style="color:#1c90d2;font-size:20px;"></p>-->
+<!--                        <div class="" style="position: fixed;margin: auto" th:object="${data}">-->
+<!--                            <div class="row"  style="font-size: 20px;margin-left: 0px">关联手机：-->
+<!--                                <a id="phone" style="font-size: 25px" th:text="*{phone}"></a>-->
+<!--                            </div>-->
+<!--                                <p id="integral" th:text="'积分+'+*{integral}"-->
+<!--                                   style="color:#1c90d2;font-size:30px;"></p>-->
+<!--                                <p id="integralTotal" th:text="'总积分:'+*{integralTotal}+'分'"-->
+<!--                                   style="color:#1c90d2;font-size:20px;"></p>-->
+<!--                            <div class="bottom-align-text" style="width: 300px;margin-top: 30px">-->
+<!--                                <h5 style="color: #FF5151">*您获得的积分可参与积分兑换活动，兑换相应的积分产品</h5>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<th:block th:include="include :: footer" />
+</body>
+<script type="text/javascript">
+
+    var msg=$('#msg').val();
+
+    function check(msg){
+        if (msg=='兑换成功'){
+            $('#msg').css('color','green')
+        }else {
+            $('#msg').css('color','red')
+        }
+
+    }
+
+
+
+</script>
+</html>

@@ -1,0 +1,45 @@
+.containers {
+    width: 200px;
+    height:  600px;
+    position: fixed;
+    top: 20%;
+    left: 0;
+    right:0;
+    margin: auto;
+}
+
+
+
+
+/*.scanText{*/
+/*    width: 130px;*/
+/*    height:  auto;*/
+/*    position: fixed;*/
+/*    left: 0;*/
+/*    right:0;*/
+/*    margin: auto;*/
+/*}*/
+
+/*.scanBtn{*/
+/*    width: 85px;*/
+/*}*/
+
+.containers1 {
+    width: 300px;
+    height:  600px;
+    position: fixed;
+    top: 4%;
+    left: 0;
+    right:0;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.scan{
+    background: url(../img/back03.png) no-repeat center fixed;
+}
+
+
+

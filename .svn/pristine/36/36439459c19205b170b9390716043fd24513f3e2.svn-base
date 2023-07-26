@@ -1,0 +1,468 @@
+package com.linkwin.basedata.service.impl;
+
+import java.math.BigDecimal;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+
+
+import com.linkwin.basedata.domain.Product;
+import com.linkwin.basedata.domain.WarehouseRecord;
+import com.linkwin.basedata.domain.Warehouse;
+import com.linkwin.basedata.domain.Whstock;
+import com.linkwin.basedata.mapper.*;
+import com.linkwin.common.core.domain.entity.SysDept;
+import com.linkwin.common.utils.ShiroUtils;
+import com.linkwin.system.mapper.SysDeptMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.linkwin.basedata.service.IWhstockService;
+import com.linkwin.common.core.text.Convert;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+/**
+ * 库存Service业务层处理
+ *
+ * @author ruoyi
+ * @date 2022-06-09
+ */
+@Service
+public class WhstockServiceImpl implements IWhstockService {
+    @Autowired
+    private WhstockMapper whstockMapper;
+    @Autowired
+    private DeptMapper deptMapper;
+    @Autowired
+    private ProductMapper productMapper;
+    @Autowired
+    private IWhstockService whstockService;
+    @Autowired
+    private WarehouseRecordMapper WarehouseRecordMapper;
+    @Autowired
+    private SysDeptMapper sysDeptMapper;
+    @Autowired
+    private WarehouseMapper warehouseMapper;
+
+    /**
+     * 查询库存
+     *
+     * @param id 库存主键
+     * @return 库存
+     */
+    @Override
+    public Whstock selectWhstockById(Long id) {
+        return whstockMapper.selectWhstockById(id);
+    }
+
+    /**
+     * 查询库存列表
+     *
+     * @param whstock 库存
+     * @return 库存
+     */
+    @Override
+    public List<Whstock> selectWhstockList(Whstock whstock) {
+        return whstockMapper.selectWhstockList(whstock);
+    }
+
+    /**
+     * 新增库存
+     *
+     * @param whstock 库存
+     * @return 结果
+     */
+    @Override
+    public int insertWhstock(Whstock whstock) {
+        return whstockMapper.insertWhstock(whstock);
+    }
+
+    /**
+     * 修改库存
+     *
+     * @param whstock 库存
+     * @return 结果
+     */
+    @Override
+    public int updateWhstock(Whstock whstock) {
+        return whstockMapper.updateWhstock(whstock);
+    }
+
+    /**
+     * 批量删除库存
+     *
+     * @param ids 需要删除的库存主键
+     * @return 结果
+     */
+    @Override
+    public int deleteWhstockByIds(String ids) {
+        return whstockMapper.deleteWhstockByIds(Convert.toStrArray(ids));
+    }
+
+    /**
+     * 删除库存信息
+     *
+     * @param id 库存主键
+     * @return 结果
+     */
+    @Override
+    public int deleteWhstockById(Long id) {
+        return whstockMapper.deleteWhstockById(id);
+    }
+
+    @Override
+    public List<Whstock> selecttaskWhstockList(Whstock whstock) {
+
+        return whstockMapper.selectList(whstock);
+    }
+
+
+    /**
+     * @param productId  产品的id
+     * @param batch      产品批次
+     * @param number     产品数量
+     * @param +|—
+     * @param thisWHid   当前仓库id
+     * @param targetWHid 目的仓库id
+     * @return
+     */
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    @Override
+    public int moreWhRecord(String productId, String batch, BigDecimal number, String thisWHid, String targetWHid, String reason) throws RuntimeException {
+        int a = 0;
+        try {
+            //这个方法之前，写校验，校验是否冻结，数量和批次是否对应
+            a = whRecord(productId, batch, number, "+", thisWHid, targetWHid, reason, batch, 0);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            throw new RuntimeException(e.getMessage());
+        }
+        return a;
+    }
+
+    /**
+     * @param productId  产品的id
+     * @param batch      产品批次
+     * @param number     产品数量
+     * @param +|—
+     * @param thisWHid   当前仓库id
+     * @param targetWHid 目的仓库id
+     * @return
+     */
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    @Override
+    public int whRecord(String productId, String batch, BigDecimal number, String thisWHid, String targetWHid, String reason, String newBatch, Integer uploadType) throws RuntimeException {
+        int a = 0;
+        try {
+            a = whRecord(productId, batch, number, "-", thisWHid, targetWHid, reason, newBatch, uploadType);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            throw new RuntimeException(e.getMessage());
+        }
+        return a;
+    }
+
+    @Override
+    public int reduceWhRecord(String productCode, String batch, BigDecimal number, String WarehouseCode, String reason, Integer uploadType) throws RuntimeException {
+        Product productData = productMapper.selectProductDataByCode(productCode);
+        Warehouse Warehouse = deptMapper.selectByCode(WarehouseCode);
+        WarehouseRecord WarehouseRecord = new WarehouseRecord();
+        Whstock whstock = new Whstock();
+        whstock.setBatch(batch);
+        whstock.setProductid(productCode);
+        whstock.setWarehouseCode(WarehouseCode);
+        List<Whstock> whsTemp = whstockService.selecttaskWhstockList(whstock);
+        if (whsTemp == null || whsTemp.size() == 0) {
+            throw new RuntimeException("没有该产品批次的库存");
+        }
+        whstock = whsTemp.get(0);
+        BigDecimal quantity = whstock.getInventoryquantity();
+        if (quantity.compareTo(number) == -1) {
+            //如果剩余冻结库存小于0
+            throw new RuntimeException("当前仓库该批次产品的 剩余库存不足");
+        }
+        quantity = quantity.subtract(number);
+        whstock.setInventoryquantity(quantity);
+        whstock.setUpdatetime(new Date());
+        whstock.setUpdator(ShiroUtils.getLoginName());
+        whstock.setWeight(quantity.multiply(productData.getCartonWeight()));
+        if (quantity.compareTo(new BigDecimal(0)) < 1) {//库存为0则删除库存信息
+            whstockService.deleteWhstockById(whstock.getId());
+        } else {
+            whstockService.updateWhstock(whstock);
+
+        }
+        WarehouseRecord.setBatch(batch);
+        WarehouseRecord.setProductid(productCode);
+        WarehouseRecord.setChangenumber(number);
+        WarehouseRecord.setChangeflag("-");
+        WarehouseRecord.setCreatetime(new Date());
+        WarehouseRecord.setCreator(ShiroUtils.getSysUser().getUserName());
+        WarehouseRecord.setProductname(productData.getName());
+        WarehouseRecord.setSpec(productData.getSpecification());
+        WarehouseRecord.setUnit(productData.getDosageForm());
+        WarehouseRecord.setInventoryquantity(number);
+        WarehouseRecord.setWarehouseId(WarehouseCode);
+        WarehouseRecord.setWarehouseName(Warehouse.getName());
+        WarehouseRecord.setReason(reason);
+        return WarehouseRecordMapper.insertWarehouseRecord(WarehouseRecord);
+    }
+
+
+    @Override
+    public int physicalInventory(Whstock whstock, BigDecimal changNum, String changeFlag, String reason) {
+        try {
+            WarehouseRecord warehouseRecord = new WarehouseRecord();
+            warehouseRecord.setBatch(whstock.getBatch());
+            warehouseRecord.setProductid(whstock.getProductid());
+            warehouseRecord.setChangenumber(changNum);
+            warehouseRecord.setChangeflag(changeFlag);
+            warehouseRecord.setCreatetime(new Timestamp(System.currentTimeMillis()));
+            warehouseRecord.setCreator(ShiroUtils.getSysUser().getUserName());
+            warehouseRecord.setProductname(whstock.getProductname());
+            warehouseRecord.setSpec(whstock.getSpec());
+            warehouseRecord.setUnit(whstock.getUnit());
+
+            String warehouseName = "";
+//            SysDept dept = sysDeptMapper.selectDeptById(Long.parseLong(whstock.getWarehouseCode()));
+//            if (dept!=null){
+//                List<Warehouse> warehouseList = warehouseMapper.selectByOrganCode(String.valueOf(dept.getDeptId()));
+//                if (warehouseList.isEmpty()&&warehouseList.size()>0){
+//                    warehouseName = warehouseList.get(0).getName();
+//                }
+//            }else {
+//
+//            }
+            Warehouse warehouse=new Warehouse();
+            warehouse.setWareHouseCode(whstock.getWarehouseCode());
+            List<Warehouse> warehouseList = warehouseMapper.selectWarehouseList(warehouse);
+            if (!warehouseList.isEmpty() && warehouseList.size() > 0) {
+                warehouseName = warehouseList.get(0).getName();
+            }
+            warehouseRecord.setWarehouseName(warehouseName);
+            warehouseRecord.setReason(reason);
+            Product product = productMapper.selectByPdCode(whstock.getProductid());
+            if (product == null) {
+                throw new Exception("该产品不存在，产品编号：" + whstock.getProductid());
+            }
+            if ("-".equals(changeFlag) || changeFlag == "-") {
+                BigDecimal subtract = whstock.getInventoryquantity().subtract(changNum);
+                BigDecimal newWeight = subtract.multiply(product.getCartonWeight());
+                whstock.setInventoryquantity(subtract);
+                whstock.setWeight(newWeight);
+                warehouseRecord.setInventoryquantity(whstock.getInventoryquantity());
+            } else if ("+".equals(changeFlag)) {
+                BigDecimal add = whstock.getInventoryquantity().add(changNum);
+                BigDecimal newWeight = add.multiply(product.getCartonWeight());
+                whstock.setInventoryquantity(add);
+                whstock.setWeight(newWeight);
+                warehouseRecord.setInventoryquantity(whstock.getInventoryquantity());
+            }
+            warehouseRecord.setWarehouseId(whstock.getWarehouseCode());
+            whstock.setUpdatetime(new Date());
+            whstockMapper.updateWhstock(whstock);
+            return WarehouseRecordMapper.insertWarehouseRecord(warehouseRecord);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("处理异常盘点异常" + e.getCause());
+        }
+
+    }
+
+    /**
+     * 库存变动
+     *
+     * @param productId
+     * @param batch
+     * @param number
+     * @param type
+     * @param thisWHid   当前仓库
+     * @param targetWHid 目标仓库
+     * @param reason
+     * @param newBatch
+     * @param uploadType
+     * @return
+     * @throws RuntimeException
+     */
+    public int whRecord(String productId, String batch, BigDecimal number, String type, String thisWHid, String targetWHid, String reason, String newBatch, Integer uploadType) throws RuntimeException {
+        WarehouseRecord WarehouseRecord = new WarehouseRecord();
+        boolean noPDflag = false;
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+//        SysUser sysUser = ShiroUtils.getSysUser();
+//        String username=sysUser.getUserName();
+        String username = "task";
+//        String username = ShiroUtils.getSysUser().getUserName();
+        Product prodactdata = productMapper.selectProductDataByCode(productId);
+        Whstock whstock = new Whstock();
+        whstock.setBatch(batch);
+        whstock.setProductid(productId);
+
+        whstock.setWarehouseCode(targetWHid);
+
+        String thisWarehouseName = null;
+
+        SysDept Warehouse = new SysDept();
+        Warehouse.setDeptId(Long.parseLong(targetWHid));
+        Warehouse warehouse = warehouseMapper.selectByCode(targetWHid);
+//        List<SysDept> Warehouse1 = sysDeptMapper.selectDeptList(Warehouse);
+        String WarehouseName = "";
+        if (warehouse!=null) {
+            WarehouseName = warehouse.getName();
+        }
+        if ("-".equals(type)) {
+            whstock.setWarehouseCode(thisWHid);
+            List<Whstock> whsTemp = whstockMapper.selectList(whstock);
+            if (whsTemp.isEmpty()) {
+//                if(uploadType!=2) {
+                throw new RuntimeException("当前仓库没有该批次产品的库存!!");
+//                }else{
+//                    noPDflag=true;
+//
+//                    Warehouse.setWareHouseCode(thisWHid);
+//                    List<Warehouse> WarehouseList = deptMapper.selectWarehouseList(Warehouse);
+//
+//                    if (!Warehouse1.isEmpty()) {
+//                        whstock.setWarehouseName(WarehouseList.get(0).getName());
+//                    }
+//
+//
+//                    whstock.setCreatetime(time);
+//                    whstock.setCreator(username);
+//                    whstock.setProductname(prodactdata.getName());
+//                    whstock.setWarehouseCode(thisWHid);
+//                    whstock.setSpec(prodactdata.getSpecification());
+//                    whstock.setBatch(batch);
+//                    whstock.setInventoryquantity(BigDecimal.ZERO );
+//                    whstock.setProductid(prodactdata.getCode());
+//                    whstock.setUnit(prodactdata.getDosageForm());
+//                    whstock.setCartonweight(prodactdata.getCartonWeight());
+//                    whstock.setWeight(prodactdata.getCartonWeight().multiply(BigDecimal.ZERO.subtract(number)));
+////                    if (prodactdata.getValidPeriod()==null){
+////                      throw new RuntimeException("产品有效期为空，请确认产品有效期数据");
+////                    }
+////                    Date periodDate = DateUtils.getPeriodDate(batch, prodactdata.getValidPeriod());
+////                    whstock.setExpiryDate(periodDate);
+//                }
+            } else {
+
+                whstock = whsTemp.get(0);
+                thisWarehouseName = whstock.getWarehouseName();
+            }
+            BigDecimal itq = BigDecimal.valueOf(0);
+//                freezeno = whstock.getFreezeno() == null ? BigDecimal.valueOf(0) : whstock.getFreezeno();
+            itq = whstock.getInventoryquantity().subtract(number);
+            if (itq.compareTo(BigDecimal.valueOf(0)) == -1 && uploadType != 2) {
+                //如果剩余冻结库存小于0
+                throw new RuntimeException("当前仓库该批次产品的 剩余库存不足");
+            }
+
+            whstock.setInventoryquantity(itq);
+            whstock.setWeight(itq.multiply(whstock.getCartonweight()));
+            if (itq.compareTo(BigDecimal.ZERO) == 0) {
+                whstockService.deleteWhstockById(whstock.getId());
+            } else {
+
+                whstock.setUpdatetime(time);
+                whstock.setUpdator(username);
+                if (noPDflag) {
+
+                    whstockMapper.insertWhstock(whstock);
+
+                } else {
+                    whstockMapper.updateWhstock(whstock);
+                }
+            }
+
+        }
+        Whstock newWhstock = new Whstock();
+        Whstock oldwhstock = new Whstock();
+        oldwhstock.setBatch(newBatch);
+        oldwhstock.setProductid(productId);
+
+        oldwhstock.setWarehouseCode(targetWHid);
+        List<Whstock> whList = whstockMapper.selectList(oldwhstock);
+
+        if (whList.isEmpty() || whList.size() == 0) {
+
+            newWhstock.setWarehouseName(WarehouseName);
+
+            newWhstock.setCreatetime(time);
+            newWhstock.setCreator(username);
+            newWhstock.setProductname(prodactdata.getName());
+            newWhstock.setWarehouseCode(targetWHid);
+            newWhstock.setSpec(prodactdata.getSpecification());
+            newWhstock.setBatch(newBatch);
+            newWhstock.setInventoryquantity(number);
+            newWhstock.setProductid(prodactdata.getCode());
+            newWhstock.setUnit(prodactdata.getDosageForm());
+            newWhstock.setCartonweight(prodactdata.getCartonWeight());
+            newWhstock.setWeight(prodactdata.getCartonWeight().multiply(number));
+//            if (prodactdata.getValidPeriod()==null){
+//                throw new RuntimeException("产品有效期为空，请确认产品有效期数据");
+//            }
+//            Date periodDate = DateUtils.getPeriodDate(batch, prodactdata.getValidPeriod());
+//            newWhstock.setExpiryDate(periodDate);
+            try {
+                whstockMapper.insertWhstock(newWhstock);
+            } catch (Exception e) {
+                if (e.getCause() instanceof SQLIntegrityConstraintViolationException) {
+                    List<Whstock> whList2 = whstockMapper.selectList(oldwhstock);
+                    if (!(whList2.isEmpty() || whList2.size() == 0)) {
+                        newWhstock = whList2.get(0);
+                        newWhstock.setUpdator(username);
+                        newWhstock.setUpdatetime(time);
+                        newWhstock.setInventoryquantity(newWhstock.getInventoryquantity().add(number));
+                        newWhstock.setWeight((prodactdata.getCartonWeight().multiply(newWhstock.getInventoryquantity())));
+                        whstockMapper.updateWhstock(newWhstock);
+                    }
+                }
+            }
+            //新增库存台账
+        } else {
+            newWhstock = whList.get(0);
+            newWhstock.setUpdator(username);
+            newWhstock.setUpdatetime(time);
+            newWhstock.setInventoryquantity(newWhstock.getInventoryquantity().add(number));
+            newWhstock.setWeight((prodactdata.getCartonWeight().multiply(newWhstock.getInventoryquantity())));
+            whstockMapper.updateWhstock(newWhstock);
+        }
+
+        WarehouseRecord.setBatch(batch);
+        WarehouseRecord.setProductid(productId);
+        WarehouseRecord.setChangenumber(number);
+        WarehouseRecord.setChangeflag(type);
+        WarehouseRecord.setCreatetime(time);
+        WarehouseRecord.setCreator(username);
+        WarehouseRecord.setProductname(prodactdata.getName());
+        WarehouseRecord.setSpec(prodactdata.getSpecification());
+        WarehouseRecord.setUnit(prodactdata.getDosageForm());
+
+        if ("+".equals(type)) {
+            WarehouseRecord.setWarehouseId(targetWHid);
+            WarehouseRecord.setWarehouseName(WarehouseName);
+            WarehouseRecord.setInventoryquantity(newWhstock.getInventoryquantity());
+        } else {
+            WarehouseRecord.setWarehouseId(thisWHid);
+            WarehouseRecord.setWarehouseName(thisWarehouseName);
+            WarehouseRecord.setInventoryquantity(whstock.getInventoryquantity());
+        }
+        WarehouseRecord.setReason(reason);
+        int result =
+                WarehouseRecordMapper.insertWarehouseRecord(WarehouseRecord);
+        if ("-".equals(type)) {
+            WarehouseRecord.setReason(reason + "，收货入库");
+            WarehouseRecord.setBatch(newBatch);
+            WarehouseRecord.setWarehouseName(WarehouseName);
+            WarehouseRecord.setChangeflag("+");
+            WarehouseRecord.setInventoryquantity(newWhstock.getInventoryquantity());
+            WarehouseRecord.setWarehouseId(targetWHid);
+            WarehouseRecordMapper.insertWarehouseRecord(WarehouseRecord);
+        }
+        return result;
+        //更改单据状态已经复核
+    }
+}

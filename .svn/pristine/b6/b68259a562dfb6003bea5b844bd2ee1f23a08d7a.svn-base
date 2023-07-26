@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('软件版本控制列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>上传人名称：</label>
+                                <input type="text" name="upUserName"/>
+                            </li>
+                            <li>
+                                <label>是否可用：</label>
+                                <input type="text" name="isUse"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:software:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:software:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:software:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:software:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var uploadFlag = [[${@permission.hasPermi('system:software:upload')}]];
+        var downloadFlag = [[${@permission.hasPermi('system:software:download')}]];
+        var softwareTypeDict = [[${@dict.getType('sys_software_type',#locale.language+'_'+#locale.country)}]];
+        var prefix = ctx + "system/software";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "软件版本控制",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '${comment}',
+                    visible: false
+                },
+                    {
+                        field: 'fileName',
+                        title: '软件名称'
+                    },
+                    {
+                        field: 'type',
+                        title: '软件类型',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(softwareTypeDict, value);
+                        }
+                    },
+                    {
+                        field: 'upUserName',
+                        title: '上传人名称'
+                    },
+                    {
+                    field: 'bigVersion',
+                    title: '大版本号',
+                    formatter: function(value, row, index) {
+                        return 'V'+value+'.'+row.minVersion;
+                    }
+                },
+                {
+                    field: 'size',
+                    title: '文件大小',
+                    formatter: function (value, row, index) {
+                        if (value != null && value != '') {
+                            let fileSize;
+                            if(value < 10240000){
+                                fileSize = value / 1024;
+                                return fileSize.toFixed(2) + 'K';
+                            }else{
+                                fileSize = value / 1024 / 1024;
+                                return fileSize.toFixed(2) + 'M'
+                            }
+                            return value;
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                {
+                    field: 'isUse',
+                    title: '是否可用',
+                    formatter: function (value, row, index) {
+                        return statusTools(row);
+                    }
+                },
+
+                {
+                    field: 'remark',
+                    title: '描述'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        if (!row.fileName){
+                            actions.push('<a class="btn btn-success btn-xs ' + uploadFlag + '" href="javascript:void(0)" onclick="upload(\'' + row.id + '\')"><i class="fa fa-upload"></i>待上传</a> ');
+                        }else {
+                            actions.push('<a class="btn btn-info btn-xs ' + downloadFlag + '" href="javascript:void(0)" onclick="downLoad(\'' + row.id + '\')"><i class="fa fa-download"></i>下载</a> ');
+                        }
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        /**
+         * 上传软件包
+         */
+        function upload(id){
+            var url = prefix + "/upload/"+id;
+            top.layer.open({
+                type: 2,
+                area: [900 + 'px', +550 + 'px'],
+                fix: false,
+                //不固定
+                maxmin: true,
+                shade: 0.3,
+                title: "软件上传",
+                content: url,
+                btn: ['关闭'],
+                // 弹层外区域关闭
+                shadeClose: true,
+                yes: function(index, layero) {
+                    // var iframeWin = layero.find('iframe')[0];
+                    // iframeWin.contentWindow.submitHandler(index, layero);
+                    $.table.refresh();
+                    top.layer.close(index);
+                },
+                cancel: function(index) {
+                    top.layer.close(index);
+                }
+            });
+        }
+
+        /* 用户状态显示 */
+        function statusTools(row) {
+            console.log(row.status)
+            if (row.status == 0) {
+                return '<i class=\"fa fa-toggle-off text-info fa-2x\" onclick="enable(\'' + row.id + '\')"></i> ';
+            } else {
+                return '<i class=\"fa fa-toggle-on text-info fa-2x\" onclick="disable(\'' + row.id + '\')"></i> ';
+            }
+        }
+
+
+        /* 软件管理-停用 */
+        function disable(id) {
+            $.modal.confirm("确认要停用该软件吗？", function() {
+                $.operate.post(prefix + "/changeStatus", { "id": id, "status": 0 });
+            })
+        }
+
+        /* 软件管理启用 */
+        function enable(id) {
+            $.modal.confirm("确认要启用该软件吗？", function() {
+                $.operate.post(prefix + "/changeStatus", { "id": id, "status": 1 },function (res){
+                    if (res.code!=0){
+                        $.modal.alertError(res.msg);
+                    }
+                });
+            })
+        }
+
+        /**
+         * 下载软件
+         * @param id
+         */
+        function downLoad(id){
+            window.location.href = prefix + "/downLoad?id="+id;
+            $.table.refresh();
+        }
+
+
+
+
+    </script>
+</body>
+</html>

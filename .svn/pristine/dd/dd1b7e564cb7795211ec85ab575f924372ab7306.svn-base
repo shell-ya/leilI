@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.apply.mapper.BoxCodeSeedMapper">
+    
+    <resultMap type="BoxCodeSeed" id="BoxCodeSeedResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="year"    column="year"    />
+        <result property="seed"    column="seed"    />
+        <result property="seedLength"    column="seed_length"    />
+        <result property="isEnd"    column="is_end"    />
+        <result property="startNum"    column="start_num"    />
+    </resultMap>
+
+    <sql id="selectBoxCodeSeedVo">
+        select id, create_time, modify_time, year, seed, seed_length, is_end, start_num from box_code_seed
+    </sql>
+
+    <sql id="where-and">
+        <where>
+            <if test="modifyTime != null "> and modify_time = #{modifyTime}</if>
+            <if test="year != null "> and year = #{year}</if>
+            <if test="seed != null  and seed != ''"> and seed = #{seed}</if>
+            <if test="seedLength != null "> and seed_length = #{seedLength}</if>
+            <if test="isEnd != null  and isEnd != ''"> and is_end = #{isEnd}</if>
+            <if test="startNum != null "> and start_num = #{startNum}</if>
+        </where>
+    </sql>
+
+    <select id="selectBoxCodeSeedList" parameterType="BoxCodeSeed" resultMap="BoxCodeSeedResult">
+        <include refid="selectBoxCodeSeedVo"/>
+        <include refid="where-and"></include>
+    </select>
+    
+    <select id="selectBoxCodeSeedById" parameterType="Long" resultMap="BoxCodeSeedResult">
+        <include refid="selectBoxCodeSeedVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertBoxCodeSeed" parameterType="BoxCodeSeed">
+        insert into box_code_seed
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="year != null">year,</if>
+            <if test="seed != null">seed,</if>
+            <if test="seedLength != null">seed_length,</if>
+            <if test="isEnd != null">is_end,</if>
+            <if test="startNum != null">start_num,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="year != null">#{year},</if>
+            <if test="seed != null">#{seed},</if>
+            <if test="seedLength != null">#{seedLength},</if>
+            <if test="isEnd != null">#{isEnd},</if>
+            <if test="startNum != null">#{startNum},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBoxCodeSeed" parameterType="BoxCodeSeed">
+        update box_code_seed
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime},</if>
+            <if test="year != null">year = #{year},</if>
+            <if test="seed != null">seed = #{seed},</if>
+            <if test="seedLength != null">seed_length = #{seedLength},</if>
+            <if test="isEnd != null">is_end = #{isEnd},</if>
+            <if test="startNum != null">start_num = #{startNum},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBoxCodeSeedById" parameterType="Long">
+        delete from box_code_seed where id = #{id}
+    </delete>
+
+    <delete id="deleteBoxCodeSeedByIds" parameterType="String">
+        delete from box_code_seed where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getOneSeed" parameterType="BoxCodeSeed" resultMap="BoxCodeSeedResult">
+        <include refid="selectBoxCodeSeedVo"/>
+        <include refid="where-and"></include>
+        limit 1
+    </select>
+
+
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.Integral.mapper.IntegralRecordMapper">
+    
+    <resultMap type="IntegralRecord" id="IntegralRecordResult">
+        <result property="id"    column="id"    />
+        <result property="phone"    column="phone"    />
+        <result property="changeNumber"    column="change_number"    />
+        <result property="curreryIntegral"    column="currery_integral"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="productName"    column="product_name"    />
+        <result property="productCode"    column="product_code"    />
+        <result property="productNumber"    column="product_number"    />
+        <result property="changeReason"    column="change_reason"    />
+        <result property="changeFlag"    column="change_flag"    />
+    </resultMap>
+
+    <sql id="selectIntegralRecordVo">
+        select id, phone, change_number, currery_integral, create_time, product_name, product_code, product_number, change_reason, change_flag from integral_record
+    </sql>
+
+    <select id="selectIntegralRecordList" parameterType="IntegralRecord" resultMap="IntegralRecordResult">
+        <include refid="selectIntegralRecordVo"/>
+        <where>  
+            <if test="changeNumber != null "> and change_number = #{changeNumber}</if>
+            <if test="curreryIntegral != null "> and currery_integral = #{curreryIntegral}</if>
+            <if test="productName != null  and productName != ''"> and product_name like concat('%', #{productName}, '%')</if>
+            <if test="productCode != null  and productCode != ''"> and product_code = #{productCode}</if>
+            <if test="productNumber != null "> and product_number = #{productNumber}</if>
+            <if test="changeReason != null  and changeReason != ''"> and change_reason = #{changeReason}</if>
+            <if test="changeFlag != null  and changeFlag != ''"> and change_flag = #{changeFlag}</if>
+        </where>
+    </select>
+    
+    <select id="selectIntegralRecordById" parameterType="Long" resultMap="IntegralRecordResult">
+        <include refid="selectIntegralRecordVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertIntegralRecord" parameterType="IntegralRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into integral_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="phone != null">phone,</if>
+            <if test="changeNumber != null">change_number,</if>
+            <if test="curreryIntegral != null">currery_integral,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="productName != null">product_name,</if>
+            <if test="productCode != null">product_code,</if>
+            <if test="productNumber != null">product_number,</if>
+            <if test="changeReason != null">change_reason,</if>
+            <if test="changeFlag != null">change_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="phone != null">#{phone},</if>
+            <if test="changeNumber != null">#{changeNumber},</if>
+            <if test="curreryIntegral != null">#{curreryIntegral},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="productName != null">#{productName},</if>
+            <if test="productCode != null">#{productCode},</if>
+            <if test="productNumber != null">#{productNumber},</if>
+            <if test="changeReason != null">#{changeReason},</if>
+            <if test="changeFlag != null">#{changeFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIntegralRecord" parameterType="IntegralRecord">
+        update integral_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="changeNumber != null">change_number = #{changeNumber},</if>
+            <if test="curreryIntegral != null">currery_integral = #{curreryIntegral},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+            <if test="productCode != null">product_code = #{productCode},</if>
+            <if test="productNumber != null">product_number = #{productNumber},</if>
+            <if test="changeReason != null">change_reason = #{changeReason},</if>
+            <if test="changeFlag != null">change_flag = #{changeFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteIntegralRecordById" parameterType="Long">
+        delete from integral_record where id = #{id}
+    </delete>
+
+    <delete id="deleteIntegralRecordByIds" parameterType="String">
+        delete from integral_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

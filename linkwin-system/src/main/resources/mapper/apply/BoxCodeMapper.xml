@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.apply.mapper.BoxCodeMapper">
+    
+    <resultMap type="BoxCode" id="BoxCodeResult">
+        <result property="id"    column="id"    />
+        <result property="applyId"    column="apply_id"    />
+        <result property="boxCode"    column="box_code"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="productionTime"    column="production_time"    />
+    </resultMap>
+
+    <sql id="selectBoxCodeVo">
+        select id, apply_id, box_code, create_time, modify_time,pd_code,production_time from box_code_
+    </sql>
+
+    <select id="selectBoxCodeList" parameterType="BoxCode" resultMap="BoxCodeResult">
+        <include refid="selectBoxCodeVo"/>
+        <where>  
+            <if test="applyId != null "> and apply_id = #{applyId}</if>
+            <if test="boxCode != null  and boxCode != ''"> and box_code = #{boxCode}</if>
+            <if test="modifyTime != null "> and modify_time = #{modifyTime}</if>
+            <if test="pdCode != null and pdCode!='' "> and pd_code = #{pdCode}</if>
+            <if test="productionTime != null and productionTime!=''  "> and production_time = #{productionTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectBoxCodeById" parameterType="Long" resultMap="BoxCodeResult">
+        <include refid="selectBoxCodeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertBoxCode" parameterType="BoxCode">
+        insert into box_code_22
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="applyId != null">apply_id,</if>
+            <if test="boxCode != null">box_code,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="pdCode != null">pd_code,</if>
+            <if test="productionTime != null">production_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="applyId != null">#{applyId},</if>
+            <if test="boxCode != null">#{boxCode},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="productionTime != null">#{productionTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBoxCode" parameterType="BoxCode">
+        update box_code_
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="applyId != null">apply_id = #{applyId},</if>
+            <if test="boxCode != null">box_code = #{boxCode},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime},</if>
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="productionTime != null">production_time = #{productionTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBoxCodeById" parameterType="Long">
+        delete from box_code_ where id = #{id}
+    </delete>
+
+    <delete id="deleteBoxCodeByIds" parameterType="String">
+        delete from box_code_ where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectExitsNum" resultType="Integer">
+        select count(0) from ${tableName} where apply_id = #{applyId}
+    </select>
+
+    <select id="selectByCode" resultMap="BoxCodeResult">
+        select id, apply_id, box_code, create_time, modify_time,pd_code,production_time from ${tableName}
+        where box_code = #{code}
+    </select>
+
+    <select id="selectByCodeArray"  resultMap="BoxCodeResult">
+        select id, apply_id, box_code, create_time, modify_time,pd_code,production_time from ${tableName}  where box_code in
+        <foreach item="code" collection="codeArray" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </select>
+
+    <select id="selectByMarkCode" resultMap="BoxCodeResult">
+        select id, apply_id, box_code, create_time, modify_time,pd_code,production_time from ${tableName}
+        where box_code = #{code}
+    </select>
+
+</mapper>

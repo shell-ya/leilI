@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/fwQueryNew.css" th:href="@{/css/fwQueryNew.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('Anti-Counterfeiting Query')" />
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0， maximum-scale=1.0,minimum-scale=1.0, user-scalable=no， viewport-fit=cove">-->
+<!--    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no, viewport-fit=cover" />-->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no, viewport-fit=auto" />
+
+</head>
+<body class="scan">
+    <div align="center">
+        <img th:src="@{/img/logo04.png}" style="height: 175px;width: 300px;margin-top: 50px">
+    </div>
+    <div align="center" class="product center-block" style="width: 350px"  th:object="${fwQuery}">
+                <div align="center" style="font-size: 20px;color: #1a7bb9" >
+                    <br />Leili product traceability and anti-counterfeiting query
+                </div>
+                <div class="row"  align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">
+                    <br />This product is：
+                    <a id="authenticity" style="font-size: 25px" th:text="*{authenticity}" ></a>
+                </div>
+                <div class="bottom-align-text" align="left">
+                    <h5 style="margin-left: 40px;margin-right: 10px">*In general, if the code is scanned more than 5 times, the goods may be deemed fake. If you have any concerns regarding the goods, you should contact after-sales support.</h5>
+                    <hr color="blue" size="10px" style="margin-left: 40px;margin-right: 20px;"/>
+                </div>
+
+                <div class="row" id="queryNum" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">The number of enquiries：
+                    <a style="font-size: 25px" th:text="*{queryNum}"></a>
+                    <hr color="blue" size="1px"  noshade="false"/>
+                </div>
+
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">product name：
+                    <a id="pdName" th:text="*{pdName}"></a>
+                    <hr color="blue" size="1px"/>
+                </div>
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">Production Date：
+                    <a id="proDateStr" th:text="*{proDateStr}"></a>
+                    <hr color="blue" size="1px"/>
+                </div>
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">product specification：
+                    <a id="specification" th:text="*{specification}">	</a>
+                    <hr color="blue" size="1px"/>
+                </div>
+<!--                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">Test report/certificate：-->
+<!--&lt;!&ndash;                    <a id="testCertificate" >点击查看</a>&ndash;&gt;-->
+<!--                    <button id="testCertificate" onclick="testCertificate1()">点击查看</button>-->
+<!--                    <hr color="blue" size="1px"/>-->
+<!--                </div>-->
+                <div class="row" align="left"  style="font-size: 15px;margin-left: 40px;margin-right: 20px">Instructions for use：
+                    <a id="usemethod" style="word-wrap: break-word;font-size: 13px" th:text="*{usemethod}"></a>
+                    <hr color="blue" size="10px"/><br />
+                </div>
+                <input name="productPath" th:value="*{productPath}" type="hidden">
+
+                <div class="row" align="left"  style="font-size: 15px;margin-left: 40px;margin-right: 20px">Company Email：
+                    <a id="usemethod" style="word-wrap: break-word;font-size: 13px" th:text="*{companyEmail}"></a>
+                    <hr color="blue" size="10px"/><br />
+                </div>
+
+                <div class="vertical-timeline-block" th:each="dataItem:*{fwFlowVoList}" >
+                    <div class="vertical-timeline-icon blue-bg">
+                        <i class="fa fa-file-text"></i>
+                    </div>
+                    <div class="vertical-timeline-content">
+                        <p th:text="'Document Number：'+${dataItem.orderNo}" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                        <p th:text="'Shipping  Organization：' + ${dataItem.sendOrganName}"  th:if="${dataItem.sendOrganName}" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                        <p th:text="'Shipping  Organization：'"  th:if="${dataItem.sendOrganName eq null}" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                        <p th:text="'Receiving Organization ：'+${dataItem.receiveOrganName}" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                        <p th:text="'Logistics Time：'+${dataItem.createTime}" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                        <p th:if="${dataItem.orderType eq 1}" th:text="'Document type: outbound'" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                        <p th:if="${dataItem.orderType eq 0}" th:text="' Document type: inbound'" style="color:#1c90d2;font-size:13px;text-align: left;"></p>
+                    </div>
+                </div>
+    </div>
+
+<!--    <div align="center" class="product center-block" style="width: 350px;margin-bottom: auto" th:object="${fwQuery}">-->
+<!--        <div class="row" style="font-size: 22px;margin-left: 20px;margin-top:10px;margin-right: 20px;color: #1a7bb9">-->
+<!--            <br />Activities available for participation<br />-->
+<!--            <a style="word-wrap: break-word;" id="activityMsg" th:text="*{activityMsg}"></a>-->
+<!--        </div>-->
+<!--        <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-top:10px;margin-right: 20px">Activity Type：-->
+<!--            <a style="word-wrap: break-word;" id="activityType" th:text="*{activityType}"></a>-->
+<!--&lt;!&ndash;            <a style="word-wrap: break-word;" id="activityType">大转盘</a>&ndash;&gt;-->
+<!--            <hr color="blue" size="1px"  />-->
+<!--        </div>-->
+<!--        <div class="row"  align="left" style="font-size: 15px;margin-left: 40px;margin-top:10px;margin-right: 20px">Activity Title：-->
+<!--            <a style="word-wrap: break-word;" id="activityTitle" th:text="*{activityTitle}"></a>-->
+<!--&lt;!&ndash;            <a style="word-wrap: break-word;" id="activityTitle" >大转盘活动</a>&ndash;&gt;-->
+<!--            <hr color="blue" size="1px" />-->
+<!--        </div>-->
+<!--        <div class="row"  align="left" style="font-size: 15px;margin-left: 40px;margin-top:10px;margin-right: 20px">Activity Introduction：-->
+<!--            <a class="introduction" style="word-wrap: break-word;" id="introduction" th:text="*{activityIntroduction}" ></a>-->
+<!--&lt;!&ndash;            <a class="introduction" style="word-wrap: break-word;" id="introduction" >测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍&ndash;&gt;-->
+<!--            </a>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--            <br />-->
+<!--            <button id="result"  class="btn btn-primary center scanText " style="border-radius: 30px" onclick="scan()" type="button"><i class="fa fa-barcode"></i> Click to scan the marketing code</button>-->
+<!--        </div>-->
+<!--        <div class="bottom-align-text">-->
+<!--            <br />-->
+<!--            <h5 style="color: #FF5151;margin-left: 20px">*Please scan the marketing code after discovering the anti-counterfeiting code. Only after scanning may you engage in the appropriate activities.<br /></h5>-->
+<!--            <br />-->
+<!--        </div>-->
+<!--    </div>-->
+    <input name="openId" th:value="*{openId}" type="hidden">
+    <input name="phone" th:value="*{phone}" type="hidden">
+    <input name="address" th:value="*{address}" type="hidden">
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+
+
+
+    <th:block th:include="include :: footer" />
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        var authenticity=$("#authenticity").text();
+        var data=check(authenticity);
+        var prefix = ctx + "fwQueryH5";
+
+
+        // var qr=GetQueryString("qrresult");
+        // if(qr){
+        //     var url=window.location.href
+        //     console.log(url)
+        //     // var openId = $('input[name="openId"]').val();
+        //     // var phone = $('input[name="phone"]').val();
+        //     // var address = $('input[name="address"]').val();
+        //     // location.href=prefix+'/exchangeIntegral?code='+qr+'&address='+address+'&phone='+phone+'&openId='+openId;
+        // }
+
+        function scan(){
+            var openId = $('input[name="openId"]').val();
+            var phone = $('input[name="phone"]').val();
+            var address = $('input[name="address"]').val();
+            var url=prefix+'/exchangeIntegral?'+'address='+address+'&phone='+phone+'&openId='+openId;
+            var host=window.location.host;
+            var protocol = window.location.protocol
+            url =protocol+'//'+host+url;
+            location.href = "https://www.996315.com/api/scan/?redirect_uri=" + encodeURIComponent(url);
+        }
+
+        function testCertificate1(){
+            var productPath = $('input[name="productPath"]').val();
+            if (!productPath){
+                $.modal.alertError('产品内检图片异常，请联系管理员');
+            }
+            var url = ctx + productPath;
+            url = url.replace("/img","");
+            var host=window.location.host;
+            var protocol = window.location.protocol
+            url =protocol+'//'+host+url;
+            location.href = url;
+        }
+
+
+        function check(aut){
+            var index=aut.indexOf("正品");
+            console.log(aut)
+            console.log(index)
+            if (index==-1){
+                $('#authenticity').css('color','red')
+            }
+            else{
+                // $("#queryNum").prop("hidden",true);
+                $('#authenticity').css('color','green')
+            }
+        }
+    </script>
+</body>
+
+</html>

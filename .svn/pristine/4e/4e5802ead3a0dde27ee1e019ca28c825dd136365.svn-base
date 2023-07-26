@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.apply.mapper.SubCodeMapper">
+    
+    <resultMap type="SubCode" id="SubCodeResult">
+        <result property="id"    column="id"    />
+        <result property="applyId"    column="apply_id"    />
+        <result property="subCode"    column="sub_code"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="prefixCode"    column="prefix_code"    />
+        <result property="seed"    column="seed"    />
+        <result property="serialNum"    column="serial_num"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="productionTime"    column="production_time"    />
+        <result property="markCode"    column="mark_code"    />
+    </resultMap>
+
+
+
+
+
+
+    <sql id="selectSubCodeVo">
+        select id, apply_id, sub_code, create_time, modify_time, prefix_code, seed, serial_num,mark_code from sub_code
+    </sql>
+
+
+    <insert id="insertSubCode" parameterType="SubCode" useGeneratedKeys="true" keyProperty="id">
+        insert into sub_code_22
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="applyId != null">apply_id,</if>
+            <if test="subCode != null">sub_code,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="prefixCode != null">prefix_code,</if>
+            <if test="seed != null">seed,</if>
+            <if test="serialNum != null">serial_num,</if>
+            <if test="pdCode != null">pd_code,</if>
+            <if test="productionTime != null">production_time,</if>
+            <if test="markCode != null">mark_code,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="applyId != null">#{applyId},</if>
+            <if test="subCode != null">#{subCode},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="prefixCode != null">#{prefixCode},</if>
+            <if test="seed != null">#{seed},</if>
+            <if test="serialNum != null">#{serialNum},</if>
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="productionTime != null">#{productionTime},</if>
+            <if test="markCode != null">#{markCode},</if>
+        </trim>
+    </insert>
+
+
+    <select id="selectSubCodeList" parameterType="SubCode" resultMap="SubCodeResult">
+        <include refid="selectSubCodeVo"/>
+        <where>  
+            <if test="applyId != null "> and apply_id = #{applyId}</if>
+            <if test="subCode != null  and subCode != ''"> and sub_code = #{subCode}</if>
+            <if test="modifyTime != null "> and modify_time = #{modifyTime}</if>
+            <if test="prefixCode != null  and prefixCode != ''"> and prefix_code = #{prefixCode}</if>
+            <if test="seed != null  and seed != ''"> and seed = #{seed}</if>
+            <if test="serialNum != null "> and serial_num = #{serialNum}</if>
+            <if test="pdCode != null and pdCode!='' "> and pd_code = #{pdCode}</if>
+            <if test="productionTime != null and productionTime!=''  "> and production_time = #{productionTime}</if>
+            <if test="markCode != null and markCode!=''  "> and mark_code = #{markCode}</if>
+        </where>
+    </select>
+    
+    <select id="selectSubCodeById" parameterType="Long" resultMap="SubCodeResult">
+        <include refid="selectSubCodeVo"/>
+        where id = #{id}
+    </select>
+
+
+    <insert id="batchInsertSubCode">
+        insert  into ${params.tableName} (apply_id, sub_code, create_time, modify_time, seed,serial_num,mark_code,prefix_code) values
+        <foreach collection="randomCodeList" item="item" index="index" separator="," >
+            (#{applyId},left(#{item},20),#{createTime},null,#{seed},right(left(#{item},20),3),right(#{item},26),left(#{item},17))
+        </foreach>
+    </insert>
+
+    <select id="selectSubCodeByApplyId" resultMap="SubCodeResult">
+        select id, apply_id, sub_code, create_time, modify_time, prefix_code, seed, serial_num,pd_code,production_time,mark_code from ${subTableName}
+        where serial_num between #{startNum} and #{endNum} and prefix_code = #{prefixCode} and apply_id=#{applyId}
+        order by id asc
+    </select>
+
+    <select id="selectByCode" resultMap="SubCodeResult">
+        select id, apply_id, sub_code, create_time, modify_time, prefix_code, seed, serial_num,pd_code,production_time,mark_code from ${tableName}
+        where sub_code = #{code}
+    </select>
+
+
+    <select id="selectByMarkCode" resultMap="SubCodeResult">
+        select id, apply_id, sub_code, create_time, modify_time, prefix_code, seed, serial_num,pd_code,production_time,mark_code from ${tableName}
+        where mark_code = #{markCode}
+    </select>
+
+    <select id="queryTableName" resultType="Integer">
+        select count(0) from information_schema.TABLES
+        where TABLE_NAME = #{tableName};
+    </select>
+
+
+    <select id="batchInsertSubCodeList">
+        insert  into ${tableName} (apply_id, sub_code, create_time, modify_time, seed,serial_num,mark_code,prefix_code) values
+        <foreach collection="subCodeList" item="item" index="index" separator="," >
+            (#{item.applyId},#{item.subCode},now(),null,#{item.seed},#{item.serialNum},#{item.markCode},#{item.prefixCode})
+        </foreach>
+    </select>
+
+
+</mapper>

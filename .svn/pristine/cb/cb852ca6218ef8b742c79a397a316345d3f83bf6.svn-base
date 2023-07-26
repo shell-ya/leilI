@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="author" content="域叶">
+    <title>超简单转盘抽奖效果</title>
+    <style>
+        #bg {
+            width: 650px;
+            height: 600px;
+            margin: 0 auto;
+            background: url(img/content_bg.jpg) no-repeat;
+            position: relative;
+        }
+
+        img.zhuanpan {
+            position: absolute;
+            z-index: 10;
+            top: 155px;
+            left: 247px;
+        }
+
+        img.content {
+            position: absolute;
+            z-index: 5;
+            top: 60px;
+            left: 116px;
+            transition: all 4s;
+        }
+    </style>
+</head>
+<body>
+<div id="bg">
+    <img id="btn" class="zhuanpan"  th:src="@{/img/back.jpg}" alt="zhuanpan">
+    <img id="content" class="content" th:src="@{/img/point.jpg}" alt="content">
+</div>
+<script>
+    var rotate = 720//默认至少转两圈
+    var canGet = [1,2,3]//中奖范围(比如你只打算让用户抽中1、2、3等奖，其他的概率为0)
+    var nowNum = 0;//当前点击次数
+    var canGetRanDom = 0;//中奖范围内的随机度数
+    document.getElementById("btn").onclick = function(){
+        var ranDom = Math.floor(Math.random() * 3)
+        canGetRanDom = Math.floor(Math.random() * 40) + 5
+        //原理：随机计算本轮转圈的度数，再加上默认转两圈（为了视觉效果）
+        btnFun((Math.ceil((canGet[ranDom]-1) * 51.4) + canGetRanDom) + rotate*(Number(nowNum)+1),canGet[ranDom])
+        nowNum++
+    }
+
+    function btnFun(rotateS,now){
+        document.getElementById("content").style.transform = "rotate("+ rotateS +"deg)"
+        setTimeout(function(){
+            alert("恭喜你获得免单"+now+"等奖")
+        },4000)
+    }
+</script>
+</body>
+</html>

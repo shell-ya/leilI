@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.activity.mapper.ActivityManagerMapper">
+    
+    <resultMap type="ActivityManager" id="ActivityManagerResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="url"    column="url"    />
+        <result property="status"    column="status"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createName"    column="create_name"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="imgUrl"    column="img_url"    />
+        <result property="introduction"    column="introduction"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="pdName"    column="pd_name"    />
+        <result property="activityType"    column="activity_type"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="prizeExplain"    column="prize_explain"    />
+        <result property="truntablePath"    column="truntable_path"    />
+
+    </resultMap>
+
+    <sql id="selectActivityManagerVo">
+        select id, title, url, status, create_id, create_name, create_time, remark, img_url, introduction,pd_code,pd_name,activity_type,start_time,end_time,prize_explain,truntable_path from activity_manager
+    </sql>
+
+    <select id="selectActivityManagerList" parameterType="ActivityManager" resultMap="ActivityManagerResult">
+        <include refid="selectActivityManagerVo"/>
+        <where>
+            <if test="id != null  "> and id = #{id}</if>
+            <if test="title != null  and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="createId != null "> and create_id = #{createId}</if>
+            <if test="createName != null  and createName != ''"> and create_name like concat('%', #{createName}, '%')</if>
+            <if test="imgUrl != null  and imgUrl != ''"> and img_url = #{imgUrl}</if>
+            <if test="introduction != null  and introduction != ''"> and introduction = #{introduction}</if>
+            <if test="pdCode != null  and pdCode != ''"> and pd_code = #{pdCode}</if>
+            <if test="pdName != null  and pdName != ''"> and pd_name = #{pdName}</if>
+            <if test="activityType != null  and activityType != ''"> and activity_type = #{activityType}</if>
+            <if test="startTime != null  and startTime != ''"> and start_time = #{startTime}</if>
+            <if test="endTime != null  and endTime != ''"> and end_time = #{endTime}</if>
+            <if test="prizeExplain != null  and prizeExplain != ''"> and prize_explain = #{prizeExplain}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectActivityManagerById" parameterType="Long" resultMap="ActivityManagerResult">
+        <include refid="selectActivityManagerVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertActivityManager" parameterType="ActivityManager">
+        insert into activity_manager
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="title != null">title,</if>
+            <if test="url != null">url,</if>
+            <if test="status != null">status,</if>
+            <if test="createId != null">create_id,</if>
+            <if test="createName != null">create_name,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="imgUrl != null">img_url,</if>
+            <if test="introduction != null">introduction,</if>
+            <if test="pdCode != null">pd_code,</if>
+            <if test="pdName != null">pd_name,</if>
+            <if test="activityType != null">activity_type,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="prizeExplain != null">prize_explain,</if>
+            <if test="truntablePath != null">truntable_path,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="title != null">#{title},</if>
+            <if test="url != null">#{url},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createId != null">#{createId},</if>
+            <if test="createName != null">#{createName},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="imgUrl != null">#{imgUrl},</if>
+            <if test="introduction != null">#{introduction},</if>
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="pdName != null">#{pdName},</if>
+            <if test="activityType != null">#{activityType},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="prizeExplain != null">#{prizeExplain},</if>
+            <if test="truntablePath != null">#{truntablePath},</if>
+        </trim>
+    </insert>
+
+    <update id="updateActivityManager" parameterType="ActivityManager">
+        update activity_manager
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createId != null">create_id = #{createId},</if>
+            <if test="createName != null">create_name = #{createName},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="imgUrl != null">img_url = #{imgUrl},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+            <if test="activityType != null">activity_type = #{activityType},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="prizeExplain != null">prize_explain = #{prizeExplain},</if>
+            <if test="truntablePath != null">truntable_path = #{truntablePath},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteActivityManagerById" parameterType="Long">
+        delete from activity_manager where id = #{id}
+    </delete>
+
+    <delete id="deleteActivityManagerByIds" parameterType="String">
+        delete from activity_manager where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getOneActivity" resultMap="ActivityManagerResult">
+        <include refid="selectActivityManagerVo"></include>
+        where pd_code = #{pdCode} and status = 1
+        limit 1
+    </select>
+
+    <select id="getActivityByPdCodeAndStatus" resultType="Integer">
+        select count(0) from activity_manager where pd_code = #{pdCode} and status = 1
+    </select>
+
+
+    <select id="getOneActivityByType" resultMap="ActivityManagerResult">
+        <include refid="selectActivityManagerVo"></include>
+        where pd_code = #{pdCode} and status = 1 and activity_type = #{activityType}
+        limit 1
+    </select>
+
+
+</mapper>

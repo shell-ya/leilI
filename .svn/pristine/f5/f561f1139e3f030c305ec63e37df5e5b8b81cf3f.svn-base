@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增软件版本控制')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-control-add">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">大版本号：</label>
+                        <div class="col-sm-8">
+                            <input name="bigVersion" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">小版本号：</label>
+                        <div class="col-sm-8">
+                            <input name="minVersion" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">软件类型：</label>
+                        <div class="col-sm-8">
+                            <select name="type" class="form-control m-b" th:with="type=${@dict.getType('sys_software_type',#locale.language+'_'+#locale.country)}"  required>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">使用状态：</label>
+                        <div class="col-sm-8">
+                            <label class="toggle-switch switch-solid">
+                                <input name="status" type="checkbox" id="status" checked>
+                                <span></span>
+                            </label>
+                        </div>
+                    </div>
+
+<!--                    -->
+<!--                    <div class="form-group">-->
+<!--                        <label class="col-sm-3 control-label">是否可用：</label>-->
+<!--                        <div class="col-sm-8">-->
+<!--                            <select name="isUse" class="form-control m-b" th:with="type=${@dict.getType('sys_normal_disable')}"  required>-->
+<!--                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                </div>
+
+<!--                <div class="form-group">-->
+<!--                    <label class="col-sm-4 control-label">用户状态：</label>-->
+<!--                    <div class="col-sm-8">-->
+<!--                        <label class="toggle-switch switch-solid">-->
+<!--                            <input type="checkbox" id="status" checked>-->
+<!--                            <span></span>-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+            </div>
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">描述：</label>
+                        <div class="col-sm-10">
+                            <textarea name="remark" class="form-control" style="height: 100px"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "system/software"
+        $("#form-control-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                var data = $("#form-control-add").serializeArray();
+                // var status = $("input[id='status']").is(':checked') == true ? 1 : 0;
+                var status = $("input[id='status']").is(':checked') == true ? 1 : 0;
+                var newData=[];
+                data.forEach(item=>{
+                    var name=item["name"];
+                    console.log(name);
+                    if (name!='status'){
+                        newData.push(item)
+                    }
+                })
+                // console.log("status",status)
+                newData.push({"name": "status", "value": status});
+                console.log(newData);
+                // $.operate.saveTab(prefix + "/add", data);
+                $.operate.save(prefix + "/add", newData);
+            }
+        }
+    </script>
+</body>
+</html>

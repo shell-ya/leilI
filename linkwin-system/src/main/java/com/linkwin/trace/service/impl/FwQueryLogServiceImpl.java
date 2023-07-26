@@ -1,0 +1,674 @@
+package com.linkwin.trace.service.impl;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import com.linkwin.Integral.domain.IntegralPerson;
+import com.linkwin.Integral.service.IIntegralPersonService;
+import com.linkwin.activity.domain.*;
+import com.linkwin.activity.mapper.CodeActivityLogMapper;
+import com.linkwin.activity.service.IActivityManagerService;
+import com.linkwin.activity.service.IExchangeIntegralService;
+import com.linkwin.activity.service.IIntegralCodeStatusService;
+import com.linkwin.activity.service.IWechatPhoneChangeService;
+import com.linkwin.apply.domain.BarCode;
+import com.linkwin.apply.domain.BoxCode;
+import com.linkwin.apply.domain.SubCode;
+import com.linkwin.apply.mapper.BarCodeMapper;
+import com.linkwin.apply.mapper.BoxCodeMapper;
+import com.linkwin.apply.mapper.SubCodeMapper;
+import com.linkwin.basedata.domain.Product;
+import com.linkwin.basedata.domain.Province;
+import com.linkwin.basedata.mapper.ProvinceMapper;
+import com.linkwin.basedata.service.IProductService;
+import com.linkwin.common.core.domain.entity.SysDept;
+import com.linkwin.common.core.domain.entity.SysDictData;
+import com.linkwin.common.exception.ServiceException;
+import com.linkwin.common.json.JsonViewObject;
+import com.linkwin.common.utils.DateUtils;
+import com.linkwin.common.utils.StringUtils;
+import com.linkwin.order.service.IBillOrderService;
+import com.linkwin.system.service.ISysDeptService;
+import com.linkwin.system.service.ISysDictTypeService;
+import com.linkwin.trace.domain.ConsumerLog;
+import com.linkwin.trace.domain.FwQueryLog;
+import com.linkwin.trace.mapper.ConsumerLogMapper;
+import com.linkwin.trace.mapper.FwQueryLogMapper;
+import com.linkwin.trace.service.IFwQueryLogService;
+import com.linkwin.utils.*;
+import com.linkwin.vo.ActivityEnum;
+import com.linkwin.vo.ExchangeIntegralResultVo;
+import com.linkwin.vo.FwFlowVo;
+import com.linkwin.vo.FwQueryResultVo;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.linkwin.common.core.text.Convert;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 防伪查询记录Service业务层处理
+ *
+ * @author ruoyi
+ * @date 2022-06-02
+ */
+@Slf4j
+@Service
+public class FwQueryLogServiceImpl implements IFwQueryLogService {
+    @Autowired
+    private FwQueryLogMapper fwQueryLogMapper;
+
+    @Autowired
+    private BoxCodeMapper boxCodeMapper;
+
+    @Autowired
+    private SubCodeMapper subCodeMapper;
+
+    @Autowired
+    private IProductService productService;
+
+
+    @Autowired
+    private ISysDeptService deptService;
+
+    @Autowired
+    private ConsumerLogMapper consumerLogMapper;
+
+    @Autowired
+    private IActivityManagerService activityManagerService;
+
+    @Autowired
+    private BarCodeMapper barCodeMapper;
+
+    @Autowired
+    private IExchangeIntegralService exchangeIntegralService;
+
+    @Autowired
+    private IIntegralPersonService integralPersonService;
+
+    @Autowired
+    private IIntegralCodeStatusService integralCodeStatusService;
+
+    @Autowired
+    private IWechatPhoneChangeService wechatPhoneChangeService;
+
+    @Autowired
+    private ProvinceMapper provinceMapper;
+
+    @Autowired
+    private CodeActivityLogMapper codeActivityLogMapper;
+
+    @Autowired
+    private ISysDictTypeService sysDictTypeService;
+
+    @Autowired
+    private IBillOrderService billOrderService;
+    /**
+     * 查询防伪查询记录
+     *
+     * @param id 防伪查询记录主键
+     * @return 防伪查询记录
+     */
+    @Override
+    public FwQueryLog selectFwQueryLogById(Long id) {
+        return fwQueryLogMapper.selectFwQueryLogById(id);
+    }
+
+    /**
+     * 查询防伪查询记录列表
+     *
+     * @param fwQueryLog 防伪查询记录
+     * @return 防伪查询记录
+     */
+    @Override
+    public List<FwQueryLog> selectFwQueryLogList(FwQueryLog fwQueryLog) {
+        return fwQueryLogMapper.selectFwQueryLogList(fwQueryLog);
+    }
+
+    /**
+     * 新增防伪查询记录
+     *
+     * @param fwQueryLog 防伪查询记录
+     * @return 结果
+     */
+    @Override
+    public int insertFwQueryLog(FwQueryLog fwQueryLog) {
+        return fwQueryLogMapper.insertFwQueryLog(fwQueryLog);
+    }
+
+    /**
+     * 修改防伪查询记录
+     *
+     * @param fwQueryLog 防伪查询记录
+     * @return 结果
+     */
+    @Override
+    public int updateFwQueryLog(FwQueryLog fwQueryLog) {
+        return fwQueryLogMapper.updateFwQueryLog(fwQueryLog);
+    }
+
+    /**
+     * 批量删除防伪查询记录
+     *
+     * @param ids 需要删除的防伪查询记录主键
+     * @return 结果
+     */
+    @Override
+    public int deleteFwQueryLogByIds(String ids) {
+        return fwQueryLogMapper.deleteFwQueryLogByIds(Convert.toStrArray(ids));
+    }
+
+    /**
+     * 删除防伪查询记录信息
+     *
+     * @param id 防伪查询记录主键
+     * @return 结果
+     */
+    @Override
+    public int deleteFwQueryLogById(Long id) {
+        return fwQueryLogMapper.deleteFwQueryLogById(id);
+    }
+
+    @Transactional
+    @Override
+    public FwQueryResultVo fwQueryByCode(String code, String openId, String phone, String address) throws ServiceException {
+        FwQueryResultVo resultVo = new FwQueryResultVo();
+        BarCode barCode = null;
+        BoxCode boxCode = null;
+        ActivityManager activityManager = null;
+        Product product;
+        try {
+            resultVo.setCode(code);
+            System.out.println(code.length());
+            if (!(code.length() == CodeUtils.BOX_CODE_LENGTH || code.length() == CodeUtils.SUB_CODE_LENGTH)) {
+                resultVo.setAuthenticity("仿品");
+                resultVo.setMsg("码格式不正确");
+                return resultVo;
+            }
+            String codeType = CodeUtils.getCodeTypeByCode(code);
+            String year = TableUtils.getYearByCode(code);
+            year = "20" + year;
+            if (codeType.equals(CodeEnum.BOX_CODE.getValue())) {
+                String tableName = TableUtils.getBoxTableByYear(Integer.valueOf(year));
+                boxCode = boxCodeMapper.selectByCode(tableName, code);
+                if (boxCode == null) {
+                    resultVo.setAuthenticity("仿品");
+                    resultVo.setMsg("仿品");
+                    return resultVo;
+                }
+                product = productService.selectByPdCode(boxCode.getPdCode());
+                if (product == null) {
+                    resultVo.setAuthenticity("仿品");
+                    resultVo.setMsg("仿品");
+                    return resultVo;
+                } else {
+                    resultVo.setProductPath(product.getReport());
+                    resultVo.setPdName(product.getName());
+                    resultVo.setSpecification(product.getSpecification());
+                    resultVo.setPdCode(product.getCode());
+                    resultVo.setProDate(boxCode.getProductionTime());
+                    resultVo.setUsemethod(product.getUsemethod());
+                    resultVo.setProDateStr(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, boxCode.getProductionTime()));
+                    activityManager = activityManagerService.getOneActivity(product.getCode());
+                    if (activityManager != null) {
+                        resultVo.setActivityIntroduction(activityManager.getIntroduction());
+                    }
+                }
+
+            } else if (codeType.equals(CodeEnum.SUB_CODE.getValue())) {
+                String tableName = TableUtils.getSubTableByYear(Integer.valueOf(year));
+                SubCode subCode = subCodeMapper.selectByCode(tableName, code);
+                if (subCode == null || StringUtils.isEmpty(subCode.getPdCode()) || subCode.getProductionTime() == null) {
+                    resultVo.setAuthenticity("仿品");
+                    resultVo.setMsg("仿品");
+                    return resultVo;
+                }
+                String barCodeTableName = TableUtils.getBarTableByYear(Integer.valueOf(year));
+                barCode = barCodeMapper.selectByPrefixCode(barCodeTableName, subCode.getPrefixCode());
+                product = productService.selectByPdCode(subCode.getPdCode());
+                if (product == null) {
+                    resultVo.setAuthenticity("仿品");
+                    resultVo.setMsg("仿品");
+                    return resultVo;
+                } else {
+                    resultVo.setProductPath(product.getReport());
+                    resultVo.setProDate(subCode.getProductionTime());
+                    resultVo.setProDateStr(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, subCode.getProductionTime()));
+                    resultVo.setPdName(product.getName());
+                    resultVo.setSpecification(product.getSpecification());
+                    resultVo.setPdCode(product.getCode());
+                    resultVo.setUsemethod(product.getUsemethod());
+                    activityManager = activityManagerService.getOneActivity(product.getCode());
+                    if (activityManager != null) {
+                        resultVo.setActivityType(ActivityEnum.getMsgByValue(activityManager.getActivityType()));
+                        resultVo.setActivityTitle(activityManager.getTitle());
+                        resultVo.setActivityIntroduction(activityManager.getIntroduction());
+                    } else {
+                        resultVo.setActivityType("无");
+                        resultVo.setActivityTitle("无");
+                        resultVo.setActivityIntroduction("无");
+                    }
+                }
+            } else {
+                resultVo.setAuthenticity("请扫描防伪码");
+                resultVo.setMsg("请扫描防伪码");
+                return resultVo;
+            }
+            FwQueryLog fwQueryLog = fwQueryLogMapper.selectByCode(resultVo.getPdCode(), code, codeType);
+            if (fwQueryLog == null) {
+                FwQueryLog add = new FwQueryLog();
+                add.setCode(code);
+                add.setPdCode(resultVo.getPdCode());
+                add.setPdName(resultVo.getPdName());
+                add.setFirstQueryTime(new Date());
+                add.setQueryNum(1);
+                add.setCodeType(codeType);
+                add.setActivation("1");//激活该码，该码可参加活动
+                add.setCreateTime(new Date());
+                resultVo.setQueryNum(1);
+                resultVo.setMsg("正品");
+                resultVo.setAuthenticity("正品");
+                ConsumerLog consumerLog = new ConsumerLog();
+                consumerLog.setCreateTime(new Date());
+//                consumerLog.setFwStatus();//是否窜货判断，根据地址
+                consumerLog.setCode(code);
+                consumerLog.setCodeType(codeType);
+                consumerLog.setAddress(address);
+                consumerLog.setPhone(phone);
+                consumerLog.setOpenId(openId);
+                consumerLog.setScanTime(new Date());
+                SysDept sysDept = null;
+                if (codeType.equals(CodeEnum.SUB_CODE.getValue())) {//如果是子码，要先找到其母码才能去出库条码表中查询出库记录，出库只扫母码箱码出库
+                    sysDept = deptService.selectOrganByCode(barCode.getBarCode());
+                }else {
+                    sysDept = deptService.selectOrganByCode(boxCode.getBoxCode());
+                }
+                if (sysDept == null) {
+                    resultVo.setMsg("仿品(未找到出库记录及收货方)");
+                    resultVo.setAuthenticity("仿品(未找到出库记录及收货方)");
+                    return resultVo;
+                } else {
+                    consumerLog.setOrderAddress(sysDept.getReceivingAddress());
+                    List<Map<String, String>> maps = CodeUtils.addressResolution(address);
+                    if (maps.size() == 0) {
+                        resultVo.setMsg("正品(位置信息异常)");
+                        resultVo.setAuthenticity("正品(位置信息异常)");
+                        return resultVo;
+                    }
+                    if (StringUtils.isEmpty(sysDept.getCity())) {
+                        resultVo.setMsg("正品(机构未维护位置信息)");
+                        resultVo.setAuthenticity("正品(机构未维护位置信息)");
+                        return resultVo;
+                    }
+                    Map<String, String> addressMaps = maps.get(0);
+                    String province = addressMaps.get("province");
+                    String county = addressMaps.get("county");
+                    consumerLog.setPdCode(product.getCode());
+                    consumerLog.setPdName(product.getName());
+                    consumerLog.setOrganCode(sysDept.getDeptId());
+                    consumerLog.setOrganName(sysDept.getDeptName());
+                    Province province1 = provinceMapper.selectProvinceByCode(sysDept.getProvince());
+                    SysDept dept = deptService.selectCountry(sysDept.getDeptId(), county);
+                    if (dept==null){
+                        consumerLog.setFwStatus(ConstEnum.CONSUMER_EXCEPTION.getValue());
+                    }
+                    double similarity = MinDistance.Similarity(province + county, province1.getName() + county);
+                    if (similarity<0.8){
+                        consumerLog.setFwStatus(ConstEnum.CONSUMER_EXCEPTION.getValue());
+                    }else {
+                        consumerLog.setFwStatus(ConstEnum.CONSUMER_OK.getValue());
+                    }
+                }
+                fwQueryLogMapper.insertFwQueryLog(add);//新增防伪查询日志
+                consumerLogMapper.insertConsumerLog(consumerLog);//新增消费者信息日志
+            } else {
+                fwQueryLog.setQueryNum(fwQueryLog.getQueryNum() + 1);
+                fwQueryLogMapper.updateFwQueryLog(fwQueryLog);
+                if (fwQueryLog.getQueryNum()>5){
+                    resultVo.setMsg("仿品");
+                    resultVo.setAuthenticity("仿品");
+                }else {
+                    resultVo.setMsg("正品");
+                    resultVo.setAuthenticity("正品");
+                }
+                resultVo.setQueryNum(fwQueryLog.getQueryNum());
+            }
+            if ( resultVo.getAuthenticity().indexOf("正品")!=-1) {
+                if (resultVo.getActivationMsg() == null || StringUtils.isEmpty(resultVo.getActivityIntroduction())) {
+                    resultVo.setActivationMsg("该产品暂无活动，请关注公众号活动");
+                }
+            }
+        } catch (Exception e) {
+            resultVo.setMsg("防伪查询异常");
+            e.printStackTrace();
+            throw new ServiceException("FwQueryLogServiceImpl fwQueryByCode is error" + e.getMessage());
+        }
+        return resultVo;
+    }
+
+    @Transactional
+    @Override
+    public JsonViewObject exchangeIntegral(String code, String phone, String address, String openId) {
+        JsonViewObject jsonViewObject = new JsonViewObject();
+        ExchangeIntegralResultVo resultVo = new ExchangeIntegralResultVo();
+        IntegralCodeStatus codeStatus = new IntegralCodeStatus();
+        try {
+            if (code.length() != CodeUtils.INTEGRAL_CODE_LENGTH) {
+                jsonViewObject.fail("码格式异常，请扫码正确码");
+                return jsonViewObject;
+            }
+            String year = TableUtils.getYearByCode(code);
+            year = "20" + year;
+            String tableName = TableUtils.getSubTableByYear(Integer.valueOf(year));
+            SubCode subCode = subCodeMapper.selectByMarkCode(tableName, code);
+            if (subCode == null) {
+                jsonViewObject.fail("该码在系统中不存在，请扫描正确码");
+                return jsonViewObject;
+            }
+            Product product = productService.selectByPdCode(subCode.getPdCode());
+            ActivityManager oneActivity = activityManagerService.getOneActivity(product.getCode());
+            if (oneActivity == null) {
+                jsonViewObject.fail("当前产品没有相关活动，敬请期待...");
+                return jsonViewObject;
+            }
+            if (!"1".equals(oneActivity.getActivityType())) {
+                IntegralCodeStatus integralCodeStatus = integralCodeStatusService.selectByMarkCode(code);
+                if (integralCodeStatus==null){
+                    codeStatus.setMarkCode(code);
+                    codeStatus.setStatus("2");
+                    codeStatus.setScanTime(new Date());
+                    integralCodeStatusService.insertIntegralCodeStatus(codeStatus);
+                }
+                jsonViewObject.success("其他活动", oneActivity);
+                return jsonViewObject;
+            }
+
+            ExchangeIntegral exchangeIntegral = exchangeIntegralService.selectByMarkCode(code);
+
+
+            if (exchangeIntegral != null) {
+                String s = DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, exchangeIntegral.getExchangeTime());
+                jsonViewObject.fail("该码已经参与过积分活动，参加时间：\n" + s);
+                return jsonViewObject;
+            }
+
+            exchangeIntegral = new ExchangeIntegral();
+            exchangeIntegral.setIntegral(product.getIntegral());
+            exchangeIntegral.setExchangeTime(new Date());
+            exchangeIntegral.setCreateTime(new Date());
+            exchangeIntegral.setPhone(phone);
+            exchangeIntegral.setOpenId(openId);
+            exchangeIntegral.setStatus(ConstEnum.REDEEMED.getValue());
+            exchangeIntegral.setMarkCode(code);
+            exchangeIntegralService.insertExchangeIntegral(exchangeIntegral);
+            IntegralPerson person = new IntegralPerson();
+            person.setIntegral(product.getIntegral());
+            person.setAddress(address);
+            person.setPhone(phone);
+            person.setCreateTime(new Date());
+            IntegralPerson person1 = integralPersonService.insertPersonAndRecord(person, code);
+            resultVo.setIntegral(product.getIntegral());
+            resultVo.setIntegralTotal(person1.getIntegral());
+            resultVo.setPhone(phone);
+            IntegralCodeStatus integralCodeStatus = integralCodeStatusService.selectByMarkCode(code);
+
+            CodeActivityLog codeActivityLog=new CodeActivityLog();
+            codeActivityLog.setCodeType(CodeUtils.getCodeTypeByCode(code));
+            codeActivityLog.setActivityTime(new Date());
+            codeActivityLog.setMarkCode(code);
+            codeActivityLog.setAddress(address);
+            codeActivityLogMapper.insertCodeActivityLog(codeActivityLog);
+            if (integralCodeStatus == null) {
+                codeStatus.setMarkCode(code);
+                codeStatus.setStatus(ConstEnum.ACTIVITY_IS_USE.getValue());
+                codeStatus.setScanTime(new Date());
+                codeStatus.setActivityType(oneActivity.getActivityType());
+                integralCodeStatusService.insertIntegralCodeStatus(codeStatus);
+            }
+            jsonViewObject.success("兑换成功", resultVo);
+        } catch (Exception e) {
+            log.error("FwQueryLogServiceImpl exchangeIntegral is error", e.getMessage());
+            e.printStackTrace();
+            jsonViewObject.fail("处理异常");
+            throw new ServiceException(e.getMessage());
+        }
+        return jsonViewObject;
+    }
+
+    @Transactional
+    @Override
+    public int bindPhone(String openId, String phone, String address) throws ServiceException {
+        JsonViewObject jsonViewObject = new JsonViewObject();
+        try {
+            IntegralPerson integralPerson = integralPersonService.selectByOpenId(openId);
+            WechatPhoneChange change = new WechatPhoneChange();
+            if (integralPerson != null) {
+                integralPerson.setPhone(phone);
+                integralPerson.setAddress(address);
+                change.setPhone(integralPerson.getPhone());
+                change.setOpenId(integralPerson.getOpenId());
+                change.setCreateTime(new Date());
+                change.setRemark("变更微信号");
+                integralPersonService.updateIntegralPerson(integralPerson);
+                wechatPhoneChangeService.insertWechatPhoneChange(change);
+                jsonViewObject.success("更改绑定成功");
+                return 1;
+            }
+            integralPerson = new IntegralPerson();
+            integralPerson.setPhone(phone);
+            integralPerson.setOpenId(openId);
+            integralPerson.setAddress(address);
+            integralPerson.setIntegral(0);
+            integralPerson.setCreateTime(new Date());
+            change.setPhone(integralPerson.getPhone());
+            change.setOpenId(integralPerson.getOpenId());
+            change.setCreateTime(new Date());
+            change.setRemark("新增用户信息");
+            integralPersonService.insertIntegralPerson(integralPerson);
+            return wechatPhoneChangeService.insertWechatPhoneChange(change);
+        } catch (Exception e) {
+            e.printStackTrace();
+            jsonViewObject.fail("处理异常");
+            throw new ServiceException();
+        }
+    }
+    /**
+     * 雷力海外版本防伪调用
+     * @param code
+     * @param email
+     * @param phone
+     * @return
+     */
+    @Override
+    @Transactional
+    public FwQueryResultVo fwQueryByCode(String code, String email, String phone) {
+        FwQueryResultVo resultVo = new FwQueryResultVo();
+        BarCode barCode = null;
+        BoxCode boxCode = null;
+        ActivityManager activityManager = null;
+        Product product;
+        List<SysDictData> dictData = sysDictTypeService.selectDictDataByType("company_email");
+
+        try {
+            resultVo.setCode(code);
+            resultVo.setCompanyEmail(dictData.get(0).getDictValue());
+            System.out.println(code.length());
+            if (!(code.length() == CodeUtils.BOX_CODE_LENGTH || code.length() == CodeUtils.SUB_CODE_LENGTH)) {
+                resultVo.setAuthenticity("Imitation");
+                resultVo.setMsg("Code format is incorrect");
+                return resultVo;
+            }
+            String codeType = CodeUtils.getCodeTypeByCode(code);
+            String year = TableUtils.getYearByCode(code);
+            year = "20" + year;
+            if (codeType.equals(CodeEnum.BOX_CODE.getValue())) {
+                String tableName = TableUtils.getBoxTableByYear(Integer.valueOf(year));
+                boxCode = boxCodeMapper.selectByCode(tableName, code);
+                if (boxCode == null) {
+                    resultVo.setAuthenticity("Imitation");
+                    resultVo.setMsg("Imitation");
+                    return resultVo;
+                }
+                product = productService.selectByPdCode(boxCode.getPdCode());
+                if (product == null) {
+                    resultVo.setAuthenticity("Imitation");
+                    resultVo.setMsg("Imitation");
+                    return resultVo;
+                } else {
+                    List<FwFlowVo> fwFlowVoList = billOrderService.selectOrderFlow(boxCode.getBoxCode());
+                    resultVo.setFwFlowVoList(fwFlowVoList);
+                    resultVo.setProductPath(product.getReport());
+                    resultVo.setPdName(product.getName());
+                    resultVo.setSpecification(product.getSpecification());
+                    resultVo.setPdCode(product.getCode());
+                    resultVo.setProDate(boxCode.getProductionTime());
+                    resultVo.setUsemethod(product.getUsemethod());
+                    resultVo.setProDateStr(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, boxCode.getProductionTime()));
+                    activityManager = activityManagerService.getOneActivity(product.getCode());
+                    if (activityManager != null) {
+                        resultVo.setActivityIntroduction(activityManager.getIntroduction());
+                    }
+                }
+
+            } else if (codeType.equals(CodeEnum.SUB_CODE.getValue())) {
+                String tableName = TableUtils.getSubTableByYear(Integer.valueOf(year));
+                SubCode subCode = subCodeMapper.selectByCode(tableName, code);
+                if (subCode == null || StringUtils.isEmpty(subCode.getPdCode()) || subCode.getProductionTime() == null) {
+                    resultVo.setAuthenticity("Imitation");
+                    resultVo.setMsg("Imitation");
+                    return resultVo;
+                }
+                String barCodeTableName = TableUtils.getBarTableByYear(Integer.valueOf(year));
+                barCode = barCodeMapper.selectByPrefixCode(barCodeTableName, subCode.getPrefixCode());
+                product = productService.selectByPdCode(subCode.getPdCode());
+                if (product == null) {
+                    resultVo.setAuthenticity("Imitation");
+                    resultVo.setMsg("Imitation");
+                    return resultVo;
+                } else {
+                    List<FwFlowVo> fwFlowVoList = billOrderService.selectOrderFlow(barCode.getBarCode());
+                    resultVo.setFwFlowVoList(fwFlowVoList);
+                    resultVo.setProductPath(product.getReport());
+                    resultVo.setProDate(subCode.getProductionTime());
+                    resultVo.setProDateStr(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, subCode.getProductionTime()));
+                    resultVo.setPdName(product.getName());
+                    resultVo.setSpecification(product.getSpecification());
+                    resultVo.setPdCode(product.getCode());
+                    resultVo.setUsemethod(product.getUsemethod());
+                    activityManager = activityManagerService.getOneActivity(product.getCode());
+                    if (activityManager != null) {
+                        resultVo.setActivityType(ActivityEnum.getMsgByValue(activityManager.getActivityType()));
+                        resultVo.setActivityTitle(activityManager.getTitle());
+                        resultVo.setActivityIntroduction(activityManager.getIntroduction());
+                    } else {
+                        resultVo.setActivityType("none");
+                        resultVo.setActivityTitle("none");
+                        resultVo.setActivityIntroduction("none");
+                    }
+                }
+            } else {
+                resultVo.setAuthenticity("Please scan the security code");
+                resultVo.setMsg("Please scan the security code");
+                return resultVo;
+            }
+            FwQueryLog fwQueryLog = fwQueryLogMapper.selectByCode(resultVo.getPdCode(), code, codeType);
+            if (fwQueryLog == null) {
+                FwQueryLog add = new FwQueryLog();
+                add.setCode(code);
+                add.setPdCode(resultVo.getPdCode());
+                add.setPdName(resultVo.getPdName());
+                add.setFirstQueryTime(new Date());
+                add.setQueryNum(1);
+                add.setCodeType(codeType);
+                add.setActivation("1");//激活该码，该码可参加活动
+                add.setCreateTime(new Date());
+                resultVo.setQueryNum(1);
+                resultVo.setMsg("Authentic");
+                resultVo.setAuthenticity("Authentic");
+                ConsumerLog consumerLog = new ConsumerLog();
+                consumerLog.setCreateTime(new Date());
+//                consumerLog.setFwStatus();//是否窜货判断，根据地址
+                consumerLog.setCode(code);
+                consumerLog.setCodeType(codeType);
+//                consumerLog.setAddress();
+                consumerLog.setPhone(phone);
+                consumerLog.setOpenId(email);
+                consumerLog.setScanTime(new Date());
+                SysDept sysDept = null;
+                if (codeType.equals(CodeEnum.SUB_CODE.getValue())) {//如果是子码，要先找到其母码才能去出库条码表中查询出库记录，出库只扫母码箱码出库
+                    sysDept = deptService.selectOrganByCode(barCode.getBarCode());
+                }else {
+                    sysDept = deptService.selectOrganByCode(boxCode.getBoxCode());
+                }
+                if (sysDept == null) {
+                    resultVo.setMsg("Imitation(No delivery record and consignee found)");
+                    resultVo.setAuthenticity("Imitation(No delivery record and consignee found)");
+                    return resultVo;
+                } else {
+                    consumerLog.setOrderAddress(sysDept.getReceivingAddress());
+                    consumerLog.setPdCode(product.getCode());
+                    consumerLog.setPdName(product.getName());
+                    consumerLog.setOrganCode(sysDept.getDeptId());
+                    consumerLog.setOrganName(sysDept.getDeptName());
+                    // TODO: 2023/5/4 写出国外
+                    consumerLog.setFwStatus(ConstEnum.CONSUMER_EXCEPTION.getValue());
+//                    List<Map<String, String>> maps = CodeUtils.addressResolution(address);
+//                    if (maps.size() == 0) {
+//                        resultVo.setMsg("正品(位置信息异常)");
+//                        resultVo.setAuthenticity("正品(位置信息异常)");
+//                        return resultVo;
+//                    }
+//                    if (StringUtils.isEmpty(sysDept.getCity())) {
+//                        resultVo.setMsg("正品(机构未维护位置信息)");
+//                        resultVo.setAuthenticity("正品(机构未维护位置信息)");
+//                        return resultVo;
+//                    }
+//                    Map<String, String> addressMaps = maps.get(0);
+//                    String province = addressMaps.get("province");
+//                    String county = addressMaps.get("county");
+//
+//                    Province province1 = provinceMapper.selectProvinceByCode(sysDept.getProvince());
+//                    SysDept dept = deptService.selectCountry(sysDept.getDeptId(), county);
+//                    if (dept==null){
+//                        consumerLog.setFwStatus(ConstEnum.CONSUMER_EXCEPTION.getValue());
+//                    }
+//                    double similarity = MinDistance.Similarity(province + county, province1.getName() + county);
+//                    if (similarity<0.8){
+//                        consumerLog.setFwStatus(ConstEnum.CONSUMER_EXCEPTION.getValue());
+//                    }else {
+//                        consumerLog.setFwStatus(ConstEnum.CONSUMER_OK.getValue());
+//                    }
+                }
+                fwQueryLogMapper.insertFwQueryLog(add);//新增防伪查询日志
+                consumerLogMapper.insertConsumerLog(consumerLog);//新增消费者信息日志
+            } else {
+                fwQueryLog.setQueryNum(fwQueryLog.getQueryNum() + 1);
+                fwQueryLogMapper.updateFwQueryLog(fwQueryLog);
+                if (fwQueryLog.getQueryNum()>5){
+                    resultVo.setMsg("Imitation");
+                    resultVo.setAuthenticity("Imitation");
+                }else {
+                    resultVo.setMsg("Authentic");
+                    resultVo.setAuthenticity("Authentic");
+                }
+                resultVo.setQueryNum(fwQueryLog.getQueryNum());
+            }
+            if ( resultVo.getAuthenticity().indexOf("Authentic")!=-1) {
+                if (resultVo.getActivationMsg() == null || StringUtils.isEmpty(resultVo.getActivityIntroduction())) {
+                    resultVo.setActivationMsg("There is no activity for this product, please pay attention to the activity");
+                }
+            }
+        } catch (Exception e) {
+            resultVo.setMsg("Anti-counterfeiting query exception");
+            e.printStackTrace();
+            throw new ServiceException("FwQueryLogServiceImpl fwQueryByCode is error" + e.getMessage());
+        }
+        return resultVo;
+    }
+
+    @Override
+    public List<FwQueryLog> selectFwQueryLogListByDeptIds(FwQueryLog fwQueryLog, List<Long> deptIds) {
+        return fwQueryLogMapper.selectFwQueryLogListByDeptIds(fwQueryLog,deptIds);
+    }
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二维码：生成、扫描、识别</title>
+
+  <link href="../static/css/fwScan.css" th:href="@{/css/fwScan.css}" rel="stylesheet"/>
+</head>
+
+<body>
+<menu class="menu" id="menu">
+  <nav class="active">二维码生成</nav> |
+  <nav>二维码识别</nav>
+</menu>
+
+<h1 class="h1">纯前端 JS ：二维码：生成、扫描、识别 (HTML版)</h1>
+<hr />
+
+<main class="main">
+  <aside class="create">
+    <input type="text" id="code" value="http://www.muguilin.com" placeholder="请在这里输入要生成的内容！" />
+    <input type="button" value="生成" onclick="create()" />
+    <div class="qrcode" id="qrcode"></div>
+  </aside>
+  <aside class="reader">
+    <button class="sweep" onclick="sweep()">扫一扫</button>
+    <button class="sweep" id="scan-btn">扫描二维码</button>
+    <button class="sweep">
+      <input type="file" id="file" onchange="upload()" />从相册选择
+    </button>
+    <div class="imgurl">
+      <img id="imgurl"
+           src="https://raw.githubusercontent.com/MuGuiLin/QRCode/master/VueQRCode/src/assets/github.com.png"
+           alt="当前识别的二维码" />
+    </div>
+    <textarea class="result" id="result" cols="32" rows="6" placeholder="二维码识别结果！"></textarea>
+    <canvas class="canvas" id="canvas"></canvas>
+  </aside>
+</main>
+<script src="https://raw.githubusercontent.com/zxing-js/library/master/zxing.js"></script>
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/jimp/0.22.7/jimp.js"></script>-->
+<script th:src="@{/js/scan/qrcode.js}"></script>
+<!-- 二维码生成 -->
+<script>
+  const text = document.querySelector('#code');
+  const qrcode = new QRCode(document.querySelector('#qrcode'), {
+    text: "http://www.muguilin.com",
+    width: 300,
+    height: 300,
+    colorDark: "blue",
+    colorLight: "white",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // 生成
+  function create() {
+    qrcode.clear();
+    qrcode.makeCode(text.value);
+  };
+</script>
+<script th:src="@{/js/scan/base.js}"></script>
+<script th:src="@{/js/scan/jsqr.min.js}"></script>
+<script th:src="@{/js/scan/jimp.js}"></script>
+<!-- 二维码识别 -->
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/jimp/0.10.0/jimp.min.js"></script>-->
+<script>
+  const result = document.querySelector('#result');
+  const QrCode = new QrCodeRecognition({
+    sweepId: '#canvas',
+    uploadId: '#file',
+    error: function (err) {
+      // 识别错误反馈
+      result.value = err;
+    },
+    seuccess: function (res) {
+      // 识别成功反馈
+      result.value = res.data;
+    }
+  });
+
+  // 扫一扫
+  function sweep() {
+    result.value = '';
+    QrCode.sweep();
+  };
+
+  // 从相册选择
+  function upload() {
+    result.value = '';
+    QrCode.upload();
+  };
+
+  const scanBtn = document.getElementById('scan-btn');
+
+  // 当点击按钮时，调用 scanQRCode() 函数进行扫描
+  scanBtn.addEventListener('click', function() {
+    scanQRCode();
+  });
+
+  // 定义 scanQRCode() 函数
+  function scanQRCode() {
+    // 获取 video 元素
+    const video = document.createElement('video');
+
+    // 请求访问摄像头
+    navigator.mediaDevices.getUserMedia({video: true})
+            .then(function (stream) {
+              // 将摄像头捕捉到的视频流绑定到 video 元素
+              video.srcObject = stream;
+              video.play();
+
+              // 创建 Canvas 元素
+              const canvas = document.createElement('canvas');
+              const canvasContext = canvas.getContext('2d');
+
+              // 设置 Canvas 元素的大小
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+
+              // 每 100ms 获取一次视频画面
+              const scanInterval = setInterval(function () {
+                // 将视频画面绘制到 Canvas 元素上
+                canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // 解析 Canvas 元素上的二维码
+                const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                const code = zxing.read(imageData);
+
+                // 如果解析出了二维码，将二维码内容输出到控制台，并停止扫描
+                if (code) {
+                  console.log(code);
+                  clearInterval(scanInterval);
+                  video.srcObject.getTracks()[0].stop();
+                }
+              }, 100);
+            })
+            .catch(function (err) {
+              console.error(err);
+            });
+  }
+</script>
+
+<!-- Demo页面交互 -->
+<script>
+  const menu = [...document.querySelectorAll('nav')];
+  const aside = [...document.querySelectorAll('aside')];
+  menu.forEach((nav, n) => {
+    nav.onclick = () => {
+      aside.forEach((ele, a) => {
+        ele.style.display = 'none';
+        menu[a].classList.remove('active');
+      });
+      menu[n].classList.add('active');
+      aside[n].style.display = 'block';
+    }
+  });
+</script>
+</body>
+
+</html>
+

@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.order.mapper.BillOrderMapper">
+    
+    <resultMap type="BillOrder" id="BillOrderResult">
+        <result property="id"    column="id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="sendOrganCode"    column="send_organ_code"    />
+        <result property="sendOrganName"    column="send_organ_name"    />
+        <result property="sendWarehouseCode"    column="send_warehouse_code"    />
+        <result property="sendWarehouseName"    column="send_warehouse_name"    />
+        <result property="receiveOrganCode"    column="receive_organ_code"    />
+        <result property="receiveOrganName"    column="receive_organ_name"    />
+        <result property="rceiveWarehouseCode"    column="rceive_warehouse_code"    />
+        <result property="receiveWarehouseName"    column="receive_warehouse_name"    />
+        <result property="batchRule"    column="batch_rule"    />
+        <result property="isPicked"    column="is_picked"    />
+        <result property="isChecked"    column="is_checked"    />
+        <result property="billCreator"    column="bill_creator"    />
+        <result property="billCrearteOrganid"    column="bill_crearte_organid"    />
+        <result property="billCreatetime"    column="bill_createtime"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="reviewerId"    column="reviewer_id"    />
+        <result property="reviewer"    column="reviewer"    />
+        <result property="reviewerTime"    column="reviewer_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="checker"    column="checker"    />
+        <result property="sender"    column="sender"    />
+        <result property="printTime"    column="print_time"    />
+        <result property="sendwarehouseid"    column="sendwarehouseid"    />
+        <result property="sendOrganid"    column="sendOrganid"    />
+        <result property="customer"    column="customer"    />
+        <result property="customerName"    column="customer_name"    />
+
+    </resultMap>
+
+    <resultMap id="BillOrderBillOrderDetailResult" type="BillOrder" extends="BillOrderResult">
+        <collection property="billOrderDetailList" notNullColumn="sub_id" javaType="java.util.List" resultMap="BillOrderDetailResult" />
+    </resultMap>
+
+    <resultMap type="BillOrderDetail" id="BillOrderDetailResult">
+        <result property="id"    column="sub_id"    />
+        <result property="pdCode"    column="sub_pd_code"    />
+        <result property="pdName"    column="sub_pd_name"    />
+        <result property="weight"    column="sub_weight"    />
+        <result property="quantity"    column="sub_quantity"    />
+        <result property="unit"    column="sub_unit"    />
+        <result property="orderNo"    column="sub_order_no"    />
+        <result property="pdBatch"    column="sub_pd_batch"    />
+        <result property="createTime"    column="sub_create_time"    />
+        <result property="reviewerId"    column="sub_reviewer_id"    />
+        <result property="reviewer"    column="sub_reviewer"    />
+        <result property="reviewerTime"    column="sub_reviewer_time"    />
+        <result property="auxiliaryProperties"    column="sub_auxiliary_properties"    />
+        <result property="spec"    column="sub_spec"    />
+        <result property="sendWarehouse"    column="sub_send_warehouse"    />
+        <result property="remark"    column="sub_remark"    />
+    </resultMap>
+
+    <resultMap type="BillOrderDetail" id="newBillOrderDetailResult">
+        <result property="id"    column="id"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="pdName"    column="pd_name"    />
+        <result property="weight"    column="weight"    />
+        <result property="quantity"    column="quantity"    />
+        <result property="unit"    column="unit"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="pdBatch"    column="pd_batch"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="reviewerId"    column="reviewer_id"    />
+        <result property="reviewer"    column="reviewer"    />
+        <result property="reviewerTime"    column="reviewer_time"    />
+        <result property="auxiliaryProperties"    column="auxiliary_properties"    />
+        <result property="spec"    column="spec"    />
+        <result property="sendWarehouse"    column="send_warehouse"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+    <sql id="selectBillOrderVo">
+        select  customer, customer_name,id, order_no, order_type, send_organ_code, send_organ_name, send_warehouse_code, send_warehouse_name, receive_organ_code, receive_organ_name, rceive_warehouse_code, receive_warehouse_name, batch_rule, is_picked, is_checked, bill_creator, bill_crearte_organid, bill_createtime, remark, create_time, reviewer_id, reviewer, reviewer_time, is_deleted, checker, sender, print_time from bill_order
+    </sql>
+
+    <select id="selectBillOrderList" parameterType="BillOrder" resultMap="BillOrderResult">
+        <include refid="selectBillOrderVo"/>
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="sendOrganName != null  and sendOrganName != ''"> and send_organ_name like concat('%', #{sendOrganName}, '%')</if>
+            <if test="sendWarehouseName != null  and sendWarehouseName != ''"> and send_warehouse_name like concat('%', #{sendWarehouseName}, '%')</if>
+            <if test="receiveOrganName != null  and receiveOrganName != ''"> and receive_organ_name like concat('%', #{receiveOrganName}, '%')</if>
+            <if test="billCreator != null  and billCreator != ''"> and bill_creator = #{billCreator}</if>
+            <if test="params.beginBillCreatetime != null and params.beginBillCreatetime != '' and params.endBillCreatetime != null and params.endBillCreatetime != ''"> and bill_createtime between #{params.beginBillCreatetime} and #{params.endBillCreatetime}</if>
+            <if test="billCreator != null  and billCreator != ''"> and bill_creator like concat('%', #{billCreator}, '%')</if>
+            <if test="orderType != null  "> and order_type = #{orderType}</if>
+            <if test="customerName != null and customerName != ''" > and customer_name like concat('%', #{customerName}, '%')</if>
+        </where>
+        order by id  desc
+    </select>
+    
+    <select id="selectBillOrderById" parameterType="Long" resultMap="BillOrderBillOrderDetailResult">
+        select a.customer,a.customer_name,a.send_organ_code as sendOrganid,a.send_warehouse_code as sendwarehouseid,a.id, a.order_no, a.order_type, a.send_organ_code, a.send_organ_name, a.send_warehouse_code, a.send_warehouse_name, a.receive_organ_code, a.receive_organ_name, a.rceive_warehouse_code, a.receive_warehouse_name, a.batch_rule, a.is_picked, a.is_checked, a.bill_creator, a.bill_crearte_organid, a.bill_createtime, a.remark, a.create_time, a.reviewer_id, a.reviewer, a.reviewer_time, a.is_deleted, a.checker, a.sender, a.print_time,
+ b.id as sub_id, b.pd_code as sub_pd_code, b.pd_name as sub_pd_name, b.weight as sub_weight, b.quantity as sub_quantity, b.unit as sub_unit, b.order_no as sub_order_no, b.pd_batch as sub_pd_batch, b.create_time as sub_create_time, b.reviewer_id as sub_reviewer_id, b.reviewer as sub_reviewer, b.reviewer_time as sub_reviewer_time, b.auxiliary_properties as sub_auxiliary_properties, b.spec as sub_spec, b.send_warehouse as sub_send_warehouse, b.remark as sub_remark
+        from bill_order a
+        left join bill_order_detail b on b.order_no = a.order_no
+        where a.id = #{id}
+    </select>
+        
+    <insert id="insertBillOrder" parameterType="BillOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into bill_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null">order_no,</if>
+            <if test="orderType != null">order_type,</if>
+            <if test="sendOrganCode != null">send_organ_code,</if>
+            <if test="sendOrganName != null">send_organ_name,</if>
+            <if test="sendWarehouseCode != null">send_warehouse_code,</if>
+            <if test="sendWarehouseName != null">send_warehouse_name,</if>
+            <if test="receiveOrganCode != null">receive_organ_code,</if>
+            <if test="receiveOrganName != null">receive_organ_name,</if>
+            <if test="rceiveWarehouseCode != null">rceive_warehouse_code,</if>
+            <if test="receiveWarehouseName != null">receive_warehouse_name,</if>
+            <if test="batchRule != null">batch_rule,</if>
+            <if test="isPicked != null">is_picked,</if>
+            <if test="isChecked != null">is_checked,</if>
+            <if test="billCreator != null">bill_creator,</if>
+            <if test="billCrearteOrganid != null">bill_crearte_organid,</if>
+            <if test="billCreatetime != null">bill_createtime,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="reviewerId != null">reviewer_id,</if>
+            <if test="reviewer != null">reviewer,</if>
+            <if test="reviewerTime != null">reviewer_time,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="checker != null">checker,</if>
+            <if test="sender != null">sender,</if>
+            <if test="printTime != null">print_time,</if>
+            <if test="customer != null">customer,</if>
+
+            <if test="customerName != null">customer_name,</if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null">#{orderNo},</if>
+            <if test="orderType != null">#{orderType},</if>
+            <if test="sendOrganCode != null">#{sendOrganCode},</if>
+            <if test="sendOrganName != null">#{sendOrganName},</if>
+            <if test="sendWarehouseCode != null">#{sendWarehouseCode},</if>
+            <if test="sendWarehouseName != null">#{sendWarehouseName},</if>
+            <if test="receiveOrganCode != null">#{receiveOrganCode},</if>
+            <if test="receiveOrganName != null">#{receiveOrganName},</if>
+            <if test="rceiveWarehouseCode != null">#{rceiveWarehouseCode},</if>
+            <if test="receiveWarehouseName != null">#{receiveWarehouseName},</if>
+            <if test="batchRule != null">#{batchRule},</if>
+            <if test="isPicked != null">#{isPicked},</if>
+            <if test="isChecked != null">#{isChecked},</if>
+            <if test="billCreator != null">#{billCreator},</if>
+            <if test="billCrearteOrganid != null">#{billCrearteOrganid},</if>
+            <if test="billCreatetime != null">#{billCreatetime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="reviewerId != null">#{reviewerId},</if>
+            <if test="reviewer != null">#{reviewer},</if>
+            <if test="reviewerTime != null">#{reviewerTime},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="checker != null">#{checker},</if>
+            <if test="sender != null">#{sender},</if>
+            <if test="printTime != null">#{printTime},</if>
+            <if test="customer != null">#{customer},</if>
+
+            <if test="customerName != null">#{customerName},</if>
+
+        </trim>
+    </insert>
+
+    <update id="updateBillOrder" parameterType="BillOrder">
+        update bill_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="sendOrganCode != null">send_organ_code = #{sendOrganCode},</if>
+            <if test="sendOrganName != null">send_organ_name = #{sendOrganName},</if>
+            <if test="sendWarehouseCode != null">send_warehouse_code = #{sendWarehouseCode},</if>
+            <if test="sendWarehouseName != null">send_warehouse_name = #{sendWarehouseName},</if>
+            <if test="receiveOrganCode != null">receive_organ_code = #{receiveOrganCode},</if>
+            <if test="receiveOrganName != null">receive_organ_name = #{receiveOrganName},</if>
+            <if test="rceiveWarehouseCode != null">rceive_warehouse_code = #{rceiveWarehouseCode},</if>
+            <if test="receiveWarehouseName != null">receive_warehouse_name = #{receiveWarehouseName},</if>
+            <if test="batchRule != null">batch_rule = #{batchRule},</if>
+            <if test="isPicked != null">is_picked = #{isPicked},</if>
+            <if test="isChecked != null">is_checked = #{isChecked},</if>
+            <if test="billCreator != null">bill_creator = #{billCreator},</if>
+            <if test="billCrearteOrganid != null">bill_crearte_organid = #{billCrearteOrganid},</if>
+            <if test="billCreatetime != null">bill_createtime = #{billCreatetime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
+            <if test="reviewer != null">reviewer = #{reviewer},</if>
+            <if test="reviewerTime != null">reviewer_time = #{reviewerTime},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="checker != null">checker = #{checker},</if>
+            <if test="sender != null">sender = #{sender},</if>
+            <if test="printTime != null">print_time = #{printTime},</if>
+            <if test="customer != null">customer = #{customer},</if>
+
+            <if test="customerName != null">customer_name = #{customerName},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateBillOrderclose" parameterType="String">
+        update bill_order
+       set is_checked=1
+        where order_no = #{orderNo}
+    </update>
+
+    <update id="updateBillOrderPicked" parameterType="String">
+        update bill_order
+        set is_picked=1
+        where order_no = #{orderNo}
+    </update>
+
+    <delete id="deleteBillOrderById" parameterType="Long">
+        delete from bill_order where id = #{id}
+    </delete>
+
+    <delete id="deleteBillOrderByIds" parameterType="String">
+        delete from bill_order where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteBillOrderDetailByOrderNos" parameterType="String">
+        delete from bill_order_detail where order_no in 
+        <foreach item="orderNo" collection="array" open="(" separator="," close=")">
+            #{orderNo}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBillOrderDetailByOrderNo" parameterType="String">
+        delete from bill_order_detail where order_no = #{orderNo}
+    </delete>
+
+    <insert id="batchBillOrderDetail">
+        insert into bill_order_detail( id, pd_code, pd_name, weight, quantity, unit, order_no, pd_batch, create_time, reviewer_id, reviewer, reviewer_time, auxiliary_properties, spec, send_warehouse, remark) values
+		<foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.pdCode}, #{item.pdName}, #{item.weight}, #{item.quantity}, #{item.unit}, #{item.orderNo}, #{item.pdBatch}, now(), #{item.reviewerId}, #{item.reviewer}, #{item.reviewerTime}, #{item.auxiliaryProperties}, #{item.spec}, #{item.sendWarehouse}, #{item.remark})
+        </foreach>
+    </insert>
+
+    <select id="getOrderList" parameterType="BillOrder" resultMap="BillOrderBillOrderDetailResult">
+        select a.customer,a.customer_name,a.id, a.order_no, a.order_type, a.send_organ_code, a.send_organ_name, a.send_warehouse_code, a.send_warehouse_name, a.receive_organ_code, a.receive_organ_name, a.rceive_warehouse_code, a.receive_warehouse_name, a.batch_rule, a.is_picked, a.is_checked, a.bill_creator, a.bill_crearte_organid, a.bill_createtime, a.remark, a.create_time, a.reviewer_id, a.reviewer, a.reviewer_time, a.is_deleted, a.checker, a.sender, a.print_time,
+               b.id as sub_id, b.pd_code as sub_pd_code, b.pd_name as sub_pd_name, b.weight as sub_weight, b.quantity as sub_quantity, b.unit as sub_unit, b.order_no as sub_order_no, b.pd_batch as sub_pd_batch, b.create_time as sub_create_time, b.reviewer_id as sub_reviewer_id, b.reviewer as sub_reviewer, b.reviewer_time as sub_reviewer_time, b.auxiliary_properties as sub_auxiliary_properties, b.spec as sub_spec, b.send_warehouse as sub_send_warehouse, b.remark as sub_remark
+        from bill_order a
+                 left join bill_order_detail b on b.order_no = a.order_no
+        where a.is_checked=#{isChecked}
+    </select>
+    <resultMap type="Warehouse" id="WarehouseResult">
+        <result property="id"    column="id"    />
+        <result property="wareHouseCode"    column="ware_house_code"    />
+        <result property="name"    column="name"    />
+        <result property="whProperty"    column="wh_property"    />
+        <result property="responsor"    column="responsor"    />
+        <result property="wareHouseBatchRule"    column="ware_house_batch_rule"    />
+        <result property="isAutomateReceive"    column="is_automate_receive"    />
+        <result property="organCode"    column="organ_code"    />
+        <result property="remark"    column="remark"    />
+     </resultMap>
+    <sql id="selectWarehouseVo">
+        select id, ware_house_code, name, wh_property, responsor, ware_house_batch_rule, is_automate_receive, organ_code, remark  from warehouse
+    </sql>
+    <select id="selectByOrganCode" resultMap="WarehouseResult">
+        <include refid="selectWarehouseVo"></include>
+        where organ_code = #{organCode}
+    </select>
+
+    <select id="selectBillOrderByorderNoAnddetailID" parameterType="BillOrder" resultMap="BillOrderBillOrderDetailResult">
+        select a.customer,a.customer_name,a.send_organ_code as sendOrganid,a.send_warehouse_code as sendwarehouseid,a.id, a.order_no, a.order_type, a.send_organ_code, a.send_organ_name, a.send_warehouse_code, a.send_warehouse_name, a.receive_organ_code, a.receive_organ_name, a.rceive_warehouse_code, a.receive_warehouse_name, a.batch_rule, a.is_picked, a.is_checked, a.bill_creator, a.bill_crearte_organid, a.bill_createtime, a.remark, a.create_time, a.reviewer_id, a.reviewer, a.reviewer_time, a.is_deleted, a.checker, a.sender, a.print_time,
+               b.id as sub_id, b.pd_code as sub_pd_code, b.pd_name as sub_pd_name, b.weight as sub_weight, b.quantity as sub_quantity, b.unit as sub_unit, b.order_no as sub_order_no, b.pd_batch as sub_pd_batch, b.create_time as sub_create_time, b.reviewer_id as sub_reviewer_id, b.reviewer as sub_reviewer, b.reviewer_time as sub_reviewer_time, b.auxiliary_properties as sub_auxiliary_properties, b.spec as sub_spec, b.send_warehouse as sub_send_warehouse, b.remark as sub_remark
+        from bill_order a
+                 left join bill_order_detail b on b.order_no = a.order_no
+        where a.order_no =#{orderNo} and b.id =#{detailId}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="newBillOrderDetailResult">
+        select id,pd_code,pd_name,weight,quantity,unit,order_no,pd_batch,create_time,reviewer_id,reviewer,reviewer_time,auxiliary_properties,spec,send_warehouse,remark from bill_order_detail
+        where order_no = #{orderNo}
+    </select>
+    <sql id="selectBillOrderDetailVo">
+        select id as sub_id, pd_code as sub_pd_code, pd_name as sub_pd_name, weight as sub_weight,quantity as sub_quantity,unit as sub_unit, order_no as sub_order_no,pd_batch as sub_pd_batch,create_time  as sub_create_time, reviewer_id as sub_reviewer_id, reviewer as sub_reviewer,reviewer_time as sub_reviewer_time,auxiliary_properties  as sub_auxiliary_properties,spec as sub_spec,send_warehouse as sub_send_warehouse, remark as sub_remark from bill_order_detail
+    </sql>
+
+    <select id="selectByOrderNoAndPdCode" resultMap="BillOrderDetailResult">
+        <include refid="selectBillOrderDetailVo"></include>
+        where order_no = #{orderNo} and pd_code = #{pdCode}
+    </select>
+
+    <select id="selectOrderNoList" parameterType="BillOrder" resultMap="BillOrderResult">
+        <include refid="selectBillOrderVo"/>
+        <where>
+            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
+            order by order_no desc limit 1
+        </where>
+    </select>
+    <select id="selectBillOrderDetailById" parameterType="Long" resultMap="BillOrderDetailResult">
+        <include refid="selectBillOrderDetailVo"></include>
+        where id = #{id}
+    </select>
+    <update id="updateBillOrderDetail" parameterType="BillOrderDetail">
+        update bill_order_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+
+            <if test="pdBatch != null">pd_batch = #{pdBatch},</if>
+            <if test="reviewerTime != null">reviewer_time = #{reviewerTime},</if>
+            <if test="reviewer != null">reviewer = #{reviewer},</if>
+            <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
+
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="auxiliaryProperties != null">auxiliary_properties = #{auxiliaryProperties},</if>
+            <if test="spec != null">spec = #{spec},</if>
+            <if test="sendWarehouse != null">send_warehouse = #{sendWarehouse},</if>
+
+            <if test="remark != null">remark = #{remark},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="selectBillOrderByOrderNo" parameterType="String" resultMap="BillOrderResult">
+        <include refid="selectBillOrderVo"/>
+        <where>
+             order_no =   #{orderNo}
+            order by id desc
+        </where>
+    </select>
+
+
+    <select id="selectImBillOrderByPdCodeAndRceiveWarehouseCode"  resultMap="BillOrderBillOrderDetailResult">
+        select a.customer,a.customer_name,a.send_organ_code as sendOrganid,a.send_warehouse_code as sendwarehouseid,a.id, a.order_no, a.order_type, a.send_organ_code, a.send_organ_name, a.send_warehouse_code, a.send_warehouse_name, a.receive_organ_code, a.receive_organ_name, a.rceive_warehouse_code, a.receive_warehouse_name, a.batch_rule, a.is_picked, a.is_checked, a.bill_creator, a.bill_crearte_organid, a.bill_createtime, a.remark, a.create_time, a.reviewer_id, a.reviewer, a.reviewer_time, a.is_deleted, a.checker, a.sender, a.print_time,
+               b.id as sub_id, b.pd_code as sub_pd_code, b.pd_name as sub_pd_name, b.weight as sub_weight, b.quantity as sub_quantity, b.unit as sub_unit, b.order_no as sub_order_no, b.pd_batch as sub_pd_batch, b.create_time as sub_create_time, b.reviewer_id as sub_reviewer_id, b.reviewer as sub_reviewer, b.reviewer_time as sub_reviewer_time, b.auxiliary_properties as sub_auxiliary_properties, b.spec as sub_spec, b.send_warehouse as sub_send_warehouse, b.remark as sub_remark
+        from bill_order a
+                 left join bill_order_detail b on b.order_no = a.order_no
+        WHERE
+            a.rceive_warehouse_code =   #{rceiveWarehouseCode}
+          AND a.customer =   #{customer}
+          AND b.pd_code =   #{pdCode}
+          and a.is_picked= 0
+          and a.order_type = 0
+    </select>
+    <select id="selectOrderFlow" resultType="com.linkwin.vo.FwFlowVo">
+        SELECT
+            bill_order.order_no AS orderNo,
+            bill_order.order_type as orderType,
+            bill_order.send_organ_name AS sendOrganName,
+            bill_order.receive_organ_name AS receiveOrganName,
+            bill_order.create_time AS createTime
+        FROM
+            bill_order
+                LEFT JOIN bill_order_barcode ON bill_order.order_no = bill_order_barcode.order_no
+        WHERE
+            bill_order_barcode.bar_code = #{barCode}
+        ORDER BY
+            createTime DESC
+    </select>
+    <select id="selectBillOrderListByDeptIds" resultMap="BillOrderResult">
+        <include refid="selectBillOrderVo"/>
+        <where>
+            <if test="billOrder.orderNo != null  and billOrder.orderNo != ''"> and order_no = #{billOrder.orderNo}</if>
+            <if test="deptIds != null and deptIds.size() > 0 ">
+                and receive_organ_code in
+                <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
+                    #{deptId}
+                </foreach>
+            </if>
+            <if test="billOrder.sendOrganName != null  and billOrder.sendOrganName != ''"> and send_organ_name like concat('%', #{billOrder.sendOrganName}, '%')</if>
+            <if test="billOrder.sendWarehouseName != null  and billOrder.sendWarehouseName != ''"> and send_warehouse_name like concat('%', #{billOrder.sendWarehouseName}, '%')</if>
+            <if test="billOrder.receiveOrganName != null  and billOrder.receiveOrganName != ''"> and receive_organ_name like concat('%', #{billOrder.receiveOrganName}, '%')</if>
+            <if test="billOrder.billCreator != null  and billOrder.billCreator != ''"> and bill_creator = #{billOrder.billCreator}</if>
+            <if test="billOrder.params.beginBillCreatetime != null and billOrder.params.beginBillCreatetime != '' and billOrder.params.endBillCreatetime != null and billOrder.params.endBillCreatetime != ''"> and bill_createtime between #{billOrder.params.beginBillCreatetime} and #{billOrder.params.endBillCreatetime}</if>
+            <if test="billOrder.billCreator != null  and billOrder.billCreator != ''"> and bill_creator like concat('%', #{billOrder.billCreator}, '%')</if>
+            <if test="billOrder.orderType != null  "> and order_type = #{billOrder.orderType}</if>
+            <if test="billOrder.customerName != null and billOrder.customerName != ''" > and customer_name like concat('%', #{billOrder.customerName}, '%')</if>
+        </where>
+        order by id  desc
+    </select>
+    <select id="selectRKBillOrderListByDeptIds" resultMap="BillOrderResult">
+        <include refid="selectBillOrderVo"/>
+        <where>
+            <if test="billOrder.orderNo != null  and billOrder.orderNo != ''"> and order_no = #{billOrder.orderNo}</if>
+            <if test="deptIds != null and deptIds.size() > 0 ">
+                and receive_organ_code in
+                <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
+                    #{deptId}
+                </foreach>
+            </if>
+            <if test="billOrder.sendOrganName != null  and billOrder.sendOrganName != ''"> and send_organ_name like concat('%', #{billOrder.sendOrganName}, '%')</if>
+            <if test="billOrder.sendWarehouseName != null  and billOrder.sendWarehouseName != ''"> and send_warehouse_name like concat('%', #{billOrder.sendWarehouseName}, '%')</if>
+            <if test="billOrder.receiveOrganName != null  and billOrder.receiveOrganName != ''"> and receive_organ_name like concat('%', #{billOrder.receiveOrganName}, '%')</if>
+            <if test="billOrder.billCreator != null  and billOrder.billCreator != ''"> and bill_creator = #{billOrder.billCreator}</if>
+            <if test="billOrder.params.beginBillCreatetime != null and billOrder.params.beginBillCreatetime != '' and billOrder.params.endBillCreatetime != null and billOrder.params.endBillCreatetime != ''"> and bill_createtime between #{billOrder.params.beginBillCreatetime} and #{billOrder.params.endBillCreatetime}</if>
+            <if test="billOrder.sender != null  and billOrder.sender != ''"> and sender = #{billOrder.sender}</if>
+            <if test="billOrder.orderType != null  "> and order_type = #{billOrder.orderType}</if>
+        </where>
+        order by id  desc
+    </select>
+
+
+</mapper>

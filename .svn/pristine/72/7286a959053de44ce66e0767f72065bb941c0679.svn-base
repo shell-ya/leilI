@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('产品信息表列表')" />
+</head>
+<body class="gray-bg">
+<div class="main-content">
+    <form id="form-user-add" class="form-horizontal">
+        <input type="hidden" id="code" name="code" th:value="${organ.deptId}">
+        <input type="hidden" id="id" name="id" th:value="${organ.deptId}">
+        <div class="select-list">
+            <ul>
+                <li>
+                    <label>产品名称：</label>
+                    <input type="text" name="name"/>
+                </li>
+                <li>
+                    <label>产品通用名：</label>
+                    <input type="text" name="commonName"/>
+                </li>
+                <li>
+                    <div>
+                        <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                        <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>重置</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+                <div class="row">
+                    <div class="btn-group-sm" id="toolbar" role="group">
+                        <a class="btn btn-success" onclick="configProduct()">
+                            <i class="fa fa-plus"></i> 增加
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="cancelAuthUserAll()">
+                            <i class="fa fa-remove"></i> 删除
+                        </a>
+                    </div>
+        <div class="col-sm-12">
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+
+                </div>
+    </form>
+</div>
+
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+
+        var prefix = ctx + "system/dept";
+
+        $(function() {
+            var options = {
+                url: prefix + "/productlist",
+                queryParams: queryParams,
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                importUrl: prefix + "/importData",
+                importTemplateUrl: prefix + "/importTemplate",
+                modalName: "产品信息表",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '',
+                    visible: false
+                },
+                    {
+                        field: 'code',
+                        title: '产品编码'
+                    },
+                    {
+                        field: 'name',
+                        title: '产品名称'
+                    },
+                    {
+                        field: 'specification',
+                        title: '规格'
+                    },
+                    {
+                        field: 'commonName',
+                        title: '通用名'
+                    },
+                    {
+                        field: 'registrationNumber',
+                        title: '登记证号'
+                    },
+                    {
+                        field: 'dosageForm',
+                        title: '剂型'
+                    },
+                    {
+                        field: 'mainComponents',
+                        title: '主要成分'
+                    }
+                ]
+            };
+            $.table.init(options);
+        });
+
+        function queryParams(params) {
+            var search = $.table.queryParams(params);
+            search.code = $("#code").val();
+            return search;
+        }
+
+        function configProduct() {
+            var url = prefix + '/configProduct/' + $("#id").val();
+            $.modal.open("选择产品", url);
+        }
+
+        function searchProduct(){
+            top.layer.open({
+                type: 2,
+                title: "搜索产品",
+                shadeClose: true,
+                area: ['50%', '75%'],
+                content: prefix + "/searchProduct",
+
+                yes: function(index,layero){
+                    //当点击‘确定’按钮的时候，获取弹出层返回的值
+                    productData=""
+                    var res= layero.find("iframe")[0].contentWindow.callBackData();//执行子页面保存事件
+                    productData=res;
+                    // //打印返回的值，看是否有我们想返回的值。
+                    if (res){
+                        let qrLastSix = res.pestRegCertNumber;
+                        let pestRegCertNumber = res.pestRegCertNumber;
+                        let specCode = res.specCode;
+                        qrLastSix=qrLastSix.substr(qrLastSix.length-6,6)
+                        $("input[name='qrLastSix']").val(qrLastSix)
+                        $("input[name='qrPestNum']").val(pestRegCertNumber)
+                        $("input[name='qrSpecCode']").val(specCode)
+                        top.layer.close(index);
+                    }else {
+                        $.modal.alertWarning("请选择一个产品");
+                    }
+                },
+                cancel: function(){
+                    //右上角关闭回调
+                },
+                end:function (){
+                    $.table.search()
+                }
+            });
+        }
+
+        function cancelAuthUserAll() {
+            var rows=getSelectData();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var codes=[];
+            rows.forEach(data=>{
+                codes.push(data.code);
+            })
+            $.modal.confirm("确认要删除选中的" + rows.length + "条数据吗?", function() {
+                var data = { "roleId": $("#code").val(), "ProductIds": codes.join() };
+                $.operate.submit(prefix + "/cancelAll", "post", "json", data);
+            });
+        }
+        function getSelectData(){
+            return  $('#bootstrap-table').bootstrapTable('getSelections');
+        }
+
+    </script>
+</body>
+<!-- 导入区域 -->
+<script id="importTpl" type="text/template">
+    <form enctype="multipart/form-data" class="mt20 mb10">
+        <div class="col-xs-offset-1">
+            <input type="file" id="file" name="file"/>
+            <div class="mt10 pt5">
+                <input type="checkbox" id="updateSupport" name="updateSupport" title="如果登录账户已经存在，更新这条数据。"> 是否更新已经存在的用户数据
+                &nbsp;	<a onclick="$.table.importTemplate()" class="btn btn-default btn-xs"><i class="fa fa-file-excel-o"></i> 下载模板</a>
+            </div>
+            <font color="red" class="pull-left mt10">
+                提示：仅允许导入“xls”或“xlsx”格式文件！
+            </font>
+        </div>
+    </form>
+</script>
+</html>

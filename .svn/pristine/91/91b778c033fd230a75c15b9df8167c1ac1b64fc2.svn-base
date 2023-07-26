@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.Integral.mapper.IntegralPersonMapper">
+    
+    <resultMap type="IntegralPerson" id="IntegralPersonResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="phone"    column="phone"    />
+        <result property="address"    column="address"    />
+        <result property="integral"    column="integral"    />
+        <result property="openId"    column="open_id"    />
+    </resultMap>
+
+    <sql id="selectIntegralPersonVo">
+        select id, name, phone, address, integral,open_id from integral_person
+    </sql>
+
+    <select id="selectIntegralPersonList" parameterType="IntegralPerson" resultMap="IntegralPersonResult">
+        <include refid="selectIntegralPersonVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="address != null  and address != ''"> and address = #{address}</if>
+            <if test="integral != null "> and integral = #{integral}</if>
+            <if test="openId != null "> and open_id = #{openId}</if>
+        </where>
+    </select>
+    
+    <select id="selectIntegralPersonById" parameterType="Long" resultMap="IntegralPersonResult">
+        <include refid="selectIntegralPersonVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertIntegralPerson" parameterType="IntegralPerson" useGeneratedKeys="true" keyProperty="id">
+        insert into integral_person
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="address != null">address,</if>
+            <if test="integral != null">integral,</if>
+            <if test="openId != null">open_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="address != null">#{address},</if>
+            <if test="integral != null">#{integral},</if>
+            <if test="openId != null">#{openId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIntegralPerson" parameterType="IntegralPerson">
+        update integral_person
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="integral != null">integral = #{integral},</if>
+            <if test="openId != null">open_id = #{openId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteIntegralPersonById" parameterType="Long">
+        delete from integral_person where id = #{id}
+    </delete>
+
+    <delete id="deleteIntegralPersonByIds" parameterType="String">
+        delete from integral_person where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectIntegralPersonByphoneNumber" parameterType="String" resultMap="IntegralPersonResult">
+        <include refid="selectIntegralPersonVo"/>
+        where open_id = #{phoneNumber}
+    </select>
+
+    <select id="selectByPhone" resultMap="IntegralPersonResult">
+        <include refid="selectIntegralPersonVo"></include>
+        where phone = #{phone}
+    </select>
+
+    <select id="selectByOpenId" resultMap="IntegralPersonResult">
+        <include refid="selectIntegralPersonVo"></include>
+        where open_id = #{openId}
+    </select>
+
+
+</mapper>

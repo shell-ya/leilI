@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.SysProductOrganMapper">
+    
+    <resultMap type="SysProductOrgan" id="SysProductOrganResult">
+        <result property="productCode"    column="product_code"    />
+        <result property="organCode"    column="organ_code"    />
+    </resultMap>
+
+    <sql id="selectSysProductOrganVo">
+        select product_code, organ_code from sys_product_organ
+    </sql>
+
+    <select id="selectSysProductOrganList" parameterType="SysProductOrgan" resultMap="SysProductOrganResult">
+        <include refid="selectSysProductOrganVo"/>
+        <where>  
+            <if test="productCode != null "> and product_code = #{productCode}</if>
+            <if test="organCode != null "> and organ_code = #{organCode}</if>
+        </where>
+    </select>
+    
+    <select id="selectSysProductOrganByProductCode" parameterType="Long" resultMap="SysProductOrganResult">
+        <include refid="selectSysProductOrganVo"/>
+        where product_code = #{productCode}
+    </select>
+        
+    <insert id="insertSysProductOrgan" parameterType="SysProductOrgan">
+        insert into sys_product_organ
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productCode != null">product_code,</if>
+            <if test="organCode != null">organ_code,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productCode != null">#{productCode},</if>
+            <if test="organCode != null">#{organCode},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysProductOrgan" parameterType="SysProductOrgan">
+        update sys_product_organ
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="organCode != null">organ_code = #{organCode},</if>
+        </trim>
+        where product_code = #{productCode}
+    </update>
+
+    <delete id="deleteSysProductOrganByProductCode" parameterType="Long">
+        delete from sys_product_organ where product_code = #{productCode}
+    </delete>
+
+    <delete id="deleteSysProductOrganByProductCodes" parameterType="String">
+        delete from sys_product_organ where product_code in 
+        <foreach item="productCode" collection="array" open="(" separator="," close=")">
+            #{productCode}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.apply.mapper.BoxCodePreMapper">
+    
+    <resultMap type="BoxCodePre" id="BoxCodePreResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="randomCode"    column="random_code"    />
+        <result property="seed"    column="seed"    />
+        <result property="applyId"    column="apply_id"    />
+        <result property="year"    column="year"    />
+    </resultMap>
+
+    <sql id="base_Column">
+        create_time, modify_time, random_code, seed, apply_id,`year`
+    </sql>
+
+    <sql id="selectBoxCodePreVo">
+        select id, create_time, modify_time, random_code, seed, apply_id,`year` from box_code_pre
+    </sql>
+
+    <select id="selectBoxCodePreList" parameterType="BoxCodePre" resultMap="BoxCodePreResult">
+        <include refid="selectBoxCodePreVo"/>
+        <where>  
+            <if test="modifyTime != null "> and modify_time = #{modifyTime}</if>
+            <if test="randomCode != null  and randomCode != ''"> and random_code = #{randomCode}</if>
+            <if test="seed != null  and seed != ''"> and seed = #{seed}</if>
+            <if test="applyId != null "> and apply_id = #{applyId}</if>
+            <if test="year != null "> and `year` = #{year}</if>
+        </where>
+    </select>
+    
+    <select id="selectBoxCodePreById" parameterType="Long" resultMap="BoxCodePreResult">
+        <include refid="selectBoxCodePreVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertBoxCodePre" parameterType="BoxCodePre">
+        insert into box_code_pre
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="randomCode != null">random_code,</if>
+            <if test="seed != null">seed,</if>
+            <if test="applyId != null">apply_id,</if>
+            <if test="year != null">year,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="randomCode != null">#{randomCode},</if>
+            <if test="seed != null">#{seed},</if>
+            <if test="applyId != null">#{applyId},</if>
+            <if test="year != null">#{year},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBoxCodePre" parameterType="BoxCodePre">
+        update box_code_pre
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime},</if>
+            <if test="randomCode != null">random_code = #{randomCode},</if>
+            <if test="seed != null">seed = #{seed},</if>
+            <if test="applyId != null">apply_id = #{applyId},</if>
+            <if test="year != null"> `year`= #{year},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBoxCodePreById" parameterType="Long">
+        delete from box_code_pre where id = #{id}
+    </delete>
+
+    <delete id="deleteBoxCodePreByIds" parameterType="String">
+        delete from box_code_pre where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getCount" resultType="Integer">
+        select count(0) from box_code_pre
+    </select>
+
+    <insert id="batchInsert" parameterType="com.linkwin.apply.domain.BoxCodePre">
+        insert into box_code_pre (<include refid="base_Column"/>) values
+        <foreach collection="codeList" item="item" index="index" separator="," >
+            (#{createTime},null,#{item},#{seed},null,#{year})
+        </foreach>
+    </insert>
+
+    <update id="updateBoxCodePreApplyId">
+        update box_code_pre set apply_id=#{applyId},modify_time=now() where apply_id is null and `year` = #{year} limit #{count}
+    </update>
+
+    <delete id="deleteByApplyId">
+        delete from box_code_pre where apply_id = #{applyId}
+    </delete>
+
+    <insert id="insertBoxCode">
+        INSERT INTO ${tableName} (apply_id, box_code, create_time) (
+            SELECT
+                apply_id,
+                random_code,
+                now()
+            FROM box_code_pre WHERE apply_id = #{applyId} AND `year` = #{year}
+        )
+    </insert>
+
+
+
+</mapper>

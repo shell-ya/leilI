@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/fwQueryNew.css" th:href="@{/css/fwQueryNew.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('防伪查询')" />
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0， maximum-scale=1.0,minimum-scale=1.0, user-scalable=no， viewport-fit=cove">-->
+<!--    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no, viewport-fit=cover" />-->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no, viewport-fit=auto" />
+
+</head>
+<body class="scan">
+    <div align="center">
+        <img th:src="@{/img/logo04.png}" style="height: 175px;width: 300px;margin-top: 50px">
+    </div>
+    <div align="center" class="product center-block" style="width: 350px"  th:object="${fwQuery}">
+                <div align="center" style="font-size: 20px;color: #1a7bb9" >
+                    <br />雷力产品溯源防伪查询
+                </div>
+                <div class="row"  align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">
+                    <br />本品为：
+                    <a id="authenticity" style="font-size: 25px" th:text="*{authenticity}" ></a>
+                </div>
+                <div class="bottom-align-text" align="left">
+                    <h5 style="margin-left: 40px;margin-right: 10px">*一般情况被扫码5次以上有可能被认为是假冒产品。如您对产品有疑虑，建议联系售后服务</h5>
+                    <hr color="blue" size="10px" style="margin-left: 40px;margin-right: 20px;"/>
+                </div>
+
+                <div class="row" id="queryNum" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">查询次数：
+                    <a style="font-size: 25px" th:text="*{queryNum}"></a>
+                    <hr color="blue" size="1px"  noshade="false"/>
+                </div>
+
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">产品名称：
+                    <a id="pdName" th:text="*{pdName}"></a>
+                    <hr color="blue" size="1px"/>
+                </div>
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">生产日期：
+                    <a id="proDateStr" th:text="*{proDateStr}"></a>
+                    <hr color="blue" size="1px"/>
+                </div>
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">产品规格：
+                    <a id="specification" th:text="*{specification}">	</a>
+                    <hr color="blue" size="1px"/>
+                </div>
+                <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-right: 20px">检测报告/证书：
+<!--                    <a id="testCertificate" >点击查看</a>-->
+                    <button id="testCertificate" onclick="testCertificate1()">点击查看</button>
+                    <hr color="blue" size="1px"/>
+                </div>
+                <div class="row" align="left"  style="font-size: 15px;margin-left: 40px;margin-right: 20px">使用说明：
+                    <a id="usemethod" style="word-wrap: break-word;font-size: 13px" th:text="*{usemethod}"></a>
+                    <hr color="blue" size="10px"/><br />
+                </div>
+                <input name="productPath" th:value="*{productPath}" type="hidden">
+
+    </div>
+
+    <div align="center" class="product center-block" style="width: 350px;margin-bottom: auto" th:object="${fwQuery}">
+        <div class="row" style="font-size: 22px;margin-left: 20px;margin-top:10px;margin-right: 20px;color: #1a7bb9">
+            <br />可参加活动<br />
+            <a style="word-wrap: break-word;" id="activityMsg" th:text="*{activityMsg}"></a>
+        </div>
+        <div class="row" align="left" style="font-size: 15px;margin-left: 40px;margin-top:10px;margin-right: 20px">活动类型：
+            <a style="word-wrap: break-word;" id="activityType" th:text="*{activityType}"></a>
+<!--            <a style="word-wrap: break-word;" id="activityType">大转盘</a>-->
+            <hr color="blue" size="1px"  />
+        </div>
+        <div class="row"  align="left" style="font-size: 15px;margin-left: 40px;margin-top:10px;margin-right: 20px">活动标题：
+            <a style="word-wrap: break-word;" id="activityTitle" th:text="*{activityTitle}"></a>
+<!--            <a style="word-wrap: break-word;" id="activityTitle" >大转盘活动</a>-->
+            <hr color="blue" size="1px" />
+        </div>
+        <div class="row"  align="left" style="font-size: 15px;margin-left: 40px;margin-top:10px;margin-right: 20px">活动简介：
+            <a class="introduction" style="word-wrap: break-word;" id="introduction" th:text="*{activityIntroduction}" ></a>
+<!--            <a class="introduction" style="word-wrap: break-word;" id="introduction" >测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍测试活动介绍-->
+            </a>
+        </div>
+        <div>
+            <br />
+            <button id="result"  class="btn btn-primary center scanText " style="border-radius: 30px" onclick="scan()" type="button"><i class="fa fa-barcode"></i> 点击扫描营销码</button>
+        </div>
+        <div class="bottom-align-text">
+            <br />
+            <h5 style="color: #FF5151;margin-left: 20px">*请揭开防伪码后扫描营销码，扫描后才能参加相应活动<br /></h5>
+            <br />
+        </div>
+    </div>
+    <input name="openId" th:value="*{openId}" type="hidden">
+    <input name="phone" th:value="*{phone}" type="hidden">
+    <input name="address" th:value="*{address}" type="hidden">
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+
+
+
+    <th:block th:include="include :: footer" />
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        var authenticity=$("#authenticity").text();
+        var data=check(authenticity);
+        var prefix = ctx + "fwQueryH5";
+
+
+        // var qr=GetQueryString("qrresult");
+        // if(qr){
+        //     var url=window.location.href
+        //     console.log(url)
+        //     // var openId = $('input[name="openId"]').val();
+        //     // var phone = $('input[name="phone"]').val();
+        //     // var address = $('input[name="address"]').val();
+        //     // location.href=prefix+'/exchangeIntegral?code='+qr+'&address='+address+'&phone='+phone+'&openId='+openId;
+        // }
+
+        function scan(){
+            var openId = $('input[name="openId"]').val();
+            var phone = $('input[name="phone"]').val();
+            var address = $('input[name="address"]').val();
+            var url=prefix+'/exchangeIntegral?'+'address='+address+'&phone='+phone+'&openId='+openId;
+            var host=window.location.host;
+            var protocol = window.location.protocol
+            url =protocol+'//'+host+url;
+            location.href = "https://www.996315.com/api/scan/?redirect_uri=" + encodeURIComponent(url);
+        }
+
+        function testCertificate1(){
+            var productPath = $('input[name="productPath"]').val();
+            if (!productPath){
+                $.modal.alertError('产品内检图片异常，请联系管理员');
+            }
+            var url = ctx + productPath;
+            url = url.replace("/img","");
+            var host=window.location.host;
+            var protocol = window.location.protocol
+            url =protocol+'//'+host+url;
+            location.href = url;
+        }
+
+
+        function check(aut){
+            var index=aut.indexOf("正品");
+            console.log(aut)
+            console.log(index)
+            if (index==-1){
+                $('#authenticity').css('color','red')
+            }
+            else{
+                // $("#queryNum").prop("hidden",true);
+                $('#authenticity').css('color','green')
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.ProductOrganMapper">
+    
+    <resultMap type="ProductOrgan" id="ProductOrganResult">
+        <result property="id"    column="id"    />
+        <result property="organCode"    column="organ_code"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="specification"    column="specification"    />
+        <result property="pdName"    column="pd_name"    />
+    </resultMap>
+
+    <sql id="selectProductOrganVo">
+        select id, organ_code, pd_code, specification, pd_name from product_organ
+    </sql>
+
+    <select id="selectProductOrganList" parameterType="ProductOrgan" resultMap="ProductOrganResult">
+        select s.id, s.organ_code, s.pd_code, p.specification, p.name as pd_name from product_organ s
+        left join product p
+        on s.pd_code = p.code
+        <where>  
+            <if test="organCode != null  and organCode != ''"> and s.organ_code = #{organCode}</if>
+            <if test="pdCode != null  and pdCode != ''"> and s.pd_code = #{pdCode}</if>
+            <if test="specification != null  and specification != ''"> and p.specification = #{specification}</if>
+            <if test="pdName != null  and pdName != ''"> and p.name like concat('%', #{pdName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectProductOrganById" parameterType="Long" resultMap="ProductOrganResult">
+        <include refid="selectProductOrganVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertProductOrgan" parameterType="ProductOrgan">
+        insert into product_organ
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="organCode != null and organCode != ''">organ_code,</if>
+            <if test="pdCode != null">pd_code,</if>
+            <if test="specification != null">specification,</if>
+            <if test="pdName != null">pd_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="organCode != null and organCode != ''">#{organCode},</if>
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="specification != null">#{specification},</if>
+            <if test="pdName != null">#{pdName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateProductOrgan" parameterType="ProductOrgan">
+        update product_organ
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="organCode != null and organCode != ''">organ_code = #{organCode},</if>
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="specification != null">specification = #{specification},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteProductOrganById" parameterType="Long">
+        delete from product_organ where id = #{id}
+    </delete>
+
+    <delete id="deleteProductOrganByIds" parameterType="String">
+        delete from product_organ where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectNotInOrganList" resultMap="ProductOrganResult">
+        select p.id, p.code as pd_code,  p.specification, p.name as pd_name from product p
+        where
+              not exists (
+                  select 1 from product_organ s where s.organ_code = #{organCode} and p.code = s.pd_code
+            )
+        <if test="pdName != null  and pdName != ''"> and p.name = #{pdName}</if>
+        <if test="pdCode != null  and pdCode != ''"> and p.code = #{pdCode}</if>
+        <if test="specification != null  and specification != ''"> and p.specification = #{specification}</if>
+    </select>
+
+
+</mapper>

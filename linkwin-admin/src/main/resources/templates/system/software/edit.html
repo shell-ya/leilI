@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改软件版本控制')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-control-edit" th:object="${softwareControl}">
+            <input name="id" th:field="*{id}" type="hidden">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">大版本号：</label>
+                        <div class="col-sm-8">
+                            <input name="bigVersion" th:field="*{bigVersion}" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">小版本号：</label>
+                        <div class="col-sm-8">
+                            <input name="minVersion" th:field="*{minVersion}" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">描述：</label>
+                        <div class="col-sm-10">
+                            <textarea name="remark" class="form-control" maxlength="200" style="height: 100px">[[*{remark}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "system/software";
+        $("#form-control-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-control-edit').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

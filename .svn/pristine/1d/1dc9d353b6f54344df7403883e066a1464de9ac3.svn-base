@@ -1,0 +1,180 @@
+package com.linkwin.Integral.service.impl;
+
+import java.util.List;
+
+import com.linkwin.Integral.domain.IntegralRecord;
+import com.linkwin.Integral.service.IIntegralRecordService;
+import com.linkwin.apply.domain.SubCode;
+import com.linkwin.apply.mapper.SubCodeMapper;
+import com.linkwin.basedata.domain.Product;
+import com.linkwin.basedata.service.IProductService;
+import com.linkwin.common.exception.ServiceException;
+import com.linkwin.common.utils.MessageUtils;
+import com.linkwin.utils.TableUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.linkwin.Integral.mapper.IntegralPersonMapper;
+import com.linkwin.Integral.domain.IntegralPerson;
+import com.linkwin.Integral.service.IIntegralPersonService;
+import com.linkwin.common.core.text.Convert;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * IntegralPersonService业务层处理
+ * 
+ * @author ruoyi
+ * @date 2022-06-11
+ */
+@Slf4j
+@Service
+public class IntegralPersonServiceImpl implements IIntegralPersonService 
+{
+    @Autowired
+    private IntegralPersonMapper integralPersonMapper;
+
+
+    @Autowired
+    private SubCodeMapper subCodeMapper;
+
+    @Autowired
+    private IProductService productService;
+
+    @Autowired
+    private IIntegralRecordService integralRecordService;
+
+
+    /**
+     * 查询IntegralPerson
+     * 
+     * @param id IntegralPerson主键
+     * @return IntegralPerson
+     */
+    @Override
+    public IntegralPerson selectIntegralPersonById(Long id)
+    {
+        return integralPersonMapper.selectIntegralPersonById(id);
+    }
+
+
+    /**
+     * 查询IntegralPerson列表
+     * 
+     * @param integralPerson IntegralPerson
+     * @return IntegralPerson
+     */
+    @Override
+    public List<IntegralPerson> selectIntegralPersonList(IntegralPerson integralPerson)
+    {
+        return integralPersonMapper.selectIntegralPersonList(integralPerson);
+    }
+
+    /**
+     * 新增IntegralPerson
+     * 
+     * @param integralPerson IntegralPerson
+     * @return 结果
+     */
+    @Override
+    public int insertIntegralPerson(IntegralPerson integralPerson)
+    {
+        return integralPersonMapper.insertIntegralPerson(integralPerson);
+    }
+
+    /**
+     * 修改IntegralPerson
+     * 
+     * @param integralPerson IntegralPerson
+     * @return 结果
+     */
+    @Override
+    public int updateIntegralPerson(IntegralPerson integralPerson)
+    {
+        return integralPersonMapper.updateIntegralPerson(integralPerson);
+    }
+
+    /**
+     * 批量删除IntegralPerson
+     * 
+     * @param ids 需要删除的IntegralPerson主键
+     * @return 结果
+     */
+    @Override
+    public int deleteIntegralPersonByIds(String ids)
+    {
+        return integralPersonMapper.deleteIntegralPersonByIds(Convert.toStrArray(ids));
+    }
+
+    /**
+     * 删除IntegralPerson信息
+     * 
+     * @param id IntegralPerson主键
+     * @return 结果
+     */
+    @Override
+    public int deleteIntegralPersonById(Long id)
+    {
+        return integralPersonMapper.deleteIntegralPersonById(id);
+    }
+    public IntegralPerson selectIntegralPersonByphoneNumber(String phoneNumber){
+        return integralPersonMapper.selectIntegralPersonByphoneNumber(phoneNumber);
+
+    }
+
+    @Transactional
+    @Override
+    public IntegralPerson insertPersonAndRecord(IntegralPerson integralPerson,String code) throws ServiceException {
+        IntegralPerson person=null;
+        try {
+            person= integralPersonMapper.selectByPhone(integralPerson.getPhone());
+            if (person==null){
+                IntegralPerson newPerson=new IntegralPerson();
+                newPerson.setIntegral(0);
+                newPerson.setPhone(integralPerson.getPhone());
+                newPerson.setAddress(integralPerson.getAddress());
+                newPerson.setName(integralPerson.getName());
+                this.insertIntegralPerson(newPerson);
+                person=integralPersonMapper.selectByPhone(integralPerson.getPhone());
+            }else {
+                person.setIntegral(person.getIntegral()+integralPerson.getIntegral());
+            }
+            String year = TableUtils.getYearByCode(code);
+            year="20"+year;
+            String tableName = TableUtils.getSubTableByYear(Integer.valueOf(year));
+            SubCode subCode = subCodeMapper.selectByMarkCode(tableName, code);
+            if (subCode==null){
+//                throw new ServiceException("该码在系统中不存在，请扫码正确码");
+                throw new ServiceException(MessageUtils.message("error.msg.codenotexistsystem"));
+            }
+            Product product = productService.selectByPdCode(subCode.getPdCode());
+            IntegralRecord record=new IntegralRecord();
+            record.setChangeNumber(integralPerson.getIntegral());//变化积分数量
+            record.setCurreryIntegral(person.getIntegral());//变动后的
+            record.setChangeFlag("+");
+            record.setChangeReason("积分兑换");
+            record.setProductNumber(1);
+            record.setPhone(integralPerson.getPhone());
+            record.setProductCode(product.getCode());
+            record.setProductName(product.getName());
+            integralRecordService.insertIntegralRecord(record);
+            this.updateIntegralPerson(person);
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("IntegralPersonServiceImpl insertPersonAndRecord is error",e.getCause());
+            throw new ServiceException();
+        }
+        return person;
+    }
+
+    @Override
+    public IntegralPerson selectByOpenId(String openId) {
+        return integralPersonMapper.selectByOpenId(openId);
+    }
+
+    @Override
+    public IntegralPerson selectByPhone(String phone) {
+        return integralPersonMapper.selectByPhone(phone);
+    }
+
+
+}

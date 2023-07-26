@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('条码参加活动记录列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label th:text="#{activity.Records.Code}">码：</label>
+                                <input type="text" name="markCode"/>
+                            </li>
+                            <li>
+                                <select id="activityType" name="activityType" class="form-control m-b required" data-first-title="请选择" th:with="type=${@dict.getType('activity_type',#locale.language+'_'+#locale.country)}"
+                                        required>
+                                    <option value="" th:text="#{please.select}">请选择</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                            th:value="${dict.dictValue}"></option>
+                                </select>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()" th:text="#{boxcode.Search}"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()" th:text="#{boxcode.Reset}"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+<!--                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:log:add">-->
+<!--                    <i class="fa fa-plus"></i> 添加-->
+<!--                </a>-->
+<!--                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:log:edit">-->
+<!--                    <i class="fa fa-edit"></i> 修改-->
+<!--                </a>-->
+<!--                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:log:remove">-->
+<!--                    <i class="fa fa-remove"></i> 删除-->
+<!--                </a>-->
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="activity:activitylog:export">
+                    <i class="fa fa-download"></i> [[#{activity.Records.Export}]]
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var activityTypeDict = [[${@dict.getType('activity_type',#locale.language+'_'+#locale.country)}]];
+        var dictCodeType= [[${@dict.getType('code_type',#locale.language+'_'+#locale.country)}]];
+        var prefix = ctx + "activity/activityLog";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: [[#{activity.records}]],
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '${comment}',
+                    visible: false
+                },
+                {
+                    field: 'markCode',
+                    title: [[#{activity.Records.Marketing.Code}]]
+                },
+                {
+                    field: 'activityType',
+                    title: [[#{activity.Records.Type.Of.Activity}]],
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(activityTypeDict, value);
+                    }
+                },
+                {
+                    field: 'activityTime',
+                    title: [[#{activity.Records.Participation.Time}]]
+                },
+                {
+                    field: 'address',
+                    title: [[#{activity.Records.Activity.address}]]
+                },
+                {
+                    field: 'codeType',
+                    title:  [[#{activity.Records.Code.Type}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(dictCodeType, value);
+                    }
+                },
+                {
+                    field: 'remark',
+                    title: [[#{activity.Remark}]]
+                },
+                {
+                    title: [[#{boxcode.Operate}]],
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        // actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        // actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

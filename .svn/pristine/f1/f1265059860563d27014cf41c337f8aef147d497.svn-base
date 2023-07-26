@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('warehouseRecoad列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>[[#{inventory.Product.Number}]]：</label>
+                                <input type="text" name="productid"/>
+                            </li>
+                            <li>
+                                <label>[[#{inventory.Product.Name}]]：</label>
+                                <input type="text" name="productname"/>
+                            </li>
+
+                            <li>
+                                <label>仓库编码：</label>
+                                <input type="text" name="warehouseId"/>
+                            </li>
+                            <li>
+                                <label>[[#{inventory.Warehouse.Name}]]：</label>
+                                <input type="text" name="warehouseName"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()" th:text="#{boxcode.Search}"><i class="fa fa-search"></i>&nbsp;</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()" th:text="#{boxcode.Reset}"><i class="fa fa-refresh"></i>&nbsp;</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+<!--                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="basedata:record:add">-->
+<!--                    <i class="fa fa-plus"></i> 添加-->
+<!--                </a>-->
+<!--                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="basedata:record:edit">-->
+<!--                    <i class="fa fa-edit"></i> 修改-->
+<!--                </a>-->
+<!--                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="basedata:record:remove">-->
+<!--                    <i class="fa fa-remove"></i> 删除-->
+<!--                </a>-->
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="basedata:record:export">
+                    <i class="fa fa-download"></i> [[#{activity.Records.Export}]]
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('basedata:record:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('basedata:record:remove')}]];
+        var prefix = ctx + "basedata/record";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "warehouseRecoad",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: [[#{Outbound.Document.Information.Serial.Number}]],
+                    visible: false
+                },
+                {
+                    field: 'productname',
+                    title: [[#{inventory.Product.Name}]]
+                },
+                    {
+                        field: 'warehouseName',
+                        title: [[#{inventory.Warehouse.Name}]]
+                    },
+
+                {
+                    field: 'changeflag',
+                    title: '出入库标志'
+                },
+                {
+                    field: 'changenumber',
+                    title: '变更数量'
+                },
+                    {
+                        field: 'inventoryquantity',
+                        title: '当前库存剩余数量'
+                    },
+
+                {
+                    field: 'reason',
+                    title: '变更原因'
+                },
+                    {
+                        field: 'warehouseId',
+                        title: [[#{Dealer.Information.Warehouse.Code}]]
+                    },
+                ]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

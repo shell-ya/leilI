@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('防伪查询记录列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>产品编码：</label>
+                                <input type="text" name="pdCode"/>
+                            </li>
+                            <li>
+                                <label>码：</label>
+                                <input type="text" name="code"/>
+                            </li>
+
+                            <li>
+                                <label>批次：</label>
+                                <input type="text" name="batchNo"/>
+                            </li>
+<!--                            <li>-->
+<!--                                <label>第一次查询时间：</label>-->
+<!--                                <input type="text" class="time-input" placeholder="请选择第一次查询时间" name="firstQueryTime"/>-->
+<!--                            </li>-->
+                            <li>
+                                <label>产品名称：</label>
+                                <input type="text" name="pdName"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="trace:fwquery:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var codeTypeDict = [[${@dict.getType('code_type')}]];
+        var prefix = ctx + "trace/fwQueryLog";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "防伪查询记录",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '${comment}',
+                    visible: false
+                },
+                {
+                    field: 'pdName',
+                    title: '产品名称'
+                },
+                {
+                    field: 'pdCode',
+                    title: '产品编码'
+                },
+                {
+                    field: 'code',
+                    title: '码'
+                },
+                {
+                    field: 'codeType',
+                    title: '码类型',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(codeTypeDict, value);
+                    }
+                },
+                {
+                    field: 'queryNum',
+                    title: '查询次数'
+                },
+                {
+                    field: 'batchNo',
+                    title: '批次'
+                },
+                {
+                    field: 'firstQueryTime',
+                    title: '第一次查询时间'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

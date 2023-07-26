@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('单据条码明细列表')" />
+    <th:block th:include="include :: bootstrap-editable-css" />
+
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <input type="hidden" id="detailId" name="detailId" th:value="${detailId}"/>
+                    <ul>
+                        <li>
+                            <label>[[#{Outbound.Document.Information.Barcode}]]：</label>
+                            <input type="text" name="barCode"/>
+                        </li>
+<!--                        <li>-->
+<!--                            <label>[[#{od.startLogisticsCode}]]：</label>-->
+<!--                            <input type="text" name="startLogisticsCode"/>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <label>[[#{od.endLogisticsCode}]]：</label>-->
+<!--                            <input type="text" name="endLogisticsCode"/>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <label>[[#{production.codeType}]]：</label>-->
+<!--                            <select name="barCodeType">-->
+<!--                                <option value="">[[#{common.all}]]<</option>-->
+<!--                                <option value="1">[[#{production.boxCode}]]</option>-->
+<!--                                <option value="2">[[#{production.cartonCode}]]</option>-->
+<!--                            </select>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <label>[[#{od.containerNo}]]：</label>-->
+<!--                            <input type="text" name="containerNo"/>-->
+<!--                        </li>-->
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()" th:text="#{boxcode.Search}"><i class="fa fa-search"></i>&nbsp;</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()" th:text="#{boxcode.Reset}"><i class="fa fa-refresh"></i>&nbsp;&nbsp;</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+<!--            <a class="btn btn-success" onclick="addCode()" shiro:hasPermission="system:barcode:add">-->
+<!--                <i class="fa fa-plus"></i> 添加-->
+<!--            </a>-->
+            <a id="deleteId" class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()">
+                <i class="fa fa-remove"></i> [[#{boxcode.Delete}]]
+            </a>
+<!--            <a class="btn btn-warning" onclick="$.table.exportExcel()">-->
+<!--                <i class="fa fa-download"></i> 导出-->
+<!--            </a>-->
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-table-editable-js" />
+<script th:inline="javascript">
+    var codeTypeDict = [[${@dict.getType('code_type',#locale.language+'_'+#locale.country)}]];
+    var prefix = ctx + "order/allot";
+    var checkStatusDict = [[${@dict.getType('check_status',#locale.language+'_'+#locale.country)}]];
+
+    $(document).ready(function(){
+        var isChecked = [[${isChecked}]];
+        console.log("isChecked:"+isChecked);
+        if (isChecked==1){
+            $("#deleteId").hide(); // 根据id 显示标签
+        }else {
+            $("#deleteId").show(); // 根据id 显示标签
+        }
+    });
+
+
+    $(function() {
+        var options = {
+            url: prefix + "/codelist",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/removeCode",
+            exportUrl: prefix + "/export",
+            modalName: "单据条码明细",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'barCode',
+                    title: [[#{Outbound.Document.Information.Barcode}]],
+                },
+
+                {
+                    field: 'startLogisticsCode',
+                    title: [[#{Outbound.Document.Information.Start.Code}]],
+                    formatter:function (value,row,index){
+                        return validateLength(value);
+                    }
+                },
+                {
+                    field: 'endLogisticsCode',
+                    title: [[#{Outbound.Document.Information.End.Code}]],
+                    formatter:function (value,row,index){
+                        return validateLength(value);
+                    }
+                },
+                {
+                    field: 'barCodeType',
+                    title:  [[#{activity.Records.Code.Type}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(codeTypeDict, value);
+                    }
+                },
+                {
+                    field: 'caseQuantity',
+                    title:  [[#{Outbound.Document.Information.Number.OfBoxes}]],
+                },
+
+                {
+                    field: 'isChecked',
+                    // title: '是否关单',
+                    title: [[#{product.IsClosedOrNot}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(checkStatusDict, value);
+                    }
+                },
+            ]
+        };
+        $.table.init(options);
+    });
+
+    function onEditableSave (field, row, rowIndex, oldValue, $el) {
+        alert("字段名：" + field + "，当前值：" + row[field]  + "，旧值：" + oldValue);
+    }
+
+    // function addCode(){
+    //     var detailId=[[${detailId}]];
+    //     console.log("detailId",detailId);
+    //         top.layer.open({
+    //             type: 2,
+    //             title: "搜索产品",
+    //             shadeClose: true,
+    //             area: ['50%', '75%'],
+    //             content: "/bill/barcode/add?detailId="+detailId,
+    //             btn: ['确定', '关闭'],
+    //             yes: function (index, layero) {
+    //                 // productData=""
+    //                 // //当点击‘确定’按钮的时候，获取弹出层返回的值
+    //                 // var res = layero.find("iframe")[0].contentWindow.callBackData();//执行子页面保存事件
+    //                 // productData=res;
+    //                 // // //打印返回的值，看是否有我们想返回的值。
+    //                 // if (res) {
+    //                 //     $("input[name='productName']").val(res.name)
+    //                 //     top.layer.close(index);
+    //                 // } else {
+    //                 //     $.modal.alertWarning("请选择一个产品");
+    //                 // }
+    //             },
+    //             cancel: function () {
+    //                 //右上角关闭回调
+    //             }
+    //         });
+    // }
+
+    function validateLength(data){
+
+        var data=data+'';
+        while(data.length<3){
+            data='0'+data;
+        }
+        return data;
+    }
+
+
+
+</script>
+</body>
+</html>

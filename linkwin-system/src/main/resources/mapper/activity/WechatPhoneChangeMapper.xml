@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.activity.mapper.WechatPhoneChangeMapper">
+    
+    <resultMap type="WechatPhoneChange" id="WechatPhoneChangeResult">
+        <result property="id"    column="id"    />
+        <result property="openId"    column="open_id"    />
+        <result property="phone"    column="phone"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectWechatPhoneChangeVo">
+        select id, open_id, phone, create_time, remark from wechat_phone_change
+    </sql>
+
+    <select id="selectWechatPhoneChangeList" parameterType="WechatPhoneChange" resultMap="WechatPhoneChangeResult">
+        <include refid="selectWechatPhoneChangeVo"/>
+        <where>  
+            <if test="openId != null  and openId != ''"> and open_id = #{openId}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+        </where>
+    </select>
+    
+    <select id="selectWechatPhoneChangeById" parameterType="Long" resultMap="WechatPhoneChangeResult">
+        <include refid="selectWechatPhoneChangeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertWechatPhoneChange" parameterType="WechatPhoneChange">
+        insert into wechat_phone_change
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="openId != null">open_id,</if>
+            <if test="phone != null">phone,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="openId != null">#{openId},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWechatPhoneChange" parameterType="WechatPhoneChange">
+        update wechat_phone_change
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="openId != null">open_id = #{openId},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWechatPhoneChangeById" parameterType="Long">
+        delete from wechat_phone_change where id = #{id}
+    </delete>
+
+    <delete id="deleteWechatPhoneChangeByIds" parameterType="String">
+        delete from wechat_phone_change where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

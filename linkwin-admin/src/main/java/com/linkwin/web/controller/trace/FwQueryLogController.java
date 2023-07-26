@@ -1,0 +1,151 @@
+package com.linkwin.web.controller.trace;
+
+import java.util.List;
+
+import com.linkwin.common.core.domain.entity.SysDept;
+import com.linkwin.common.core.domain.entity.SysUser;
+import com.linkwin.system.service.ISysDeptService;
+import com.linkwin.trace.domain.ConsumerLog;
+import com.linkwin.trace.domain.FwQueryLog;
+import com.linkwin.trace.service.IFwQueryLogService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.enums.BusinessType;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.utils.poi.ExcelUtil;
+import com.linkwin.common.core.page.TableDataInfo;
+
+/**
+ * 防伪查询记录Controller
+ * 
+ * @author ruoyi
+ * @date 2022-06-02
+ */
+@Controller
+@RequestMapping("/trace/fwQueryLog")
+public class FwQueryLogController extends BaseController
+{
+    private String prefix = "trace/fwQuery";
+
+    @Autowired
+    private IFwQueryLogService fwQueryLogService;
+
+    @Autowired
+    private ISysDeptService sysDeptService;
+
+    @RequiresPermissions("trace:fwquery:view")
+    @GetMapping()
+    public String log()
+    {
+        return prefix + "/log";
+    }
+
+    /**
+     * 查询防伪查询记录列表
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public TableDataInfo list(FwQueryLog fwQueryLog)
+    {
+        SysUser currentUser = getSysUser();
+        SysDept sysDept = sysDeptService.selectDeptById(currentUser.getDeptId());
+        if (currentUser.isAdminByRole() || "0".equals(sysDept.getOrganLevel())){
+            startPage();
+            List<FwQueryLog> list = fwQueryLogService.selectFwQueryLogList(fwQueryLog);
+            return getDataTable(list);
+        }
+        List<Long> deptIds = sysDeptService.selectDeptId(currentUser.getDeptId());
+        deptIds.add(getSysUser().getDeptId());
+        startPage();
+        List<FwQueryLog> list = fwQueryLogService.selectFwQueryLogListByDeptIds(fwQueryLog,deptIds);
+//         List<FwQueryLog> list = fwQueryLogService.selectFwQueryLogList(fwQueryLog);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出防伪查询记录列表
+     */
+    @Log(title = "防伪查询记录", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    @ResponseBody
+    public AjaxResult export(FwQueryLog fwQueryLog)
+    {
+        SysUser currentUser = getSysUser();
+        SysDept sysDept = sysDeptService.selectDeptById(currentUser.getDeptId());
+        if (currentUser.isAdminByRole() || "0".equals(sysDept.getOrganLevel())){
+            startPage();
+            List<FwQueryLog> list = fwQueryLogService.selectFwQueryLogList(fwQueryLog);
+            ExcelUtil<FwQueryLog> util = new ExcelUtil<FwQueryLog>(FwQueryLog.class);
+            return util.exportExcel(list, "防伪查询记录数据");
+        }
+        List<Long> deptIds = sysDeptService.selectDeptId(currentUser.getDeptId());
+        deptIds.add(getSysUser().getDeptId());
+        startPage();
+        List<FwQueryLog> list = fwQueryLogService.selectFwQueryLogListByDeptIds(fwQueryLog,deptIds);
+        ExcelUtil<FwQueryLog> util = new ExcelUtil<FwQueryLog>(FwQueryLog.class);
+        return util.exportExcel(list, "防伪查询记录数据");
+    }
+
+    /**
+     * 新增防伪查询记录
+     */
+    @GetMapping("/add")
+    public String add()
+    {
+        return prefix + "/add";
+    }
+
+    /**
+     * 新增保存防伪查询记录
+     */
+    @Log(title = "防伪查询记录", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult addSave(FwQueryLog fwQueryLog)
+    {
+        return toAjax(fwQueryLogService.insertFwQueryLog(fwQueryLog));
+    }
+
+    /**
+     * 修改防伪查询记录
+     */
+    @RequiresPermissions("system:log:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    {
+        FwQueryLog fwQueryLog = fwQueryLogService.selectFwQueryLogById(id);
+        mmap.put("fwQueryLog", fwQueryLog);
+        return prefix + "/edit";
+    }
+
+    /**
+     * 修改保存防伪查询记录
+     */
+    @Log(title = "防伪查询记录", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult editSave(FwQueryLog fwQueryLog)
+    {
+        return toAjax(fwQueryLogService.updateFwQueryLog(fwQueryLog));
+    }
+
+    /**
+     * 删除防伪查询记录
+     */
+    @Log(title = "防伪查询记录", businessType = BusinessType.DELETE)
+    @PostMapping( "/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids)
+    {
+        return toAjax(fwQueryLogService.deleteFwQueryLogByIds(ids));
+    }
+}

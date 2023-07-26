@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.apply.mapper.BoxCodeApplyMapper">
+    
+    <resultMap type="BoxCodeApply" id="BoxCodeApplyResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="creator"    column="creator"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="fileFormat"    column="file_format"    />
+        <result property="applyNum"    column="apply_num"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="isDownload"    column="is_download"    />
+        <result property="downloadNum"    column="download_num"    />
+        <result property="downloadMaxNum"    column="download_max_num"    />
+        <result property="filePath"    column="file_path"    />
+        <result property="existNum"    column="exist_num"    />
+        <result property="totalNum"    column="total_num"    />
+        <result property="bumaNum"    column="buma_num"    />
+        <result property="bumaRate"    column="buma_rate"    />
+        <result property="status"    column="status"    />
+        <result property="password"    column="password"    />
+    </resultMap>
+
+    <sql id="selectBoxCodeApplyVo">
+        select id, create_time, creator, modify_time, file_format, apply_num, file_name, is_download, download_num, download_max_num,file_path, exist_num, total_num, buma_num,buma_rate,status,password from box_code_apply
+    </sql>
+
+    <sql id="where-and">
+        <where>
+            <if test="id != null"> and id = #{id}</if>
+            <if test="creator != null  and creator != ''"> and creator = #{creator}</if>
+            <if test="modifyTime != null "> and modify_time = #{modifyTime}</if>
+            <if test="fileFormat != null  and fileFormat != ''"> and file_format = #{fileFormat}</if>
+            <if test="applyNum != null "> and apply_num = #{applyNum}</if>
+            <if test="fileName != null  and fileName != ''"> and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="isDownload != null  and isDownload != ''"> and is_download = #{isDownload}</if>
+            <if test="downloadNum != null "> and download_num = #{downloadNum}</if>
+            <if test="downloadMaxNum != null "> and download_max_num = #{downloadMaxNum}</if>
+            <if test="filePath != null  and filePath != ''"> and file_path = #{filePath}</if>
+            <if test="existNum != null "> and exist_num = #{existNum}</if>
+            <if test="totalNum != null "> and total_num = #{totalNum}</if>
+            <if test="bumaNum != null "> and buma_num = #{bumaNum}</if>
+            <if test="bumaRate != null "> and buma_rate = #{bumaRate}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="password != null "> and password = #{password}</if>
+        </where>
+    </sql>
+
+    <select id="selectBoxCodeApplyList" parameterType="BoxCodeApply" resultMap="BoxCodeApplyResult">
+        <include refid="selectBoxCodeApplyVo"/>
+        <include refid="where-and"></include>
+        order by id desc
+    </select>
+    
+    <select id="selectBoxCodeApplyById" parameterType="Long" resultMap="BoxCodeApplyResult">
+        <include refid="selectBoxCodeApplyVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBoxCodeApply" parameterType="BoxCodeApply" useGeneratedKeys="true" keyProperty="id">
+        insert into box_code_apply
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null">create_time,</if>
+            <if test="creator != null">creator,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="fileFormat != null">file_format,</if>
+            <if test="applyNum != null">apply_num,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="isDownload != null">is_download,</if>
+            <if test="downloadNum != null">download_num,</if>
+            <if test="downloadMaxNum != null">download_max_num,</if>
+            <if test="filePath != null">file_path,</if>
+            <if test="existNum != null">exist_num,</if>
+            <if test="totalNum != null">total_num,</if>
+            <if test="bumaNum != null">buma_num,</if>
+            <if test="bumaRate != null">buma_rate,</if>
+            <if test="status != null">status,</if>
+            <if test="password != null">password,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null">#{createTime},</if>
+            <if test="creator != null">#{creator},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="fileFormat != null">#{fileFormat},</if>
+            <if test="applyNum != null">#{applyNum},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="isDownload != null">#{isDownload},</if>
+            <if test="downloadNum != null">#{downloadNum},</if>
+            <if test="downloadMaxNum != null">#{downloadMaxNum},</if>
+            <if test="filePath != null">#{filePath},</if>
+            <if test="existNum != null">#{existNum},</if>
+            <if test="totalNum != null">#{totalNum},</if>
+            <if test="bumaNum != null">#{bumaNum},</if>
+            <if test="bumaRate != null">#{bumaRate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="password != null">#{password},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBoxCodeApply" parameterType="BoxCodeApply">
+        update box_code_apply
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="creator != null">creator = #{creator},</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime},</if>
+            <if test="fileFormat != null">file_format = #{fileFormat},</if>
+            <if test="applyNum != null">apply_num = #{applyNum},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="isDownload != null">is_download = #{isDownload},</if>
+            <if test="downloadNum != null">download_num = #{downloadNum},</if>
+            <if test="downloadMaxNum != null">download_max_num = #{downloadMaxNum},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="existNum != null">exist_num = #{existNum},</if>
+            <if test="totalNum != null">total_num = #{totalNum},</if>
+            <if test="bumaNum != null">buma_num = #{bumaNum},</if>
+            <if test="bumaRate != null">buma_rate = #{bumaRate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="password != null">password = #{password},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBoxCodeApplyById" parameterType="Long">
+        delete from box_code_apply where id = #{id}
+    </delete>
+
+    <delete id="deleteBoxCodeApplyByIds" parameterType="String">
+        delete from box_code_apply where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="getOneByWhere" resultMap="BoxCodeApplyResult">
+        <include refid="selectBoxCodeApplyVo"/>
+        <include refid="where-and"></include>
+        limit 1
+    </select>
+
+    <update id="changeStatus">
+        update box_code_apply set `status` = #{newStatus} where id=#{id} and status = #{oldStatus}
+    </update>
+
+
+    <update id="updateExitsAndEndNum">
+        update box_code_apply set exist_num = exist_num+#{existNum} where id = #{applyId}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.ProductMapper">
+    
+    <resultMap type="Product" id="ProductResult">
+        <result property="id"    column="id"    />
+        <result property="code"    column="code"    />
+        <result property="name"    column="name"    />
+        <result property="specification"    column="specification"    />
+        <result property="commonName"    column="common_name"    />
+        <result property="registrationNumber"    column="registration_number"    />
+        <result property="dosageForm"    column="dosage_form"    />
+        <result property="mainComponents"    column="main_components"    />
+        <result property="performanceCoefficient"    column="performance_coefficient"    />
+        <result property="routineFlag"    column="routine_flag"    />
+        <result property="remarks"    column="remarks"    />
+        <result property="creator"    column="creator"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifier"    column="modifier"    />
+        <result property="modificationtime"    column="modificationtime"    />
+        <result property="logo"    column="logo"    />
+        <result property="usemethod"    column="usemethod"    />
+        <result property="productActivities"    column="product_activities"    />
+        <result property="integral"    column="integral"    />
+        <result property="proexplain"    column="proexplain"    />
+        <result property="needIntegral"    column="need_integral"    />
+        <result property="cartonWeight"    column="carton_weight"    />
+        <result property="explainimg"    column="explainimg"    />
+        <result property="standard"    column="standard"    />
+        <result property="integralflag"    column="integralflag"    />
+        <result property="report"    column="report"    />
+
+
+    </resultMap>
+    <resultMap type="AllProduct" id="AllProductResult">
+        <result property="id"    column="id"    />
+        <result property="code"    column="code"    />
+        <result property="name"    column="name"    />
+        <result property="spec"    column="specification"    />
+
+        <result property="unit"    column="dosage_form"    />
+
+    </resultMap>
+
+    <sql id="selectProductVo">
+        select report,id,standard,explainimg,logo,usemethod,product_activities,integral,proexplain,need_integral, carton_weight,code, name, specification, common_name, registration_number, dosage_form, main_components, performance_coefficient, routine_flag, remarks, creator, create_time, modifier, modificationtime,integralflag from product
+    </sql>
+
+    <select id="selectProductList" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        <where>  
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="commonName != null  and commonName != ''"> and common_name like concat('%', #{commonName}, '%')</if>
+        </where>
+        order by id  desc
+
+    </select>
+
+    <select id="selectProductListonlyName" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        <where>
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="name != null  and name != ''"> and name = #{name}</if>
+            <if test="commonName != null  and commonName != ''"> and common_name like concat('%', #{commonName}, '%')</if>
+        </where>
+        order by id  desc
+
+    </select>
+    <select id="selectCashingProductList" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            AND need_integral is NOT NULL
+            AND need_integral > 0
+            and integralflag = 0
+        </where>
+        order by need_integral asc
+    </select>
+
+
+    <select id="selectProductDataByCode"  resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where code = #{code}
+    </select>
+    
+    <select id="selectProductById" parameterType="Long" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertProduct" parameterType="Product">
+        insert into product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="code != null and code != ''">code,</if>
+            <if test="name != null">name,</if>
+            <if test="specification != null">specification,</if>
+            <if test="commonName != null">common_name,</if>
+            <if test="registrationNumber != null">registration_number,</if>
+            <if test="dosageForm != null">dosage_form,</if>
+            <if test="mainComponents != null">main_components,</if>
+            <if test="performanceCoefficient != null">performance_coefficient,</if>
+            <if test="routineFlag != null">routine_flag,</if>
+            <if test="remarks != null">remarks,</if>
+            <if test="creator != null">creator,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifier != null">modifier,</if>
+            <if test="modificationtime != null">modificationtime,</if>
+            <if test="logo != null">logo,</if>
+            <if test="usemethod != null">usemethod,</if>
+            <if test="productActivities != null">product_activities,</if>
+            <if test="integral != null">integral,</if>
+            <if test="proexplain != null">proexplain,</if>
+            <if test="needIntegral != null">need_integral,</if>
+            <if test="explainimg != null">explainimg,</if>
+            <if test="standard != null">standard,</if>
+            <if test="cartonWeight != null">carton_weight,</if>
+            <if test="integralflag != null">integralflag,</if>
+            <if test="report != null">report,</if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="code != null and code != ''">#{code},</if>
+            <if test="name != null">#{name},</if>
+            <if test="specification != null">#{specification},</if>
+            <if test="commonName != null">#{commonName},</if>
+            <if test="registrationNumber != null">#{registrationNumber},</if>
+            <if test="dosageForm != null">#{dosageForm},</if>
+            <if test="mainComponents != null">#{mainComponents},</if>
+            <if test="performanceCoefficient != null">#{performanceCoefficient},</if>
+            <if test="routineFlag != null">#{routineFlag},</if>
+            <if test="remarks != null">#{remarks},</if>
+            <if test="creator != null">#{creator},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifier != null">#{modifier},</if>
+            <if test="modificationtime != null">#{modificationtime},</if>
+            <if test="logo != null">#{logo},</if>
+            <if test="usemethod != null">#{usemethod},</if>
+            <if test="productActivities != null">#{productActivities},</if>
+            <if test="integral != null">#{integral},</if>
+            <if test="proexplain != null">#{proexplain},</if>
+            <if test="needIntegral != null">#{needIntegral},</if>
+            <if test="explainimg != null">#{explainimg},</if>
+            <if test="standard != null">#{standard},</if>
+            <if test="cartonWeight != null">#{cartonWeight},</if>
+            <if test="integralflag != null">#{integralflag},</if>
+            <if test="report != null">#{report},</if>
+
+        </trim>
+    </insert>
+
+    <update id="updateProduct" parameterType="Product">
+        update product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="specification != null">specification = #{specification},</if>
+            <if test="commonName != null">common_name = #{commonName},</if>
+            <if test="registrationNumber != null">registration_number = #{registrationNumber},</if>
+            <if test="dosageForm != null">dosage_form = #{dosageForm},</if>
+            <if test="mainComponents != null">main_components = #{mainComponents},</if>
+            <if test="performanceCoefficient != null">performance_coefficient = #{performanceCoefficient},</if>
+            <if test="routineFlag != null">routine_flag = #{routineFlag},</if>
+            <if test="remarks != null">remarks = #{remarks},</if>
+            <if test="creator != null">creator = #{creator},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifier != null">modifier = #{modifier},</if>
+            <if test="modificationtime != null">modificationtime = #{modificationtime},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="usemethod != null">usemethod = #{usemethod},</if>
+            <if test="productActivities != null">product_activities = #{productActivities},</if>
+            <if test="integral != null">integral = #{integral},</if>
+            <if test="proexplain != null">proexplain = #{proexplain},</if>
+            <if test="needIntegral != null">need_integral = #{needIntegral},</if>
+            <if test="explainimg != null">explainimg = #{explainimg},</if>
+            <if test="standard != null">standard = #{standard},</if>
+            <if test="cartonWeight != null">carton_weight = #{cartonWeight},</if>
+            <if test="integralflag != null">integralflag = #{integralflag},</if>
+            <if test="report != null">report = #{report},</if>
+
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteProductById" parameterType="Long">
+        delete from product where id = #{id}
+    </delete>
+
+    <delete id="deleteProductByIds" parameterType="String">
+        delete from product where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectAllProductList" parameterType="Product" resultMap="AllProductResult">
+        select id, code, name, specification,   dosage_form  from product
+        <where>
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="commonName != null  and commonName != ''"> and common_name like concat('%', #{commonName}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectByPdCode" resultMap="ProductResult">
+        <include refid="selectProductVo"></include>
+        where code = #{code}
+    </select>
+
+
+    <select id="selectProductDataByOrganCode" resultMap="ProductResult" parameterType="Product">
+        select t.report,t.id,t.standard,t.explainimg,t.logo,t.usemethod,t.product_activities,t.integral,t.proexplain,t.need_integral,t. carton_weight,t.code,t. name,t. specification,t. common_name,t. registration_number,t. dosage_form,t. main_components,t. performance_coefficient,t. routine_flag,t. remarks,t. creator,t. create_time,t. modifier,t. modificationtime,t.integralflag
+        FROM
+        product t
+        INNER JOIN sys_product_organ p ON p.Product_code = t.code
+        <where>
+            <if test="name != null  and name != ''"> and t.name like  concat('%', #{name}, '%')</if>
+            <if test="commonName != null  and commonName != ''"> and t.common_name  like concat('%', #{commonName}, '%')</if>
+            and p.organ_code = #{code}
+        </where>
+    </select>
+
+
+
+    <select id="selectUmProductDataByOrganCode" resultMap="ProductResult">
+
+        select t.report,t.id,t.standard,t.explainimg,t.logo,t.usemethod,t.product_activities,t.integral,t.proexplain,t.need_integral,t. carton_weight,t.code,t. name,t. specification,t. common_name,t. registration_number,t. dosage_form,t. main_components,t. performance_coefficient,t. routine_flag,t. remarks,t. creator,t. create_time,t. modifier,t. modificationtime,integralflag
+        FROM
+        product t
+        <where>
+            <if test="organcode != null  and organcode != ''"> and  code =  #{organcode} </if>
+
+            <if test="name != null  and name != ''"> and  name like concat('%', #{name}, '%')</if>
+
+            and   not EXISTS ( SELECT 1 FROM sys_product_organ k WHERE
+            k.Product_code = t.code AND k.organ_code =  #{code} )
+        </where>
+
+    </select>
+
+</mapper>

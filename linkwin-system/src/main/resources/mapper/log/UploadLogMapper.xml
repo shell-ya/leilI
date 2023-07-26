@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.log.mapper.UploadLogMapper">
+    
+    <resultMap type="UploadLog" id="UploadLogResult">
+        <result property="id"    column="id"    />
+        <result property="isDeal"    column="is_deal"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="filePath"    column="file_path"    />
+        <result property="logFilePath"    column="log_file_path"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="billNo"    column="bill_no"    />
+        <result property="version"    column="version"    />
+        <result property="logFileName"    column="log_file_name"    />
+        <result property="handleStatus"    column="handle_status"    />
+        <result property="handleMsg"    column="handle_msg"    />
+        <result property="json"    column="json"    />
+        <result property="response"    column="response"    />
+    </resultMap>
+
+    <sql id="selectUploadLogVo">
+        select id, is_deal, file_name, file_path, log_file_path, file_type, create_time, bill_no, version, log_file_name, handle_status, handle_msg, json, response from upload_log
+    </sql>
+
+    <select id="selectUploadLogList" parameterType="UploadLog" resultMap="UploadLogResult">
+        <include refid="selectUploadLogVo"/>
+        <where>  
+            <if test="isDeal != null "> and is_deal = #{isDeal}</if>
+            <if test="fileName != null  and fileName != ''"> and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="filePath != null  and filePath != ''"> and file_path = #{filePath}</if>
+            <if test="logFilePath != null  and logFilePath != ''"> and log_file_path = #{logFilePath}</if>
+            <if test="fileType != null  and fileType != ''"> and file_type = #{fileType}</if>
+            <if test="billNo != null  and billNo != ''"> and bill_no = #{billNo}</if>
+            <if test="version != null  and version != ''"> and version = #{version}</if>
+            <if test="logFileName != null  and logFileName != ''"> and log_file_name like concat('%', #{logFileName}, '%')</if>
+            <if test="handleStatus != null "> and handle_status = #{handleStatus}</if>
+            <if test="handleMsg != null  and handleMsg != ''"> and handle_msg = #{handleMsg}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectUploadLogById" parameterType="Long" resultMap="UploadLogResult">
+        <include refid="selectUploadLogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertUploadLog" parameterType="UploadLog" useGeneratedKeys="true" keyProperty="id">
+        insert into upload_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="isDeal != null">is_deal,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="filePath != null">file_path,</if>
+            <if test="logFilePath != null">log_file_path,</if>
+            <if test="fileType != null">file_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="billNo != null">bill_no,</if>
+            <if test="version != null">version,</if>
+            <if test="logFileName != null">log_file_name,</if>
+            <if test="handleStatus != null">handle_status,</if>
+            <if test="handleMsg != null">handle_msg,</if>
+            <if test="json != null">json,</if>
+            <if test="response != null">response,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="isDeal != null">#{isDeal},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="filePath != null">#{filePath},</if>
+            <if test="logFilePath != null">#{logFilePath},</if>
+            <if test="fileType != null">#{fileType},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="billNo != null">#{billNo},</if>
+            <if test="version != null">#{version},</if>
+            <if test="logFileName != null">#{logFileName},</if>
+            <if test="handleStatus != null">#{handleStatus},</if>
+            <if test="handleMsg != null">#{handleMsg},</if>
+            <if test="json != null">#{json},</if>
+            <if test="response != null">#{response},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUploadLog" parameterType="UploadLog">
+        update upload_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="isDeal != null">is_deal = #{isDeal},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="logFilePath != null">log_file_path = #{logFilePath},</if>
+            <if test="fileType != null">file_type = #{fileType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="billNo != null">bill_no = #{billNo},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="logFileName != null">log_file_name = #{logFileName},</if>
+            <if test="handleStatus != null">handle_status = #{handleStatus},</if>
+            <if test="handleMsg != null">handle_msg = #{handleMsg},</if>
+            <if test="json != null">json = #{json},</if>
+            <if test="response != null">response = #{response},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUploadLogById" parameterType="Long">
+        delete from upload_log where id = #{id}
+    </delete>
+
+    <delete id="deleteUploadLogByIds" parameterType="String">
+        delete from upload_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

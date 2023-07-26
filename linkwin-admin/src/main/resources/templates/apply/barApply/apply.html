@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('字母码申请记录列表')"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label th:text="#{boxcode.Application.No}">申请编号：</label>
+                            <input type="text" name="id"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search" th:text="#{boxcode.Search}"></i>&nbsp;</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh" th:text="#{boxcode.Reset}"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="apply:barCode:add">
+                <i class="fa fa-plus"></i> <label th:text="#{boxcode.Add}"/>
+            </a>
+            <a class="btn btn-primary multiple disabled" onclick="queryPassword()"
+               shiro:hasPermission="apply:barCode:password">
+                <i class="fa fa-check"></i> <label th:text="#{boxcode.Code.Package.Password}"/>
+            </a>
+            <a class="btn btn-warning" onclick="setMaxDown()" shiro:hasPermission="apply:barCode:maxdown">
+                <i class="fa fa-cog"></i> <label th:text="#{boxcode.Set.The.Maximum.Number.Of.Downloads}"/>
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<script th:inline="javascript">
+    var dictApplyStatus = [[${@dict.getType('apply_code_status',#locale.language+'_'+#locale.country)}]];
+    var dictApplyFormat = [[${@dict.getType('apply_file_format',#locale.language+'_'+#locale.country)}]];
+    var dictApplyDownLoadStatus = [[${@dict.getType('apply_download_status',#locale.language+'_'+#locale.country)}]];
+    var dictApplyType = [[${@dict.getType('apply_type',#locale.language+'_'+#locale.country)}]];
+    var prefix = ctx + "apply/barApply"
+
+    //获取默认语言
+    var LANG_COUNTRY = [[${#locale.language+'_'+#locale.country}]];
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: [[#{qr.code.applicationrecord}]],
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: [[#{boxcode.Application.No}]],
+                    visible: true
+                },
+                {
+                    field: 'status',
+                    title: [[#{boxcode.Processing.Status}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(dictApplyStatus, value);
+                    }
+                },
+                {
+                    field: 'proportion',
+                    title: [[#{boxcode.Letter.Code.Ratio}]]
+                },
+                {
+                    field: 'fileFormat',
+                    title: [[#{boxcode.Format.Of.Generated.Files}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(dictApplyFormat, value);
+                    }
+                },
+                {
+                    field: 'applyType',
+                    title: [[#{boxcode.Coating.Type}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(dictApplyType, value);
+                    }
+                },
+                {
+                    field: 'applyNum',
+                    title: [[#{boxcode.Application.Amount}]]
+                },
+                {
+                    field: 'isDownload',
+                    title: [[#{boxcode.Whether.To.Download}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(dictApplyDownLoadStatus, value);
+                    }
+                },
+                {
+                    field: 'downloadNum',
+                    title: [[#{boxcode.Download.Times}]]
+                },
+                {
+                    field: 'existNum',
+                    title: [[#{boxcode.Generated.Amount}]]
+                },
+                {
+                    field: 'totalNum',
+                    title: [[#{boxcode.Total.Generated.Amount}]]
+                },
+                {
+                    field: 'bumaNum',
+                    title: [[#{boxcode.Number.Of.Complements}]]
+                },
+                {
+                    field: 'creator',
+                    title: [[#{boxcode.Creator}]]
+                },
+                {
+                    field: 'createTime',
+                    title: [[#{boxcode.Creation.Time}]]
+                },
+                {
+                    title: [[#{boxcode.Operate}]],
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        // actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        // actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        if (row.status == 2 && row.downloadNum < row.downloadMaxNum) {
+                            actions.push('<a class="btn btn-danger btn-xs ' + '" href="javascript:void(0)" onclick="downLoad(\'' + row.id + '\')"><i class="fa fa-download"></i>[[#{bxocode.download}]]</a>');
+                            // actions.push('<a class="btn btn-danger btn-xs ' + '" href="javascript:void(0)" onclick="downLoad(\'' + row.id + '\')"><i class="fa fa-download"></i>下载</a>');
+
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    function downLoad(id) {
+        window.location.href = prefix + "/downLoad?id=" + id;
+        $.table.refresh();
+    }
+
+    function queryPassword() {
+        var data = getSelectData();
+        if (data.length == 0) {
+            $.modal.alertError('[[#{maxdownload.select.one}]]');
+            return;
+        } else if (data.length > 1) {
+            $.modal.alertError('[[#{maxdownload.select.one}]]');
+            return;
+        }
+        var data = {
+            "id": data[0].id
+        }
+        console.log(data.id)
+        console.log(LANG_COUNTRY)
+        $.operate.post(prefix + "/queryPassword", data, function (res) {
+            $.modal.alert(LANG_COUNTRY,res.data);
+            // $.modal.msgSuccess(res.data)
+        });
+    }
+
+
+    /**
+     * 设置最大下载次数
+     */
+    function setMaxDown() {
+        var data = getSelectData();
+        if (data.length == 0) {
+            $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.select.one}]]');
+            return;
+        } else if (data.length > 1) {
+            $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.select.one}]]');
+            return;
+        }
+        // if(data[0].isConfirmed==-1){
+        //     $.modal.alertError();
+        //     return;
+        // }
+        var confirm = [[#{person.Confirm}]];
+        var close = [[#{person.Close}]];
+        layer.prompt(
+            {
+                title: [[#{boxApply.maxDownload}]],
+                btn: [ confirm, close ],
+                formType: 0,
+                value: data[0].downloadMaxNum
+            },
+            function (number, index) {
+                if ((/^(\+|-)?\d+$/.test(number))) {
+                } else {
+                    $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.input.correctNumber}]]');
+                    return;
+                }
+                if (number <= 0) {
+                    $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.input.correctNumber}]]');
+                    return;
+                }
+                if (number > 10) {
+                    $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.maxDownloadTimes.limit}]]');
+                    return;
+                }
+                if (number < data[0].downloadNum) {
+                    $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.maxDownloadTimes.lessThanDownloaded}]]');
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: prefix + "/setMaxDown",
+                    data: {
+                        "id": data[0].id,
+                        "downloadMaxNum": number
+                    },
+                    async: false,
+                    error: function (request) {
+                        $.modal.alertError(LANG_COUNTRY,'[[#{maxdownload.update.exception}]]');
+                    },
+                    success: function (data) {
+                        console.log("修改成功")
+                        $.table.refresh();
+                        $.operate.successCallback(data);
+                    }
+                });
+                layer.close(index);
+            });
+    }
+
+    /**
+     * 获取选择数据
+     */
+    function getSelectData() {
+        return $('#bootstrap-table').bootstrapTable('getSelections');
+    }
+
+</script>
+</body>
+</html>

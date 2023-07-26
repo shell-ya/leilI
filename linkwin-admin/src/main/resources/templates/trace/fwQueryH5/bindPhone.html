@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/otherActivity.css" th:href="@{/css/otherActivity.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('绑定手机号')" />
+</head>
+<body class="scan" >
+<div align="center">
+    <img th:src="@{/img/logo04.png}" style="height: 175px;width: 300px;margin-top: 50px">
+</div>
+<div id="ibox-content" align="center" style="margin-top: 30px;">
+    <input id="address" name="address" type="hidden" th:value="*{address}"/>
+    <input id="openId" name="openId" type="hidden" th:value="*{openId}"/>
+    <form id="bindForm">
+        <div class="form-group" style="margin-left: 20px;margin-right: 20px">
+            <input type="number"     id="phone" name="phone" class="form-control"   style="margin-top: 10px;height: 50px;font-size: 28px"   placeholder="请输入11位手机号"    />
+            <button class="btn btn-success btn-block" id="zqpLogin" style="margin-top: 10px;font-size: 22px" data-loading="正在验证登录，请稍候..." onclick="bindPhone()">绑定
+            </button>
+            <div class="bottom-align-text" style="width: 300px;margin-top: 30px;color: red">
+                <h4>*您当前微信号未绑定手机号，请先绑定手机号，如原有的手机号已绑定其他微信号，则会更改为当前微信号，并留存变更记录</h4>
+            </div>
+        </div>
+    </form>
+</div>
+
+<th:block th:include="include :: footer" />
+</body>
+<script type="text/javascript">
+
+
+
+    $("#bindForm").validate({
+        rules: {
+            phone:{
+                isPhone:true,
+            },
+        },
+        focusCleanup: true,
+
+    });
+
+    function bindPhone(){
+            var phone = $('input[name="phone"]').val();
+            if (phone.length!=11){
+                $.modal.msgError("请输入正确格式手机号")
+                return;
+            }
+            var address = $('input[name="address"]').val();
+            var openId = $('input[name="openId"]').val();
+            var url=ctx+'fwQueryH5/bindPhone'
+            var data ={
+                "phone": phone,
+                "address": address,
+                "openId": openId,
+            }
+        $.ajax({
+            type : "POST",
+            url : url,
+            data : data,
+            async : false,
+            error : function(res) {
+                $.modal.alertError(res.msg);
+            },
+            success : function(res) {
+                location.href = ctx + 'fwQueryH5/'+openId+'/'+address;
+            }
+        });
+    }
+
+</script>
+</html>

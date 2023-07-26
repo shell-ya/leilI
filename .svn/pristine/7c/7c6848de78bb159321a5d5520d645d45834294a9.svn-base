@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('机构代理产品关联列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+
+                <form id="formId">
+                    <input id="organCode" name="organCode" type="hidden" th:value="*{organCode}"/>
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>产品名称：</label>
+                                <input type="text" name="pdName"/>
+                            </li>
+                            <li>
+                                <label>产品编码：</label>
+                                <input type="text" name="pdCode"/>
+                            </li>
+                            <li>
+                                <label>产品规格：</label>
+                                <input type="text" name="specification"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="add()">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:organ:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:organ:remove')}]];
+        var prefix = ctx + "basedata/organProduct";
+
+        $(function() {
+            var options = {
+                url: prefix + "/listNotIn",
+                modalName: "添加代理产品",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '${comment}',
+                    visible: false
+                },
+                 {
+                     field: 'pdName',
+                     title: '产品名称'
+                 },
+                {
+                    field: 'pdCode',
+                    title: '产品编码'
+                },
+                {
+                    field: 'specification',
+                    title: '产品规格'
+                },
+
+             ]
+            };
+            $.table.init(options);
+        });
+
+        function add(){
+            // var organCode = '[[${organCode}]]';
+            // var organCode = $("#organCode").val();
+            var organCode = $('input[name="organCode"]').val();
+            // var organCode = '[[${organCode}]]';
+            var datas=getSelectData();
+            if (datas.length==0){
+                $.modal.alertError("请选择需要添加的机构");
+                return;
+            }
+            var data=[]
+            for(var i=0;i<datas.length;i++){
+                data.push(datas[i].pdCode)
+            }
+            $.operate.post(prefix + "/add", {"organCode": organCode, "pdList": data});//管辖
+
+        }
+
+        /**
+         * 获取选择数据
+         */
+        function getSelectData(){
+            return  $('#bootstrap-table').bootstrapTable('getSelections');
+        }
+
+    </script>
+</body>
+</html>

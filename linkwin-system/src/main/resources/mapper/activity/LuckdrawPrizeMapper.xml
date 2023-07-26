@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.activity.mapper.LuckdrawPrizeMapper">
+    
+    <resultMap type="LuckdrawPrize" id="LuckdrawPrizeResult">
+        <result property="id"    column="id"    />
+        <result property="angle"    column="angle"    />
+        <result property="level"    column="level"    />
+        <result property="name"    column="name"    />
+        <result property="num"    column="num"    />
+        <result property="activityid"    column="activityid"    />
+        <result property="remainnum"    column="remainnum"    />
+        <result property="ratenum"    column="ratenum"    />
+        <result property="probability"    column="probability"    />
+        <result property="activityName"    column="activity_name"    />
+        <result property="isMaterial"    column="is_material"    />
+    </resultMap>
+
+    <sql id="selectLuckdrawPrizeVo">
+        select id, angle, level, name, num, activityid,remainnum,ratenum,probability,is_material from luckdraw_prize
+    </sql>
+
+    <select id="selectLuckdrawPrizeList" parameterType="LuckdrawPrize" resultMap="LuckdrawPrizeResult">
+        select s.id, angle, s.level, s.name, s.num, s.activityid,s.remainnum,s.ratenum,s.probability,m.title as activity_name,s.is_material from luckdraw_prize s
+        left join activity_manager m
+        on s.activityid = m.id
+        <where>  
+            <if test="angle != null "> and s.angle = #{angle}</if>
+            <if test="level != null  and level != ''"> and s.level = #{level}</if>
+            <if test="name != null  and name != ''"> and s.name like concat('%', #{name}, '%')</if>
+            <if test="num != null "> and s.num = #{num}</if>
+            <if test="activityid != null "> and s.activityid = #{activityid}</if>
+            <if test="remainnum != null "> and s.remainnum = #{remainnum}</if>
+            <if test="ratenum != null "> and s.ratenum = #{ratenum}</if>
+            <if test="probability != null "> and s.probability = #{probability}</if>
+            <if test="activityName != null "> and m.title = #{activityName}</if>
+            <if test="isMaterial != null "> and s.is_material = #{isMaterial}</if>
+        </where>
+    </select>
+    
+    <select id="selectLuckdrawPrizeById" parameterType="Long" resultMap="LuckdrawPrizeResult">
+        <include refid="selectLuckdrawPrizeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertLuckdrawPrize" parameterType="LuckdrawPrize" useGeneratedKeys="true" keyProperty="id">
+        insert into luckdraw_prize
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="angle != null">angle,</if>
+            <if test="level != null">level,</if>
+            <if test="name != null">name,</if>
+            <if test="num != null">num,</if>
+            <if test="activityid != null">activityid,</if>
+            <if test="remainnum != null">remainnum,</if>
+            <if test="ratenum != null">ratenum,</if>
+            <if test="probability != null">probability,</if>
+            <if test="isMaterial != null">is_material,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="angle != null">#{angle},</if>
+            <if test="level != null">#{level},</if>
+            <if test="name != null">#{name},</if>
+            <if test="num != null">#{num},</if>
+            <if test="activityid != null">#{activityid},</if>
+            <if test="remainnum != null">#{remainnum},</if>
+            <if test="ratenum != null">#{ratenum},</if>
+            <if test="probability != null">#{probability},</if>
+            <if test="isMaterial != null">#{isMaterial},</if>
+        </trim>
+    </insert>
+
+    <update id="updateLuckdrawPrize" parameterType="LuckdrawPrize">
+        update luckdraw_prize
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="angle != null">angle = #{angle},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="num != null">num = #{num},</if>
+            <if test="activityid != null">activityid = #{activityid},</if>
+            <if test="remainnum != null">remainnum = #{remainnum},</if>
+            <if test="ratenum != null">ratenum = #{ratenum},</if>
+            <if test="probability != null">probability = #{probability},</if>
+            <if test="isMaterial != null">is_material = #{isMaterial},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteLuckdrawPrizeById" parameterType="Long">
+        delete from luckdraw_prize where id = #{id}
+    </delete>
+
+    <delete id="deleteLuckdrawPrizeByIds" parameterType="String">
+        delete from luckdraw_prize where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <update id="updateSumRatenumById" parameterType="Long" >
+        update  luckdraw_prize,(select sum(ratenum)as sum_ratenum from luckdraw_prize  where activityid =#{activityid}) s set Probability = convert(ratenum*100/sum_ratenum,decimal(10,2))
+        where activityid =#{activityid}
+    </update>
+
+
+    <update id="updateReMainNum">
+        update luckdraw_prize set remainnum = remainnum-1 where id =#{id} and remainnum &gt; 0
+    </update>
+
+</mapper>

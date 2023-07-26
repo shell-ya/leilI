@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改单据')" />
+    <th:block th:include="include :: datetimepicker-css" />
+    <th:block th:include="include :: select2-css" />
+
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-order-edit" th:object="${billOrder}">
+            <h4 class="form-header h4">单据信息</h4>
+            <input name="id" th:field="*{id}" type="hidden">
+            <div class="form-group">
+                <div id="element" class="row">
+                    <label class="col-sm-2 control-label">出库单号：</label>
+                    <div class="col-sm-4">
+                        <div name="orderNo2"th:text="*{orderNo}" class="form-control" type="text"></div>
+                    </div>
+
+                    <label class="col-sm-2 control-label">客户名称：</label>
+                    <div class="col-sm-4">
+                        <select id="customer" name="customer" class="form-control m-b" data-first-title="请选择"
+                                required>
+                            <option value="">请选择</option>
+                            <option th:each="organCode:${organList}" th:value="${organCode.deptId}"
+                                    th:text="${organCode.deptName}"
+                                    th:selected="*{customer} == ${organCode.deptId}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <input name="orderNo" th:field="*{orderNo}" class="form-control" type="hidden">
+
+
+
+
+            <div class="form-group">
+                <!--            <p>简单联动示例。</p>-->
+                <div id="element2" class="row">
+                    <label class="col-sm-2 control-label is-required">发货机构：</label>
+                    <div class="col-sm-4">
+                        <select id="sendOrganCode" name="sendOrganCode" class="form-control m-b" data-first-title="请选择"
+                                required>
+                            <option value="">请选择</option>
+                            <option th:each="organCode:${organList}" th:value="${organCode.deptId}"
+                                    th:text="${organCode.deptName}"
+                                    th:selected="*{sendOrganCode} == ${organCode.deptId}"></option>
+                        </select>
+                    </div>
+                    <label class="col-sm-2 control-label is-required">发货仓库：</label>
+                    <div class="col-sm-4">
+                        <select id="sendWarehouseCode" name="sendWarehouseCode" th:attr='data-value=*{sendWarehouseCode}'
+                                class="sendWarehouseCode form-control m-b" required>
+
+                        </select>
+                    </div>
+
+                </div>
+                <div class="form-group" hidden>
+                    <label class="col-sm-3 control-label">发货仓库id：</label>
+                    <div class="col-sm-8">
+                        <input name="sendwarehouseid" id="sendwarehouseid" th:field="*{sendwarehouseid}"
+                               class="form-control" type="text">
+                    </div>
+                </div>
+
+                <div class="form-group" hidden>
+                    <label class="col-sm-3 control-label">发货机构id：</label>
+                    <div class="col-sm-8">
+                        <input name="sendOrganid" id="sendOrganid" th:field="*{sendOrganid}"
+                               class="form-control" type="text">
+                    </div>
+                </div>
+
+            </div>
+
+<!--                    <input name="sendOrganCode" th:field="*{sendOrganCode}" class="form-control" type="hidden">-->
+<!--                    <input name="sendOrganName" th:field="*{sendOrganName}" class="form-control" type="hidden">-->
+<!--                    <input name="sendWarehouseCode" th:field="*{sendWarehouseCode}" class="form-control" type="hidden">-->
+<!--                    <input name="sendWarehouseName" th:field="*{sendWarehouseName}" class="form-control" type="hidden">-->
+<!--                    <input name="receiveOrganCode" th:field="*{receiveOrganCode}" class="form-control" type="hidden">-->
+<!--                    <input name="receiveOrganName" th:field="*{receiveOrganName}" class="form-control" type="hidden">-->
+<!--                    <input name="rceiveWarehouseCode" th:field="*{rceiveWarehouseCode}" class="form-control" type="hidden">-->
+                    <input name="reviewerId" th:field="*{reviewerId}" class="form-control" type="hidden">
+                    <input name="checker" th:field="*{checker}" class="form-control" type="hidden">
+                    <input name="sender" th:field="*{sender}" class="form-control" type="hidden">
+                    <input name="receiveWarehouseName" th:field="*{receiveWarehouseName}" class="form-control" type="hidden">
+
+
+
+
+            <div class="form-group">    
+                <label class="col-sm-2 control-label">备注：</label>
+                <div class="col-sm-10">
+                    <textarea name="remark" th:field="*{remark}" class="form-control" type="text"></textarea>
+                </div>
+            </div>
+
+
+
+            <h4 class="form-header h4">单据明细信息</h4>
+            <div class="row">
+                <div class="col-sm-12">
+                    <button type="button" class="btn btn-white btn-sm" onclick="addRow()"><i class="fa fa-plus"> 增加</i></button>
+                    <button type="button" class="btn btn-white btn-sm" onclick="sub.delRow()"><i class="fa fa-minus"> 删除</i></button>
+                    <div class="col-sm-12 select-table table-striped">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <th:block th:include="include :: select2-js" />
+
+    <script th:inline="javascript">
+        var prefix = ctx + "order/order";
+        $("#form-order-edit").validate({
+
+            focusCleanup: true
+        });
+
+
+        //定义serializeObject方法，序列化表单
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [ o[this.name] ];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+        function submitHandler() {
+            var data=$('#form-order-edit').serializeObject();
+
+            if ($.validate.form()) {
+                data.sendOrganName=$("#sendOrganCode option:checked").text();
+                data.sendWarehouseName=$("#sendWarehouseCode option:checked").text();
+                data.customerName=$("#customer option:checked").text();
+                $.operate.save(prefix + "/edit", data);
+
+             }
+        }
+
+        $("input[name='billCreatetime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $("input[name='reviewerTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $(function() {
+            var options = {
+                data: [[${billOrder.billOrderDetailList}]],
+                pagination: false,
+                showSearch: false,
+                showRefresh: false,
+                showToggle: false,
+                showColumns: false,
+                sidePagination: "client",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'index',
+                    align: 'center',
+                    title: "序号",
+                    formatter: function (value, row, index) {
+                    	var columnIndex = $.common.sprintf("<input type='hidden' name='index' value='%s'>", $.table.serialNumber(index));
+                    	return columnIndex + $.table.serialNumber(index);
+                    }
+                },
+                // {
+                //     field: 'pdCode',
+                //     align: 'center',
+                //     title: '产品编码',
+                //     formatter: function(value, row, index) {
+                //         var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].pdCode' value='%s'>", index, value);
+                //         return html;
+                //     }
+                // },
+
+                {
+                    field: 'pdCode',
+                    align: 'center',
+                    title: '产品名称',
+                    formatter: function(value, row, index) {
+                        var datas = [[${pdCode}]];
+                         var html = $.common.dictToSelectforPD(datas, value, $.common.sprintf("billOrderDetailList[%s].pdCode", index));
+                        return html;
+                    }
+                },
+                //
+                // {
+                //     field: 'weight',
+                //     align: 'center',
+                //     title: '重量',
+                //     formatter: function(value, row, index) {
+                //         var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].weight' value='%s'>", index, value);
+                //         return html;
+                //     }
+                // },
+
+                {
+                    field: 'quantity',
+                    align: 'center',
+                    title: '数量',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].quantity' value='%s' oninput='if(value<0)value=0;' required>", index, value);
+                        return html;
+                    }
+                },
+
+                {
+                    field: 'unit',
+                    align: 'center',
+                    title: '单位',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].unit' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+
+                {
+                    field: 'pdBatch',
+                    align: 'center',
+                    title: '批号',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].pdBatch' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+
+                {
+                    field: 'auxiliaryProperties',
+                    align: 'center',
+                    title: '辅助属性',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].auxiliaryProperties' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+
+                {
+                    field: 'spec',
+                    align: 'center',
+                    title: '规格编号',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].spec' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+
+                {
+                    field: 'sendWarehouse',
+                    align: 'center',
+                    title: '发货仓库',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].sendWarehouse' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+
+                {
+                    field: 'remark',
+                    align: 'center',
+                    title: '备注',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control' type='text' name='billOrderDetailList[%s].remark' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+
+                // {
+                //     title: '操作',
+                //     align: 'center',
+                //     formatter: function(value, row, index) {
+                //         var value = $.common.isNotEmpty(row.index) ? row.index : $.table.serialNumber(index);
+                //         return '<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="sub.delRowByIndex(\'' + value + '\')"><i class="fa fa-remove"></i>删除</a>';
+                //     }
+                // }
+                    {
+                        field: 'id',
+                        align: 'center',
+                        width: '0',
+                        formatter: function (value, row, index) {
+                            var html = $.common.sprintf("<input type='hidden' class='form-control' name='billOrderDetailList[%s].id' value='%s'>", index, value);
+
+                            return html;
+                        }
+                    },
+                ]
+            };
+            $.table.init(options);
+        });
+        var sendOrganid = $("#sendOrganid").val();
+        var sendwarehouseid = $("#sendwarehouseid").val();
+        $.ajax({
+
+            url: prefix + "/searchWh/" + sendOrganid,
+            dataType: "json",
+            type: "GET",
+            success: function (data) {
+
+                if (data.isSuccess == true) {
+                    $.each(data.warehouseList, function (infoIndex, info) {  //循环遍历后台传过来的json数据
+
+                        var a = sendwarehouseid;
+
+                        if (a == info["wareHouseCode"]) {
+                            $("#sendWarehouseCode").append("<option value='" + info["wareHouseCode"] + "' selected>" + info["name"] + "</option>");
+                        }
+                        $("#sendWarehouseCode").append("<option value='" + info["wareHouseCode"] + "'>" + info["name"] + "</option>");
+                    });
+                    $.ajax({
+
+                        url: prefix + "/searchWh/" + receiveOrganid,
+                        dataType: "json",
+                        type: "GET",
+                        success: function (data) {
+
+                            if (data.isSuccess == true) {
+                                $.each(data.warehouseList, function (infoIndex, info) {  //循环遍历后台传过来的json数据
+
+                                    if (receivewarehouseid == info["wareHouseCode"]) {
+                                        $("#rceiveWarehouseCode").append("<option value='" + info["wareHouseCode"] + "' selected>" + info["name"] + "</option>");
+                                    }
+                                    $("#rceiveWarehouseCode").append("<option value='" + info["wareHouseCode"] + "'>" + info["name"] + "</option>");
+                                });
+                                return true;
+                            } else {
+                                $.modal.alertWarning(data.msg);
+                                return false;
+                            }
+                        }
+                    });
+                    return true;
+                } else {
+                    $.modal.alertWarning(data.msg);
+                    return false;
+                }
+            }
+        });
+
+        $("#sendOrganCode").change(function () {
+            $("#sendWarehouseCode").empty();
+
+            debugger;
+            $("#sendWarehouseCode").append("<option value=''>请选择</option>");
+            var sendOrganCode = $("#sendOrganCode").val();
+            if (sendOrganCode == '') {
+                $.modal.alertWarning('请先选择发货机构');
+                return false;
+            }
+            $.ajax({
+                url: prefix + "/searchWh/" + sendOrganCode,
+                dataType: "json",
+                type: "GET",
+                success: function (data) {
+                    console.log(data);
+                    if (data.isSuccess == true) {
+                        $.each(data.warehouseList, function (infoIndex, info) {  //循环遍历后台传过来的json数据
+                            $("#sendWarehouseCode").append("<option value='" + info["wareHouseCode"] + "'>" + info["name"] + "</option>");
+
+                        });
+                        return true;
+                    } else {
+                        $.modal.alertWarning(data.msg);
+                        return false;
+                    }
+                }
+            });
+        });
+        function addRow() {
+            var count = $("#" + table.options.id).bootstrapTable('getData').length;
+            var row = {
+                index: $.table.serialNumber(count),
+                pdCode: "",
+                pdName: "",
+                weight: "",
+                quantity: "",
+                unit: "",
+                pdBatch: "",
+                createTime: "",
+                reviewerId: "",
+                reviewer: "",
+                reviewerTime: "",
+                auxiliaryProperties: "",
+                spec: "",
+                sendWarehouse: "",
+                remark: "",
+            }
+            sub.addRow(row);
+        }
+    </script>
+</body>
+</html>

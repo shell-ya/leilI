@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link href="../static/css/otherActivity.css" th:href="@{/css/otherActivity.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('活动')" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0， maximum-scale=1.0,minimum-scale=1.0, user-scalable=no">
+</head>
+<body class="scan" >
+<div align="center">
+    <img th:src="@{/img/logo04.png}" style="height: 175px;width: 300px;margin-top: 50px">
+</div>
+<div align="center" class="product center-block" style="width: 350px"  th:object="${data}">
+        <br />
+        <p id="msg" th:text="*{msg}"
+           style="font-size:20px;"></p>
+        <br />
+        <br />
+</div>
+
+<th:block th:include="include :: footer" />
+</body>
+<script type="text/javascript">
+
+
+</script>
+</html>

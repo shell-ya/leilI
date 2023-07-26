@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.basedata.mapper.ProvinceMapper">
+    
+    <resultMap type="Province" id="ProvinceResult">
+        <result property="code"    column="code"    />
+        <result property="creator"    column="creator"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifier"    column="modifier"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="pcode"    column="pcode"    />
+        <result property="name"    column="name"    />
+        <result property="enName"    column="en_name"    />
+        <result property="regionLevel"    column="region_level"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectProvinceVo">
+        select code, creator, create_time, modifier, modify_time, pcode, name, en_name, region_level, remark from province
+    </sql>
+
+    <select id="selectProvinceList" parameterType="Province" resultMap="ProvinceResult">
+        <include refid="selectProvinceVo"/>
+        <where>  
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="creator != null "> and creator = #{creator}</if>
+            <if test="modifier != null "> and modifier = #{modifier}</if>
+            <if test="modifyTime != null "> and modify_time = #{modifyTime}</if>
+            <if test="pcode != null  and pcode != ''"> and pcode = #{pcode}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="enName != null  and enName != ''"> and en_name like concat('%', #{enName}, '%')</if>
+            <if test="regionLevel != null  and regionLevel != ''"> and region_level = #{regionLevel}</if>
+        </where>
+    </select>
+    
+    <select id="selectProvinceByCode" parameterType="String" resultMap="ProvinceResult">
+        <include refid="selectProvinceVo"/>
+        where code = #{code}
+    </select>
+        
+    <insert id="insertProvince" parameterType="Province">
+        insert into province
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null">code,</if>
+            <if test="creator != null">creator,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifier != null">modifier,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="pcode != null">pcode,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="enName != null">en_name,</if>
+            <if test="regionLevel != null and regionLevel != ''">region_level,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null">#{code},</if>
+            <if test="creator != null">#{creator},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifier != null">#{modifier},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="pcode != null">#{pcode},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="enName != null">#{enName},</if>
+            <if test="regionLevel != null and regionLevel != ''">#{regionLevel},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateProvince" parameterType="Province">
+        update province
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="creator != null">creator = #{creator},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifier != null">modifier = #{modifier},</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime},</if>
+            <if test="pcode != null">pcode = #{pcode},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="enName != null">en_name = #{enName},</if>
+            <if test="regionLevel != null and regionLevel != ''">region_level = #{regionLevel},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where code = #{code}
+    </update>
+
+    <delete id="deleteProvinceByCode" parameterType="String">
+        delete from province where code = #{code}
+    </delete>
+
+    <delete id="deleteProvinceByCodes" parameterType="String">
+        delete from province where code in 
+        <foreach item="code" collection="array" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </delete>
+
+
+
+
+    <select id="selectProvinceListByname"  resultType="String">
+        select code from province
+        where (name = #{name} or name = #{namelike} )and region_level = #{level}   limit 1
+    </select>
+
+</mapper>

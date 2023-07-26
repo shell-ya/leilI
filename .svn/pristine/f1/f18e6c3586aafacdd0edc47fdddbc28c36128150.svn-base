@@ -1,0 +1,169 @@
+package com.linkwin.web.controller.basedata;
+
+import com.linkwin.basedata.domain.Warehouse;
+import com.linkwin.basedata.service.IWarehouseService;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.core.page.TableDataInfo;
+import com.linkwin.common.enums.BusinessType;
+import com.linkwin.common.utils.poi.ExcelUtil;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * WarehouseController
+ * 
+ * @author ymding
+ * @date 2021-10-26
+ */
+@Controller
+@RequestMapping("/basedata/warehouse")
+public class WarehouseController extends BaseController
+{
+    private String prefix = "basedata/warehouse";
+
+    @Autowired
+    private IWarehouseService WarehouseService;
+
+    @RequiresPermissions("system:warehouse:view")
+    @GetMapping()
+    public String Warehouse()
+    {
+        return prefix + "/warehouse";
+    }
+
+    /**
+     * 查询Warehouse列表
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public TableDataInfo list(Warehouse Warehouse)
+    {
+        startPage();
+            List<Warehouse> list = WarehouseService.selectWarehouseList(Warehouse);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出Warehouse列表
+     */
+    @Log(title = "Warehouse", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    @ResponseBody
+    public AjaxResult export(Warehouse Warehouse)
+    {
+        List<Warehouse> list = WarehouseService.selectWarehouseList(Warehouse);
+        ExcelUtil<Warehouse> util = new ExcelUtil<Warehouse>(Warehouse.class);
+        return util.exportExcel(list, "Warehouse数据");
+    }
+
+    /**
+     * 新增Warehouse
+     */
+    @GetMapping("/add")
+    public String add()
+    {
+        return prefix + "/add";
+    }
+
+
+    /**
+     * 修改Warehouse
+     */
+    @GetMapping("/add/{id}")
+    public String editadd(@PathVariable("id") String id, ModelMap mmap)
+    {
+
+        Warehouse Warehouse = new Warehouse();
+        Warehouse.setOrganCode(id);
+        mmap.put("warehouse", Warehouse);
+        return prefix + "/editadd";
+    }
+
+    /**
+     * 新增保存Warehouse
+     */
+    @Log(title = "Warehouse", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult addSave(Warehouse Warehouse)
+    {
+        if (Warehouse.getName()!=null&&!"".equals(Warehouse.getName())) {
+            Warehouse newp = new Warehouse();
+            newp.setName(Warehouse.getName());
+
+            List<Warehouse> list = WarehouseService.selectWarehouseList(newp);
+            if(list.size()>0){
+
+                    return AjaxResult.error(Warehouse.getName()+"名字已存在，请重试");}
+
+        }
+
+        return toAjax(WarehouseService.insertWarehouse(Warehouse));
+    }
+
+    /**
+     * 修改Warehouse
+     */
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    {
+        Warehouse Warehouse = WarehouseService.selectWarehouseById(id);
+        mmap.put("warehouse", Warehouse);
+        return prefix + "/edit";
+    }
+
+    /**
+     * 修改保存Warehouse
+     */
+    @Log(title = "Warehouse", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult editSave(Warehouse Warehouse)
+    {
+        if (Warehouse.getName()!=null&&!"".equals(Warehouse.getName())) {
+            Warehouse newp = new Warehouse();
+            newp.setName(Warehouse.getName());
+
+            List<Warehouse> list = WarehouseService.selectWarehouseList(newp);
+            if(list.size()>0){
+                if(!list.get(0).getId().equals(Warehouse.getId())){
+                    return AjaxResult.error(Warehouse.getName()+"名字已存在，请重试");}
+            }
+        }
+
+        return toAjax(WarehouseService.updateWarehouse(Warehouse));
+    }
+
+    /**
+     * 删除Warehouse
+     */
+    @Log(title = "Warehouse", businessType = BusinessType.DELETE)
+    @PostMapping( "/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids)
+    {
+        return toAjax(WarehouseService.deleteWarehouseByIds(ids));
+    }
+
+    /**
+     * 查询Warehouse列表
+     */
+//    @RequiresPermissions("system:Warehouse:list")
+    @PostMapping("/getAllByWhere")
+    @ResponseBody
+    public List<Warehouse> getAllByWhere(Warehouse Warehouse,ModelMap mmap)
+    {
+        List<Warehouse> Warehouses = WarehouseService.selectWarehouseList(Warehouse);
+        mmap.put("wareList",Warehouses);
+        return Warehouses;
+    }
+
+
+}

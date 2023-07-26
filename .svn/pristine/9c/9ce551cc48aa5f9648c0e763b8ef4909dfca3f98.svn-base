@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增产品信息')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-product-add">
+<!--            <div class="text-center">-->
+<!--                <p class="user-info-head" onclick="avatar()"><img class="img-circle img-lg" th:src="(${#strings.isEmpty(Logo)}) ? @{/img/logo.png} : @{${Logo}}" th:onerror="'this.src=\'' + @{'/img/logo.png'} + '\''"></p>-->
+<!--                <p><a href="javascript:avatar()">修改头像</a></p>-->
+<!--            </div>-->
+
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label is-required">产品编码：</label>-->
+                <label class="col-sm-3 control-label is-required">[[#{activity.Product.Code}]]：</label>
+                <div class="col-sm-8">
+                    <input name="code" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">产品名称：</label>-->
+                <label class="col-sm-3 control-label">[[#{Outbound.Document.Information.Product.Name}]]：</label>
+                <div class="col-sm-8">
+                    <input name="name" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">规格：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Specification}]]：</label>
+                <div class="col-sm-8">
+                    <input name="specification" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label is-required">箱重（Kg/L）：</label>-->
+                <label class="col-sm-3 control-label is-required">[[#{product.Box.Weight}]]：</label>
+                <div class="col-sm-8">
+                    <input name="cartonWeight" class="form-control" type="text"  maxlength="10"   oninput="value=value.match(/[0-9]{1,10}\.?[0-9]{0,6}/)" onchange="checkNum(this)"  required>
+                </div>
+            </div>
+
+            <div class="form-group">    
+<!--                <label class="col-sm-3 control-label">通用名：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Common.Name}]]：</label>
+                <div class="col-sm-8">
+                    <input name="commonName" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">登记证号：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Registration.Code}]]：</label>
+                <div class="col-sm-8">
+                    <input name="registrationNumber" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">剂型：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Dosage.Form}]]：</label>
+                <div class="col-sm-8">
+                    <input name="dosageForm" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">主要成分：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Main.Ingredient}]]：</label>
+                <div class="col-sm-8">
+                    <input name="mainComponents" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">业绩系数：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Performance.Factor}]]：</label>
+                <div class="col-sm-8">
+                    <input name="performanceCoefficient" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">使用方式：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.UsageMethod}]]：</label>
+                <div class="col-sm-8">
+                    <input name="usemethod" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">执行标准：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.ExecutionStandard}]]：</label>
+                <div class="col-sm-8">
+                    <input name="standard" class="form-control" type="text">
+                </div>
+            </div>
+
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">产品介绍：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.ProductIntroduction}]]：</label>
+                <div class="col-sm-8">
+                    <input name="proexplain"  class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">常规/定制：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.Regular.or.Custom}]]：</label>
+                <div class="col-sm-8">
+                    <select name="routineFlag" class="form-control m-b" th:with="type=${@dict.getType('routine_flag',#locale.language+'_'+#locale.country)}">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">备注：</label>-->
+                <label class="col-sm-3 control-label">[[#{activity.Remark}]]：</label>
+                <div class="col-sm-8">
+                    <input name="remarks" class="form-control" type="text">
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "basedata/product"
+        // $("#form-product-add").validate({
+        //     focusCleanup: true
+        // });
+        $("#form-product-add").validate({
+            rules: {
+                code:      "required",
+                cartonWeight:      "required",
+
+            },
+            messages: {
+                code:     [[#{required}]],
+                cartonWeight:     [[#{required}]],
+            }
+        });
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-product-add').serialize());
+            }
+        }
+
+        function checkNum(t) {
+
+            let reg = /\.$/g;
+            if (reg.test(t.value) ){
+                t.value = t.value + '0';
+            }}
+        // function avatar() {
+        //     var url = ctx + 'basedata/product/avatar';
+        //     top.layer.open({
+        //         type: 2,
+        //         area: [$(window).width() + 'px', $(window).height() + 'px'],
+        //         fix: false,
+        //         //不固定
+        //         maxmin: true,
+        //         shade: 0.3,
+        //         title: "修改头像",
+        //         content: url,
+        //         btn: ['确定', '关闭'],
+        //         // 弹层外区域关闭
+        //         shadeClose: true,
+        //         yes: function(index, layero) {
+        //             var iframeWin = layero.find('iframe')[0];
+        //             iframeWin.contentWindow.submitHandler(index, layero);
+        //         },
+        //         cancel: function(index) {
+        //             return true;
+        //         }
+        //     });
+        // }
+    </script>
+</body>
+</html>

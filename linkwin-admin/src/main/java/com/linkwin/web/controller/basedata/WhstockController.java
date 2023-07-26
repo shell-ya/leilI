@@ -1,0 +1,244 @@
+package com.linkwin.web.controller.basedata;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.linkwin.basedata.domain.Warehouse;
+import com.linkwin.basedata.service.IWarehouseService;
+import com.linkwin.common.core.domain.entity.SysDept;
+import com.linkwin.common.core.domain.entity.SysUser;
+import com.linkwin.common.utils.MessageUtils;
+import com.linkwin.system.service.ISysDeptService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.enums.BusinessType;
+import com.linkwin.basedata.domain.Whstock;
+import com.linkwin.basedata.service.IWhstockService;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.utils.poi.ExcelUtil;
+import com.linkwin.common.core.page.TableDataInfo;
+
+/**
+ * 库存Controller
+ * 
+ * @author ruoyi
+ * @date 2022-06-09
+ */
+@Controller
+@RequestMapping("/basedata/whstock")
+public class WhstockController extends BaseController
+{
+    private String prefix = "basedata/whstock";
+
+    @Autowired
+    private IWhstockService whstockService;
+    @Autowired
+    private IWarehouseService warehouseService;
+    @Autowired
+    private ISysDeptService sysDeptService;
+
+    @RequiresPermissions("system:whstock:view")
+    @GetMapping()
+    public String whstock()
+    {
+        return prefix + "/whstock";
+    }
+
+    /**
+     * 查询库存列表
+     */
+     @PostMapping("/list")
+    @ResponseBody
+    public TableDataInfo list(Whstock whstock)
+    {
+        SysUser currentUser = getSysUser();
+        SysDept sysDept = sysDeptService.selectDeptById(currentUser.getDeptId());
+        if (currentUser.isAdminByRole() || "0".equals(sysDept.getOrganLevel())){
+            startPage();
+            List<Whstock> list = whstockService.selectWhstockList(whstock);
+            return getDataTable(list);
+        }
+        List<Warehouse> warehouses = warehouseService.selectByOrganCode(
+                String.valueOf(currentUser.getDeptId())
+        );
+        List<Long> deptIds = sysDeptService.selectDeptId(currentUser.getDeptId());
+        deptIds.add(currentUser.getDeptId());
+        List<Long> warehouseIds = warehouses.stream().map(item -> {
+            return Long.parseLong(item.getWareHouseCode());
+        }).collect(Collectors.toList());
+        deptIds.addAll(warehouseIds);
+        startPage();
+        List<Whstock> list = whstockService.selectWhstockListByWarehouse(whstock,deptIds);
+//        List<Whstock> list = whstockService.selectWhstockList(whstock);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出库存列表
+     */
+    @RequiresPermissions("system:whstock:export")
+    @Log(title = "库存", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    @ResponseBody
+    public AjaxResult export(Whstock whstock)
+    {
+        SysUser currentUser = getSysUser();
+        SysDept sysDept = sysDeptService.selectDeptById(currentUser.getDeptId());
+        if (currentUser.isAdminByRole() || "0".equals(sysDept.getOrganLevel())){
+            List<Whstock> list = whstockService.selectWhstockList(whstock);
+            ExcelUtil<Whstock> util = new ExcelUtil<Whstock>(Whstock.class);
+            return util.exportExcel(list, "库存数据");
+        }
+        List<Warehouse> warehouses = warehouseService.selectByOrganCode(
+                String.valueOf(currentUser.getDeptId())
+        );
+        List<Long> deptIds = sysDeptService.selectDeptId(currentUser.getDeptId());
+        deptIds.add(currentUser.getDeptId());
+        List<Long> warehouseIds = warehouses.stream().map(item -> {
+            return Long.parseLong(item.getWareHouseCode());
+        }).collect(Collectors.toList());
+        deptIds.addAll(warehouseIds);
+        List<Whstock> list = whstockService.selectWhstockListByWarehouse(whstock,deptIds);
+        ExcelUtil<Whstock> util = new ExcelUtil<Whstock>(Whstock.class);
+        return util.exportExcel(list, "库存数据");
+    }
+
+    /**
+     * 新增库存
+     */
+    @GetMapping("/add")
+    public String add()
+    {
+        return prefix + "/add";
+    }
+
+    /**
+     * 新增保存库存
+     */
+    @RequiresPermissions("system:whstock:add")
+    @Log(title = "库存", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult addSave(Whstock whstock)
+    {
+        return toAjax(whstockService.insertWhstock(whstock));
+    }
+
+    /**
+     * 修改库存
+     */
+    @RequiresPermissions("system:whstock:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    {
+        Whstock whstock = whstockService.selectWhstockById(id);
+        mmap.put("whstock", whstock);
+        return prefix + "/edit";
+    }
+
+    /**
+     * 修改保存库存
+     */
+    @RequiresPermissions("system:whstock:edit")
+    @Log(title = "库存", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult editSave(Whstock whstock)
+    {
+        return toAjax(whstockService.updateWhstock(whstock));
+    }
+
+    /**
+     * 删除库存
+     */
+    @RequiresPermissions("system:whstock:remove")
+    @Log(title = "库存", businessType = BusinessType.DELETE)
+    @PostMapping( "/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids)
+    {
+        return toAjax(whstockService.deleteWhstockByIds(ids));
+    }
+
+
+    /**
+     * 盘亏
+     * @param number
+     * @param id
+     * @param flag
+     * @return
+     */
+    @Log(title = "盘亏", businessType = BusinessType.UPDATE)
+    @PostMapping("/whstockDel")
+    @ResponseBody
+    public Map<String, Object> whstockDel(BigDecimal number, Long id, String flag){
+        try {
+            if(number.compareTo(BigDecimal.ZERO) < 1){
+//                return AjaxResult.error("数量必须大于0");
+                return AjaxResult.error(MessageUtils.message("error.msg.mustgreaterzero"));
+            }
+            Whstock whstock = whstockService.selectWhstockById(id);
+            BigDecimal IQnumber =whstock.getInventoryquantity().subtract(number);
+            if (IQnumber.intValue() < 0) {
+//                return AjaxResult.error("盘亏数量大于当前库存");
+                return AjaxResult.error(MessageUtils.message("error.msg.inventoryquantity"));
+            }
+            //添加一条日志
+            if ( whstockService.physicalInventory(whstock,number,flag,"盘亏")>0){
+//                return AjaxResult.error("盘盈成功！");
+                return AjaxResult.error(MessageUtils.message("error.msg.inventorygain"));
+            }
+        }catch (Exception e){
+            return AjaxResult.error(e.getMessage());
+        }
+//        return AjaxResult.success("盘盈成功！");
+        return AjaxResult.success(MessageUtils.message("error.msg.inventorygain"));
+    }
+
+
+
+    /**
+     * 盘亏
+     * @param number
+     * @param id
+     * @param flag
+     * @return
+     */
+    @Log(title = "盘盈", businessType = BusinessType.UPDATE)
+    @PostMapping("/whstockAdd")
+    @ResponseBody
+    public Map<String, Object> whstockAdd(BigDecimal number, Long id, String flag){
+        try {
+            if(number.compareTo(BigDecimal.ZERO) < 1){
+//                return AjaxResult.error("数量必须大于0");
+                return AjaxResult.error(MessageUtils.message("error.msg.mustgreaterzero"));
+            }
+            Whstock whstock = whstockService.selectWhstockById(id);
+            //添加一条日志
+            if ( whstockService.physicalInventory(whstock,number,flag,"盘盈")>0){
+                return AjaxResult.success("盘亏成功！");
+//                return AjaxResult.error("盘亏成功！");
+            }
+            return AjaxResult.error("盘亏失败！");
+        }catch (Exception e){
+            return AjaxResult.error(e.getMessage());
+        }
+
+    }
+
+
+
+
+}

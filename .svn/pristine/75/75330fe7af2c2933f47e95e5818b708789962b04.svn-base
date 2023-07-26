@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改产品信息')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-product-edit" th:object="${product}">
+            <input name="id" th:field="*{id}" type="hidden">
+            <div class="text-center">
+                <p class="user-info-head" onclick="avatar()"><img class="img-circle img-lg" th:src="(${#strings.isEmpty(img)}) ? @{/img/logo.png} : @{${img}}" th:onerror="'this.src=\'' + @{'/img/logo.png'} + '\''"></p>
+<!--                <p><a href="javascript:avatar()">修改logo</a></p>-->
+                <p><a href="javascript:avatar()">[[#{product.ModifyLogo}]]</a></p>
+            </div>
+            <div class="text-center">
+                <p class="user-info-head" onclick="avatarExplain()"><img class="img-circle img-lg" th:src="(${#strings.isEmpty(product.explainimg)}) ? @{/img/logo.png} : @{${product.explainimg}}" th:onerror="'this.src=\'' + @{'/img/logo.png'} + '\''"></p>
+<!--                <p><a href="javascript:avatarExplain()">修改产品介绍图片</a></p>-->
+                <p><a href="javascript:avatar()">[[#{product.ModifyProductIntroductionImage}]]</a></p>
+            </div>
+            <div class="text-center">
+                <p class="user-info-head" onclick="avatarreport()"><img class="img-circle img-lg" th:src="(${#strings.isEmpty(product.report)}) ? @{/img/logo.png} : @{${product.report}}" th:onerror="'this.src=\'' + @{'/img/logo.png'} + '\''"></p>
+<!--                <p><a href="javascript:avatarreport()">修改产品报告图片</a></p>-->
+                <p><a href="javascript:avatar()">[[#{product.ModifyProductReportImage}]]</a></p>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">产品名称：</label>-->
+                <label class="col-sm-3 control-label">[[#{Outbound.Document.Information.Product.Name}]]：</label>
+                <div class="col-sm-8">
+                    <div name="name" th:text="*{name}" class="form-control" type="text"></div>
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">产品可兑换积分：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.ProductRedeemablePoints}]]：</label>
+                <div class="col-sm-8">
+                    <input name="integral" th:field="*{integral}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">[[#{product.PointsRequiredForRedemption}]]：</label>
+<!--                <label class="col-sm-3 control-label">兑换所需积分：</label>-->
+                <div class="col-sm-8">
+                    <input name="needIntegral" th:field="*{needIntegral}" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+<!--                <label class="col-sm-3 control-label">是否参加活动：</label>-->
+                <label class="col-sm-3 control-label">[[#{product.ParticipateInActivities}]]：</label>
+                <div class="col-sm-8">
+                    <div class="radio-box" th:each="dict : ${@dict.getType('sys_normal_disable',#locale.language+'_'+#locale.country)}">
+                        <input type="radio" th:id="${dict.dictCode}" name="integralflag" th:value="${dict.dictValue}" th:field="*{integralflag}">
+                        <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "basedata/product";
+        $("#form-product-edit").validate({
+            rules:{
+                integral:{
+                    digits:true
+                },
+                needIntegral:{
+                    digits:true
+                },
+            },
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-product-edit').serialize());
+            }
+            // var data = { "code": 0,"msg": "成功"};
+            // $.operate.successCallback(data);
+        }
+        var sendOrganid = $("#id").val();
+        function avatar() {
+            var url = ctx + 'basedata/product/avatar/'+sendOrganid;
+            top.layer.open({
+                type: 2,
+                area: [$(window).width() + 'px', $(window).height() + 'px'],
+                fix: false,
+                //不固定
+                maxmin: true,
+                shade: 0.3,
+                title: "修改头像",
+                content: url,
+                btn: ['确定', '关闭'],
+                // 弹层外区域关闭
+                shadeClose: true,
+                yes: function(index, layero) {
+                    var iframeWin = layero.find('iframe')[0];
+                    var res= iframeWin.contentWindow.submitHandler(index, layero);
+
+
+                },
+                cancel: function(index) {
+                    return true;
+                }
+            });
+        }
+
+        function avatarExplain() {
+            var url = ctx + 'basedata/product/avatarExplain/'+sendOrganid;
+            top.layer.open({
+                type: 2,
+                area: [$(window).width() + 'px', $(window).height() + 'px'],
+                fix: false,
+                //不固定
+                maxmin: true,
+                shade: 0.3,
+                title: "修改头像",
+                content: url,
+                btn: ['确定', '关闭'],
+                // 弹层外区域关闭
+                shadeClose: true,
+                yes: function(index, layero) {
+                    var iframeWin = layero.find('iframe')[0];
+                    var res= iframeWin.contentWindow.submitHandler(index, layero);
+
+
+                },
+                cancel: function(index) {
+                    return true;
+                }
+            });
+        }
+        function avatarreport() {
+            var url = ctx + 'basedata/product/avatarreport/'+sendOrganid;
+            top.layer.open({
+                type: 2,
+                area: [$(window).width() + 'px', $(window).height() + 'px'],
+                fix: false,
+                //不固定
+                maxmin: true,
+                shade: 0.3,
+                title: "修改头像",
+                content: url,
+                btn: ['确定', '关闭'],
+                // 弹层外区域关闭
+                shadeClose: true,
+                yes: function(index, layero) {
+                    var iframeWin = layero.find('iframe')[0];
+                    var res= iframeWin.contentWindow.submitHandler(index, layero);
+
+
+                },
+                cancel: function(index) {
+                    return true;
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+package com.linkwin.web.controller.Integral;
+
+import java.util.List;
+
+import com.linkwin.Integral.domain.IntegralPerson;
+import com.linkwin.Integral.domain.IntegralRecord;
+import com.linkwin.Integral.service.IIntegralPersonService;
+import com.linkwin.Integral.service.IIntegralRecordService;
+import com.linkwin.basedata.domain.Product;
+import com.linkwin.basedata.service.IProductService;
+import com.linkwin.utils.GetOrderNoUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.enums.BusinessType;
+import com.linkwin.Integral.domain.IntegralOrder;
+import com.linkwin.Integral.service.IIntegralOrderService;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.utils.poi.ExcelUtil;
+import com.linkwin.common.core.page.TableDataInfo;
+
+/**
+ * IntegralOrderController
+ * 
+ * @author ruoyi
+ * @date 2022-06-12
+ */
+@Controller
+@RequestMapping("/Integral/order")
+public class IntegralOrderController extends BaseController
+{
+    private String prefix = "Integral/order";
+
+    @Autowired
+    private IIntegralOrderService integralOrderService;
+    @Autowired
+    private IProductService productService;
+    @Autowired
+    private IIntegralPersonService integralPersonService;
+    @Autowired
+    private GetOrderNoUtils getOrderNoUtils;
+    @Autowired
+    private IIntegralRecordService iIntegralRecordService;
+
+
+
+
+    @RequiresPermissions("IntegralOrder:order:view")
+    @GetMapping()
+    public String order()
+    {
+        return prefix + "/order";
+    }
+
+    /**
+     * 查询IntegralOrder列表
+     */
+     @PostMapping("/list")
+    @ResponseBody
+    public TableDataInfo list(IntegralOrder integralOrder)
+    {
+        startPage();
+        List<IntegralOrder> list = integralOrderService.selectIntegralOrderList(integralOrder);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出IntegralOrder列表
+     */
+    @RequiresPermissions("IntegralOrder:order:export")
+    @Log(title = "IntegralOrder", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    @ResponseBody
+    public AjaxResult export(IntegralOrder integralOrder)
+    {
+        List<IntegralOrder> list = integralOrderService.selectIntegralOrderList(integralOrder);
+        ExcelUtil<IntegralOrder> util = new ExcelUtil<IntegralOrder>(IntegralOrder.class);
+        return util.exportExcel(list, "IntegralOrder数据");
+    }
+
+    /**
+     * 新增IntegralOrder
+     */
+    @GetMapping("/add")
+    public String add()
+    {
+        return prefix + "/add";
+    }
+
+    /**
+     * 新增保存IntegralOrder
+     */
+    @Log(title = "IntegralOrder", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult addSave(IntegralOrder integralOrder)
+    {
+        try {
+            String orderno = getOrderNoUtils.serinalNo(2);
+            integralOrder.setOrderNo(orderno);
+            integralOrder.setStatus("0");
+            //兑换数量
+            Integer quantuity = integralOrder.getQuantity();
+            //产品code
+            String  productCode = integralOrder.getProductCode();
+            Product product =  productService.selectByPdCode(productCode);
+            String phoneNo = integralOrder.getCreator();
+            //兑换所需积分
+            Integer needIg = product.getNeedIntegral();
+            IntegralPerson itp = integralPersonService.selectIntegralPersonByphoneNumber(phoneNo);
+            Integer currtyintegral =itp.getIntegral();
+            Integer changeNo = quantuity* needIg;
+            if (needIg>0){
+
+                if (changeNo>currtyintegral){
+                    return AjaxResult.error("积分不足，每份所需积分为："+needIg);
+                }
+            }else{
+                return  AjaxResult.error("兑换失败，该产品不予兑换，请联系工作人员");
+
+            }
+            IntegralRecord integralRecord =new IntegralRecord();
+
+            integralRecord.setCurreryIntegral(currtyintegral-(quantuity* needIg));
+            integralRecord.setChangeNumber(changeNo);
+            integralRecord.setPhone(phoneNo);
+            integralRecord.setChangeFlag("-");
+            integralRecord.setProductCode(productCode);
+            integralRecord.setProductName(product.getName());
+            integralRecord.setChangeReason("积分兑换产品"+orderno);
+            integralRecord.setProductNumber(quantuity);
+            iIntegralRecordService.insertIntegralRecord(integralRecord);
+            itp.setIntegral(integralRecord.getCurreryIntegral());
+            //更新人员积分表
+            integralPersonService.updateIntegralPerson(itp);
+        }catch (Exception e){
+            return  AjaxResult.error("兑换失败，请联系开发人员");
+        }
+
+
+        return toAjax(integralOrderService.insertIntegralOrder(integralOrder));
+    }
+
+    /**
+     * 修改IntegralOrder
+     */
+    @RequiresPermissions("IntegralOrder:order:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    {
+        IntegralOrder integralOrder = integralOrderService.selectIntegralOrderById(id);
+        mmap.put("integralOrder", integralOrder);
+        return prefix + "/edit";
+    }
+
+    /**
+     * 修改保存IntegralOrder
+     */
+    @RequiresPermissions("IntegralOrder:order:edit")
+    @Log(title = "IntegralOrder", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult editSave(IntegralOrder integralOrder)
+    {
+        return toAjax(integralOrderService.updateIntegralOrder(integralOrder));
+    }
+
+    /**
+     * 删除IntegralOrder
+     */
+    @RequiresPermissions("IntegralOrder:order:remove")
+    @Log(title = "IntegralOrder", businessType = BusinessType.DELETE)
+    @PostMapping( "/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids)
+    {
+        return toAjax(integralOrderService.deleteIntegralOrderByIds(ids));
+    }
+}

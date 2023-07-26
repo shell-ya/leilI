@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.trace.mapper.FwQueryLogMapper">
+    
+    <resultMap type="FwQueryLog" id="FwQueryLogResult">
+        <result property="id"    column="id"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="code"    column="code"    />
+        <result property="codeType"    column="code_type"    />
+        <result property="queryNum"    column="query_num"    />
+        <result property="batchNo"    column="batch_no"    />
+        <result property="firstQueryTime"    column="first_query_time"    />
+        <result property="pdName"    column="pd_name"    />
+        <result property="activation"    column="activation"    />
+    </resultMap>
+
+    <sql id="selectFwQueryLogVo">
+        select id, pd_code, code, code_type, query_num, batch_no, first_query_time, pd_name, activation from fw_query_log
+    </sql>
+
+    <select id="selectFwQueryLogList" parameterType="FwQueryLog" resultMap="FwQueryLogResult">
+        <include refid="selectFwQueryLogVo"/>
+        <where>  
+            <if test="pdCode != null  and pdCode != ''"> and pd_code = #{pdCode}</if>
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="codeType != null  and codeType != ''"> and code_type = #{codeType}</if>
+            <if test="queryNum != null "> and query_num = #{queryNum}</if>
+            <if test="batchNo != null  and batchNo != ''"> and batch_no = #{batchNo}</if>
+            <if test="firstQueryTime != null "> and first_query_time = #{firstQueryTime}</if>
+            <if test="pdName != null  and pdName != ''"> and pd_name like concat('%', #{pdName}, '%')</if>
+            <if test="activation != null  and activation != ''"> and activation = #{activation}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectFwQueryLogById" parameterType="Long" resultMap="FwQueryLogResult">
+        <include refid="selectFwQueryLogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFwQueryLog" parameterType="FwQueryLog">
+        insert into fw_query_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="pdCode != null">pd_code,</if>
+            <if test="code != null">code,</if>
+            <if test="codeType != null">code_type,</if>
+            <if test="queryNum != null">query_num,</if>
+            <if test="batchNo != null">batch_no,</if>
+            <if test="firstQueryTime != null">first_query_time,</if>
+            <if test="pdName != null">pd_name,</if>
+            <if test="activation != null">activation,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="code != null">#{code},</if>
+            <if test="codeType != null">#{codeType},</if>
+            <if test="queryNum != null">#{queryNum},</if>
+            <if test="batchNo != null">#{batchNo},</if>
+            <if test="firstQueryTime != null">#{firstQueryTime},</if>
+            <if test="pdName != null">#{pdName},</if>
+            <if test="activation != null">#{activation},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFwQueryLog" parameterType="FwQueryLog">
+        update fw_query_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="codeType != null">code_type = #{codeType},</if>
+            <if test="queryNum != null">query_num = #{queryNum},</if>
+            <if test="batchNo != null">batch_no = #{batchNo},</if>
+            <if test="firstQueryTime != null">first_query_time = #{firstQueryTime},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+            <if test="activation != null">activation = #{activation},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFwQueryLogById" parameterType="Long">
+        delete from fw_query_log where id = #{id}
+    </delete>
+
+    <delete id="deleteFwQueryLogByIds" parameterType="String">
+        delete from fw_query_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectByCode" resultMap="FwQueryLogResult">
+        <include refid="selectFwQueryLogVo"/>
+        where pd_code = #{pdCode} and code = #{code} and code_type = #{codeType}
+    </select>
+
+</mapper>

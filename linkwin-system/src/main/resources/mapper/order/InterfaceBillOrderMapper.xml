@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.order.mapper.InterfaceBillOrderMapper">
+    
+    <resultMap type="BillOrder" id="BillOrderResult">
+        <result property="id"    column="id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="sendOrganCode"    column="send_organ_code"    />
+        <result property="sendOrganName"    column="send_organ_name"    />
+        <result property="sendWarehouseCode"    column="send_warehouse_code"    />
+        <result property="sendWarehouseName"    column="send_warehouse_name"    />
+        <result property="receiveOrganCode"    column="receive_organ_code"    />
+        <result property="receiveOrganName"    column="receive_organ_name"    />
+        <result property="rceiveWarehouseCode"    column="rceive_warehouse_code"    />
+        <result property="receiveWarehouseName"    column="receive_warehouse_name"    />
+    </resultMap>
+
+    <resultMap id="BillOrderBillOrderDetailResult" type="BillOrder" extends="BillOrderResult">
+        <collection property="billOrderDetailList" notNullColumn="sub_id" javaType="java.util.List" resultMap="BillOrderDetailResult" />
+    </resultMap>
+
+    <resultMap type="BillOrderDetail" id="BillOrderDetailResult">
+        <result property="id"    column="sub_id"    />
+        <result property="pdCode"    column="sub_pd_code"    />
+        <result property="pdName"    column="sub_pd_name"    />
+        <result property="quantity"    column="sub_quantity"    />
+        <result property="unit"    column="sub_unit"    />
+        <result property="orderNo"    column="sub_order_no"    />
+        <result property="pdBatch"    column="sub_pd_batch"    />
+        <result property="spec"    column="sub_spec"    />
+        <result property="sendWarehouse"    column="sub_send_warehouse"    />
+        <collection  property="BillOrderBarcodeList"   javaType="java.util.List"        resultMap="BillOrderBarcodeResult" />
+    </resultMap>
+
+    <resultMap type="BillOrderBarcode" id="BillOrderBarcodeResult">
+        <result property="barCode"    column="bar_code"    />
+
+    </resultMap>
+
+
+
+
+
+    <select id="getOrderListIF" parameterType="BillOrder" resultMap="BillOrderBillOrderDetailResult">
+        select
+             a.id, a.order_no, a.order_type, a.send_organ_code, a.send_organ_name, a.send_warehouse_code, a.send_warehouse_name, a.receive_organ_code, a.receive_organ_name, a.rceive_warehouse_code, a.receive_warehouse_name,
+               b.id as sub_id, b.pd_code as sub_pd_code, b.pd_name as sub_pd_name, b.quantity as sub_quantity, b.unit as sub_unit, b.order_no as sub_order_no, b.pd_batch as sub_pd_batch,  b.spec as sub_spec, b.send_warehouse as sub_send_warehouse
+        from bill_order a
+                 left join bill_order_detail b on b.order_no = a.order_no
+        where a.is_checked=#{isChecked}
+        order by a.id desc
+    </select>
+
+</mapper>

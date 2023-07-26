@@ -1,0 +1,122 @@
+package com.linkwin.web.controller.openInterface;
+
+
+import com.linkwin.activity.domain.CodeActivityLog;
+import com.linkwin.activity.domain.ExchangePrize;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.enums.BusinessType;
+import com.linkwin.common.json.JsonViewObject;
+import com.linkwin.common.utils.StringUtils;
+import com.linkwin.openInterface.IMobileInterfaceService;
+import com.linkwin.vo.UploadConsumerVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.Map;
+
+@RequestMapping("/mobileInterface")
+@RestController
+@ResponseBody
+public class MobileInterfaceController {
+
+
+    @Autowired
+    private IMobileInterfaceService mobileInterfaceService;
+
+
+    @Log(title = "上传消费者信息", businessType = BusinessType.INSERT)
+    @PostMapping("/uploadConsumer")
+    public JsonViewObject uploadConsumer(@Validated @RequestBody UploadConsumerVo uploadConsumerVo){
+        JsonViewObject jsonViewObject=new JsonViewObject();
+        if (uploadConsumerVo.getConsumerLogList()==null||uploadConsumerVo.getConsumerLogList().size()==0){
+            jsonViewObject.fail("请传入正确参数");
+            return jsonViewObject;
+        }
+        return mobileInterfaceService.uploadConsumer(uploadConsumerVo.getConsumerLogList());
+    }
+
+
+    @Log(title = "上传条码参加活动记录", businessType = BusinessType.INSERT)
+    @PostMapping("/uploadActivityLog")
+    public JsonViewObject uploadActivityLog(@Validated @RequestBody CodeActivityLog codeActivityLog
+    ){
+        return mobileInterfaceService.uploadActivityLog(codeActivityLog);
+    }
+
+    @Log(title = "查询条码参与活动信息")
+    @GetMapping("/queryActivityLog")
+    public JsonViewObject queryActivityLog(@RequestParam(value = "openId") String openId,@RequestParam(value = "code") String code){
+        return mobileInterfaceService.queryActivityLog(openId,code);
+    }
+
+    @Log(title = "上传大转盘中奖信息")
+    @PostMapping("uploadExchangePrize")
+    public JsonViewObject uploadExchangePrize(@Valid @RequestBody ExchangePrize exchangePrize){
+        return mobileInterfaceService.uploadExchangePrize(exchangePrize);
+    }
+
+    @Log(title = "根据openId查询兑奖记录")
+    @PostMapping("queryExchangePrizeLog")
+    public JsonViewObject queryExchangePrizeLog(@RequestBody Map<String,String> map){
+        JsonViewObject jsonViewObject=new JsonViewObject();
+        try {
+            String openId = map.get("openId");
+            if (StringUtils.isEmpty(openId)){
+                jsonViewObject.fail("openId为空");
+                return jsonViewObject;
+            }
+            jsonViewObject=mobileInterfaceService.queryExchangePrizeLog(openId);
+        }catch (Exception e){
+            jsonViewObject.fail("查询异常");
+            e.printStackTrace();
+        }
+        return jsonViewObject;
+    }
+
+    @Log(title = "获取中奖码")
+    @GetMapping("getPrizeCode")
+    public JsonViewObject getPrizeCode(){
+        JsonViewObject jsonViewObject=new JsonViewObject();
+        try {
+            jsonViewObject=mobileInterfaceService.getPrizeCode();
+        }catch (Exception e){
+            jsonViewObject.fail("获取中奖码异常");
+        }
+        return jsonViewObject;
+    }
+
+    @Log(title = "绑定中奖码信息")
+    @PostMapping("bindPrizeMsg")
+    public JsonViewObject bindPrizeMsg(@RequestParam("markCode") String markCode,
+                                       @RequestParam("code") String code,
+                                       @RequestParam("prize") String prize,
+                                       @RequestParam("openId") String openId,
+                                       @RequestParam("address") String address,
+                                       @RequestParam("activityType") String activityType,
+                                       @RequestParam("luckdrawPrizeId") Long luckdrawPrizeId
+    ){
+        JsonViewObject jsonViewObject=new JsonViewObject();
+        try {
+            jsonViewObject=mobileInterfaceService.bindPrizeMsg(markCode,code,prize,openId,address,activityType,luckdrawPrizeId);
+        }catch (Exception e){
+            e.printStackTrace();
+            jsonViewObject.fail("绑定中奖码信息异常");
+        }
+        return jsonViewObject;
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Log(title = "根据营销码获取活动")
+    @PostMapping("getActivityByMarkCode")
+    public JsonViewObject getActivityByMarkCode(@RequestParam("markCode") String markCode,
+                            @RequestParam("activityType") String activityType
+    ){
+        return mobileInterfaceService.getActivityByMarkCode(markCode, activityType);
+    }
+
+}

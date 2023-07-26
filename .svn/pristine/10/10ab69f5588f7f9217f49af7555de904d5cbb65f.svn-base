@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('单据列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <input type="hidden" id="pdCode" name="pdCode" th:value="${pdCode}">
+                    <input type="hidden" id="rceiveWarehouseCode" name="rceiveWarehouseCode" th:value="${rceiveWarehouseCode}">
+                    <input type="hidden" id="detailId" name="detailId" th:value="${detailId}">
+                    <input type="hidden" id="customer" name="customer" th:value="${customer}">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>[[#{Outbound.Document.Information.Stock-out.doc.No.}]]：</label>
+                                <input type="text" name="orderNo"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search" th:text="#{boxcode.Search}"></i>&nbsp;</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh" th:text="#{boxcode.Reset}"></i>&nbsp;</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('order:order:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('order:order:remove')}]];
+        var prefix = ctx + "order/order";
+
+        $(function() {
+            var options = {
+                url: prefix + "/whstocklist",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "单据",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: 'id',
+                    visible: false
+                },
+                {
+                    field: 'orderNo',
+                    title: [[#{Outbound.Document.Information.Stock-out.doc.No.}]]
+                },
+
+                {
+                    field: 'sendOrganName',
+                    title: [[#{Dealer.Information.Company.Name}]]
+                },
+
+                {
+                    field: 'sendWarehouseName',
+                    // title: '发货仓库名称'
+                    title: [[#{Outbound.Document.Information.Shipping.Warehouse}]]
+                },
+
+                {
+                    field: 'customer',
+                    title: [[#{Outbound.Document.Information.The.NameOf.Client}]]
+                },
+
+                {
+                    field: 'billCreator',
+                    title: [[#{Outbound.Document.Information.Prepared.By}]]
+                },
+                {
+                    field: 'createTime',
+                    title: [[#{Outbound.Document.Information.The.CreatingTime.OfOrder}]]
+                },
+
+               ]
+            };
+            $.table.init(options);
+        });
+
+        /* 添加用户-选择用户-提交 */
+        function submitHandler() {
+            var rows=getSelectData();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var ids=[];
+            rows.forEach(data=>{
+                ids.push(data.orderNo);
+            })
+
+            var data = { "detailId": $("#detailId").val(),"Oids":ids.join()};
+            $.operate.save(prefix + "/savebatchs", data);
+            // });
+
+        }
+
+        function cancelFunction() {
+            location.reload();
+            // var data = { "detailId": $("#detailId").val()};
+            // $.operate.save(prefix + "/cancelchangenumber", data);
+        }
+        /**
+         * 获取选择数据
+         */
+        function getSelectData(){
+            return  $('#bootstrap-table').bootstrapTable('getSelections');
+        }
+
+    </script>
+</body>
+</html>

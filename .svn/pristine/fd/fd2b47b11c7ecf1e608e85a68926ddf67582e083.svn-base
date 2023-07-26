@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('仓库库存实物报表')"/>
+    <th:block th:include="include :: bootstrap-select-css" />
+    <th:block th:include="include :: select2-css" />
+    <script src="https://cdn.staticfile.org/echarts/5.3.3/echarts.min.js"></script>
+
+</head>
+<body class="gray-bg">
+<div class="row" style="margin-top: 8px">
+    <form class="form-horizontal" id="form-manager-add" style="margin-top: 5px">
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" >仓库：</label>
+                <div class="col-sm-9">
+                    <select id="warehouseCode" name="warehouseCode" class="form-control"  th:with="type=${warehouseList}" onchange="warehouseChange(this.value)">
+                        <option value="">请选择仓库</option>
+                        <option th:each="dict : ${type}" th:text="${dict.name}" th:value="${dict.wareHouseCode}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+<div class="row" style="margin-top: 3px;margin-left: 10px;margin-right: 10px">
+    <div class="col-sm-3">
+        <div class="ibox">
+            <div class="ibox-content">
+                <h5 class="m-b-md">总库存(箱)</h5>
+                <h2 class="text-navy" id="totalNum">
+                    <i class="fa fa-play fa-rotate-270" ></i>  0
+                </h2>
+             </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="ibox">
+            <div class="ibox-content">
+                <h5 class="m-b-md">入库数量(箱)</h5>
+                <h2 class="text-navy"  id="inNum">
+                    <i class="fa fa-play fa-rotate-270"></i>  0
+                </h2>
+             </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="ibox">
+            <div class="ibox-content">
+                <h5 class="m-b-md">出库数量(箱)</h5>
+                <h2 class="text-navy" id="outNum">
+                    <i class="fa fa-play fa-rotate-270" ></i>  0
+                </h2>
+             </div>
+        </div>
+    </div>
+
+</div>
+<div class="ibox float-e-margins">
+    <div class="ibox-title">
+        <h5>仓库实物库存报表</h5>
+        <div class="ibox-tools">
+            <a class="collapse-link">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="fa fa-wrench"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-user">
+                <li><a href="#">选项1</a>
+                </li>
+                <li><a href="#">选项2</a>
+                </li>
+            </ul>
+            <a class="close-link">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+    <div>
+        <div class="echarts" id="echarts-line-chart" style="width: 100%;height: 100%;position: absolute"></div>
+    </div>
+</div>
+
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: select2-js" />
+<th:block th:include="include :: bootstrap-select-js" />
+<script type="text/javascript">
+
+    var prefix = ctx + "report";
+
+    var xNames =[];
+    var yValues = [];
+    var pieDatas = [];
+
+
+    $(function () {
+        init();
+    });
+
+
+    function init(){
+        var lineChart = echarts.init(document.getElementById("echarts-line-chart"));
+        setTimeout(function () {
+            option = {
+                legend: {},
+                tooltip: {
+                    trigger: 'axis',
+                    showContent: false
+                },
+                label: {
+                    show: true
+                },
+
+                dataset: {
+                    source: [
+                    ]
+                },
+                xAxis: { type: 'category',
+                    data:xNames
+                },
+                yAxis: { gridIndex: 0 },
+                grid: { top: '55%' },
+                series: [
+                    {
+                        type: 'bar',
+                        smooth: true,
+                        seriesLayoutBy: 'row',
+                        emphasis: { focus: 'series' },
+                        data:yValues,
+                        // itemStyle: {
+                        //     normal: {
+                        //         color: function(params) {
+                        //             // 给出颜色组
+                        //             var colorList = ['#333399', '#74608f', '#d7a02b', '#c8ba23'];
+                        //             //循环调用
+                        //             return colorList[params.dataIndex%colorList.length]
+                        //         },
+                        //     }
+                        // },
+                    },
+
+
+                    {
+                        type: 'pie',
+                        id: 'pie',
+                        radius: '30%',
+                        center: ['50%', '25%'],
+                        emphasis: {
+                            focus: 'self'
+                        },
+                        label: {
+                            formatter: '{b}: {@2012} ({d}%)'
+                        },
+                        encode: {
+                            itemName: 'product',
+                            value: '2012',
+                            tooltip: '2012',
+
+                        },
+                        data:pieDatas
+                    }
+                ]
+            };
+            lineChart.on('updateAxisPointer', function (event) {
+                const xAxisInfo = event.axesInfo[0];
+                if (xAxisInfo) {
+                    const dimension = xAxisInfo.value + 1;
+                    lineChart.setOption({
+                        series: {
+                            id: 'pie',
+                            label: {
+                                formatter: '{b}: {@[' + dimension + ']} ({d}%)'
+                            },
+                            encode: {
+                                value: dimension,
+                                tooltip: dimension
+                            }
+                        }
+                    });
+                }
+            });
+            lineChart.setOption(option);
+        });
+
+    }
+
+    function warehouseChange(code){
+        console.log(code);
+
+        var url = prefix + "/warehouseDetailReport";
+        $.operate.post(url, {
+            "wareHouseCode": code,
+        }, function (result) {
+            console.log(result)
+            if (result.code == 0){
+                xNames = result.data.pdNameList;
+                yValues  = result.data.pdNumList;
+                pieDatas = result.data.nameValueList;
+                var totalStock = result.data.totalStock;
+                var inWarehouse = result.data.inWarehouse;
+                var outWarehouse = result.data.outWarehouse;
+                console.log(totalStock);
+                console.log(inWarehouse);
+                console.log(outWarehouse);
+                var total = "<i class=\"fa fa-play fa-rotate-270\" ></i>  "+ totalStock;
+                var inNum = "<i class=\"fa fa-play fa-rotate-270\" ></i>  "+ inWarehouse;
+                var outNum = "<i class=\"fa fa-play fa-rotate-270\" ></i>  "+ outWarehouse;
+                $("#totalNum").html(total);
+                $("#inNum").html(inNum);
+                $("#outNum").html(outNum);
+                init();
+            }
+        });
+
+
+
+    }
+
+    //bootstrap select插件多选的change事件
+    $('#warehouseCode').on('changed.bs.select',function () {
+        // $('#pdName').val($('#warehouseCode').text());
+        console.log($('#warehouseCode').text())
+    });
+
+
+
+
+
+
+</script>
+</body>
+</html>

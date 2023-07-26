@@ -1,0 +1,215 @@
+login=login
+login.username=username
+login.password=password
+login.remember=remember
+index.welcome=welcome LeiLi manager system
+index.main.title=LeiLiSystem
+boxApply.number=Application No\uFF1A
+boxApply.search=Search
+boxApply.reset=Reset
+boxApply.add=Add
+boxApply.maxDownload=Set The Maximum Number Of Downloads
+boxApply.codepassword=Code Package Password
+
+#\u7BB1\u7801\u7533\u8BF7
+boxcode.Application.No=Application No.
+boxcode.Search=Search
+boxcode.Reset=Reset
+boxcode.Add=Add
+boxcode.Modify=Modify
+boxcode.Delete=Delete
+boxcode.Code.Package.Password=Code Package Password
+boxcode.Set.The.Maximum.Number.Of.Downloads=Set The Maximum Number Of Downloads
+boxcode.Creator=Creator
+boxcode.Processing.Status=Processing Status
+boxcode.Format.Of.Generated.Files=Format Of Generated Files
+boxcode.Application.Data=Application Data
+boxcode.Whether.To.Download=Whether To Download
+boxcode.Download.Times=Download Times
+boxcode.Generated.Amount=Generated Amount
+boxcode.Total.Generated.Amount=Total Generated Amount
+boxcode.Creation.Time=Creation Time
+boxcode.Modified.Time=Modified Time
+boxcode.Operate=Operate
+boxcode.Complement.Rate=Complement Rate
+boxcode.Letter.Code.Ratio=Letter Code Ratio
+boxcode.Coating.Type=Coating Type
+boxcode.Number.Of.Complements=Number Of Complements
+boxcode.Add.Application.No=Add Box Code Application
+#\u6D3B\u52A8\u7BA1\u7406
+activity.Id=Activity Id
+activity.Title=Activity Title
+activity.Type.Of.Activity=Type Of Activity
+activity.Type.All=All
+activity.Type.Rewards.Points=Rewards Points
+activity.Type.Big.Turntable=Big Turntable
+activity.Type.Coupon=Coupon
+activity.Type.Other=Other
+activity.Status=Activity Status
+activity.Remark=Remark
+activity.Description=Activity Description
+activity.Product.Code=Product Code
+activity.Product.Name=Product Name
+activity.Starting.Time=Starting Time
+activity.End.Time=End Time
+activity.Configuration=Configuration
+activity.Edit=Edit
+activity.Edit.Modify.Event.Management=Modify Event Management
+activity.Edit.Edit.Activity.Image=Edit Activity Image
+activity.Add.Event.Management=Add Event Management
+activity.Add.Event.Management.Product=Product
+activity.Add.Event.Management.Activity.Time=Activity Time
+activity.Add.Event.Management.Award.Description=Award Description
+activity.Add.Event.Management.Please.Enter.The.Announcement.Content=Please Enter The Announcement Content
+
+#\u53C2\u52A0\u6D3B\u52A8\u8BB0\u5F55
+activity.Records.Code=Code
+activity.Records.Export=Export
+activity.Records.Marketing.Code=Marketing Code
+activity.Records.Type.Of.Activity=Type Of Activity
+activity.Records.Participation.Time=Participation Time
+activity.Records.Activity.address=Activity address
+activity.Records.Code.Type=Code Type
+
+#\u5151\u5956\u6838\u9500
+redemption.Winning.Code=Winning Code
+redemption.Whether.To.Exchange=Whether To Exchange
+redemption.Whether.To.Exchange.Not.Redeemed=Not Redeemed
+redemption.Whether.To.Exchange.Redeemed=Redeemed
+redemption.Redeem.Place=Redeem Place
+redemption.Operator.Of.The.Redeem=Operator Of The Redeem
+redemption.Activity.Name=Activity Name
+redemption.Redeem.Prizes=Redeem Prizes
+redemption.WinnerS.Phone.Number=Winner'S Phone Number
+redemption.Redeem.Time=Redeem Time
+
+#\u5151\u6362\u79EF\u5206\u8BB0\u5F55
+redeem.Record.Phone.Number=Phone Number
+redeem.Record.Redeem.Time=Redeem   Time
+redeem.Record.Whether.To.Redeem.Points=Whether To Redeem Points
+redeem.Record.Redeem.Points=Redeem Points
+
+#\u79EF\u5206\u5151\u6362\u8BA2\u5355
+redemption.OrderPhone.Number=Phone Number
+redemption.OrderOrder.No=Order No.
+redemption.OrderShipping.Address=Shipping Address
+redemption.OrderReceiving.Method=Receiving Method
+redemption.OrderHome.Address=Home Address
+
+#\u8425\u9500\u7801\u72B6\u6001\u65E5\u5FD7
+marking.code.log.code.status=Code Status
+marking.code.log.state=State
+marking.code.log.scanning.time=Marketing Code Scanning Time
+marking.code.log.status.Inactivated=Activated
+marking.code.log.status.Activated=Activated
+marking.code.log.status.Used=Used
+
+#\u6D3B\u52A8\u57FA\u7840\u914D\u7F6E
+activity.Configuration.ActivityId=Activity Id
+activity.Configuration.Turntable.Angle=Turntable Angle
+activity.Configuration.Award.Level=Award Level
+activity.Configuration.Prize.Name=Prize Name
+activity.Configuration.Number.Of.Prizes=Number Of Prizes
+activity.Configuration.Remaining.Prize.Data=Remaining Prize Data
+activity.Configuration.The.Weight.Value.Of.Winning.The.Prize=The Weight Value Of Winning The Prize
+activity.Configuration.Probability.Of.Winning=Probability Of Winning(%)
+activity.Configuration.Whether.There.Is.A.Physical.Prize=Whether There Is A Physical Prize
+activity.Configuration.No.Physical.Prize=No Physical Prize
+activity.Configuration.There.Are.Physical.Prizes.Available=There Are Physical Prizes Available
+activity.Configuration.Add=Add
+
+#\u4EA7\u54C1\u4FE1\u606F
+product.Common.Name=Common Name
+product.Import.Data=Import Data
+product.Specification=Specification
+product.Registration.Code=Registration Code
+product.Dosage.Form=Dosage Form
+product.Main.Ingredient=Main Ingredient
+product.Performance.Factor=Performance Factor
+product.Regular.or.Custom=Regular/Custom
+product.Edit.Product.Image=Edit Product Image
+product.Box.Weight=Box Weight (Kg/L)
+
+#\u7ECF\u9500\u5546\u4FE1\u606F
+Dealer.Information.Company.Name=Company Name
+Dealer.Information.Company.Status=Company Status
+Dealer.Information.Normal=Normal
+Dealer.Information.Disabled=Disabled
+Dealer.Information.ExpandOrCollapse=Expand/Collapse
+Dealer.Information.Institution.Code=Institution Code
+Dealer.Information.Province=Province
+Dealer.Information.City=City
+Dealer.Information.Agent.Territory=Agent Territory
+Dealer.Information.Institutional.Level=Institutional Level
+Dealer.Information.State=State
+Dealer.Information.Warehouse.Settings=Warehouse Settings
+Dealer.Information.Warehouse.Code=Warehouse Code
+Dealer.Information.Warehouse.Name=Warehouse Name
+Dealer.Information.Person.In.Charge=Person In Charge
+Dealer.Information.Agent.Products=Agent Products
+
+#\u51FA\u5E93\u5355\u636E\u4FE1\u606F
+Outbound.Document.Information.Stock-out.doc.No.=Stock-out doc No.
+Outbound.Document.Information.Shipping.Warehouse=Shipping Warehouse
+Outbound.Document.Information.The.NameOf.Client=The Name Of Client
+Outbound.Document.Information.The.CreatingTime.OfOrder=The Creating Time Of Order
+Outbound.Document.Information.Shipper=Shipper
+Outbound.Document.Information.Review.The.Information=Review The Information
+Outbound.Document.Information.Prepared.By=Prepared By
+Outbound.Document.Information.Product.Details=Product Details
+Outbound.Document.Information.Order.Detail.Documents=Order Detail Documents
+Outbound.Document.Information.Document.Information=Document Information
+Outbound.Document.Information.Stock-out.docNo.=Stock-out doc No.
+Outbound.Document.Information.Shipping.Agency=Shipping Agency
+Outbound.Document.Information.Document.Details=Document Details
+Outbound.Document.Information.Serial.Number=Serial Number
+Outbound.Document.Information.Product.Name=Product Name
+Outbound.Document.Information.Quantity=Quantity
+Outbound.Document.Information.Unit=Unit
+Outbound.Document.Information.Batch.Number=Batch Number
+Outbound.Document.Information.Auxiliary.Attribute=Auxiliary Attribute
+Outbound.Document.Information.Specification.Number=Specification Number
+Outbound.Document.Information.View.Barcode=View Barcode
+Outbound.Document.Information.Barcode.Details=Barcode Details
+Outbound.Document.Information.Barcode=Barcode
+Outbound.Document.Information.Start.Code=Start Code
+Outbound.Document.Information.End.Code=End Code
+Outbound.Document.Information.Number.OfBoxes=Number Of Boxes
+Outbound.Document.Information.Manual.Picking=Manual Picking
+Outbound.Document.Information.Select.Batch=Select Batch
+
+
+#\u5E93\u5B58\u4FE1\u606F
+inventory.Product.Number=Product Number
+inventory.Product.Name=Product Name
+inventory.Warehouse.Name=Warehouse Name
+inventory.Inventory.Loss=Inventory Loss
+inventory.Deficit.Preservation=Deficit Preservation	
+inventory.Inventory.Quantity=Inventory Quantity	
+inventory.Inventory.Surplus=Inventory Surplus
+inventory.Overage.Amount=Overage Amount	
+inventory.Surplus.Preservation=Surplus Preservation	
+inventory.Batch=Batch
+inventory.Stock.Quantity/Box=Stock Quantity/Box
+inventory.Weight=Weight
+inventory.Update.Time=Update Time
+
+
+#\u5165\u5E93\u5355\u636E\u4FE1\u606F
+Inbound.Document.Information.Stock-in.doc.Number=Stock-in doc Number
+Inbound.Document.Information.Receiver.Code=Receiver Code
+Inbound.Document.Information.Receiving.Warehouse.Name=Receiving Warehouse Name
+
+#\u6D88\u8D39\u8005\u4FE1\u606F\u65E5\u5FD7
+Consumer.Information.Log.Code.Scanning.Address=Code Scanning Address
+Consumer.Information.Log.Dealer=Dealer
+Consumer.Information.Log.Telephone=Telephone
+Consumer.Information.Log.Sales.Address=Sales Address
+Consumer.Information.Log.Barcode=Barcode
+Consumer.Information.Log.Scan.Time=Scan Time
+Consumer.Information.Log.Cross-Region.Sell.Status=Cross-Region Sell Status
+boxcode.Application.Amount=Application Amount
+boxcode.Application.Coating.Type=Application Type
+activity.Management=Activity Management
+please.select=Please select
+redemption.Winner'S.Phone.Number=Winner'S Phone Number

@@ -1,0 +1,13 @@
+
+body.scan{
+    background: url(../img/back03.png) no-repeat center fixed;
+}
+
+.product{
+    background-color: #FFFFFF;
+    border-radius: 25px;
+}
+
+
+
+

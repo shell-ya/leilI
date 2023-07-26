@@ -1,0 +1,84 @@
+package com.linkwin.order.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.order.domain.BillOrder;
+import com.linkwin.order.domain.BillOrderDetail;
+import com.linkwin.vo.FwFlowVo;
+
+/**
+ * 单据Service接口
+ * 
+ * @author ruoyi
+ * @date 2022-05-25
+ */
+public interface IBillOrderService 
+{
+    /**
+     * 查询单据
+     * 
+     * @param id 单据主键
+     * @return 单据
+     */
+    public BillOrder selectBillOrderById(Long id);
+
+    /**
+     * 查询单据列表
+     * 
+     * @param billOrder 单据
+     * @return 单据集合
+     */
+    public List<BillOrder> selectBillOrderList(BillOrder billOrder);
+
+    /**
+     * 新增单据
+     * 
+     * @param billOrder 单据
+     * @return 结果
+     */
+    public int insertBillOrder(BillOrder billOrder);
+
+    /**
+     * 修改单据
+     * 
+     * @param billOrder 单据
+     * @return 结果
+     */
+    public int updateBillOrder(BillOrder billOrder);
+
+    /**
+     * 批量删除单据
+     * 
+     * @param ids 需要删除的单据主键集合
+     * @return 结果
+     */
+    public int deleteBillOrderByIds(String ids);
+
+    /**
+     * 删除单据信息
+     * 
+     * @param id 单据主键
+     * @return 结果
+     */
+    public int deleteBillOrderById(Long id);
+
+    public AjaxResult dealOutBillUpload(List<Map<String, Object>> map);
+
+    public AjaxResult cancelUploadCodeFile(List<Map<String, Object>> map);
+
+    public Map<String, Object> search(String code);
+    public AjaxResult dealInBillUpload(List<Map<String, Object>> map) ;
+
+    public BillOrderDetail selectBillOrderDetailById(Long id);
+    public BillOrder selectBillOrderByOrderNo(String orderNo);
+
+    public List<BillOrder> selectImBillOrderByPdCodeAndRceiveWarehouseCode(String customer,String rceiveWarehouseCode,String pdCode);
+
+    public AjaxResult savebatchs(Long detailId,String Oids);
+
+    public List<FwFlowVo> selectOrderFlow(String barCode);
+
+    List<BillOrder> selectBillOrderListByDeptIds(BillOrder billOrder, List<Long> deptIds);
+}

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.trace.mapper.ConsumerLogMapper">
+    
+    <resultMap type="ConsumerLog" id="ConsumerLogResult">
+        <result property="id"    column="id"    />
+        <result property="scanTime"    column="scan_time"    />
+        <result property="openId"    column="open_id"    />
+        <result property="phone"    column="phone"    />
+        <result property="address"    column="address"    />
+        <result property="code"    column="code"    />
+        <result property="codeType"    column="code_type"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="orderAddress"    column="order_address"    />
+        <result property="fwStatus"    column="fw_status"    />
+        <result property="pdCode"    column="pd_code"    />
+        <result property="pdName"    column="pd_name"    />
+        <result property="organCode"    column="organ_code"    />
+        <result property="organName"    column="organ_name"    />
+    </resultMap>
+
+
+
+
+    <sql id="selectConsumerLogVo">
+        select id, scan_time, open_id, phone, address, code, code_type, create_time, remark,order_address,fw_status,pd_code,pd_name,organ_code,organ_name from consumer_log
+    </sql>
+
+    <select id="selectConsumerLogList" parameterType="ConsumerLog" resultMap="ConsumerLogResult">
+        <include refid="selectConsumerLogVo"/>
+        <where>  
+            <if test="scanTime != null "> and scan_time = #{scanTime}</if>
+            <if test="openId != null  and openId != ''"> and open_id = #{openId}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="address != null  and address != ''"> and  address like concat('%', #{address}, '%')</if>
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="codeType != null  and codeType != ''"> and code_type = #{codeType}</if>
+            <if test="orderAddress != null  and orderAddress != ''"> and order_address = #{orderAddress}</if>
+            <if test="fwStatus != null  and fwStatus != ''"> and fw_status = #{fwStatus}</if>
+            <if test="pdCode != null  and pdCode != ''"> and pd_code = #{pdCode}</if>
+            <if test="pdName != null  and pdName != ''"> and pd_name = #{pdName}</if>
+            <if test="organCode != null  and organCode != ''"> and organ_code = #{organCode}</if>
+            <if test="organName != null  and organName != ''"> and organ_name = #{organName}</if>
+        </where>
+        order by id desc
+    </select>
+    
+    <select id="selectConsumerLogById" parameterType="Long" resultMap="ConsumerLogResult">
+        <include refid="selectConsumerLogVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectConsumerLogByDeptId"  resultMap="ConsumerLogResult">
+        <include refid="selectConsumerLogVo"/>
+        <where>
+            <if test="consumerLog.scanTime != null "> and scan_time = #{consumerLog.scanTime}</if>
+            <if test="consumerLog.openId != null  and consumerLog.openId != ''"> and open_id = #{consumerLog.openId}</if>
+            <if test="consumerLog.phone != null  and consumerLog.phone != ''"> and phone = #{consumerLog.phone}</if>
+            <if test="consumerLog.address != null  and consumerLog.address != ''"> and  address like concat('%', #{consumerLog.address}, '%')</if>
+            <if test="consumerLog.code != null  and consumerLog.code != ''"> and code = #{consumerLog.code}</if>
+            <if test="consumerLog.codeType != null  and consumerLog.codeType != ''"> and code_type = #{consumerLog.codeType}</if>
+            <if test="consumerLog.orderAddress != null  and consumerLog.orderAddress != ''"> and order_address = #{consumerLog.orderAddress}</if>
+            <if test="consumerLog.fwStatus != null  and consumerLog.fwStatus != ''"> and fw_status = #{consumerLog.fwStatus}</if>
+            <if test="consumerLog.pdCode != null  and consumerLog.pdCode != ''"> and pd_code = #{consumerLog.pdCode}</if>
+            <if test="consumerLog.pdName != null  and consumerLog.pdName != ''"> and pd_name = #{consumerLog.pdName}</if>
+            <if test="deptIds != null and deptIds.size() > 0 ">
+                and organ_code in
+                <foreach collection="deptIds" item="dept" close=")" open="(" separator=",">
+                    #{dept}
+                </foreach>
+            </if>
+            <if test="consumerLog.organName != null  and consumerLog.organName != ''"> and organ_name = #{consumerLog.organName}</if>
+        </where>
+        order by id desc
+    </select>
+
+    <insert id="insertConsumerLog" parameterType="ConsumerLog">
+        insert into consumer_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="scanTime != null">scan_time,</if>
+            <if test="openId != null">open_id,</if>
+            <if test="phone != null">phone,</if>
+            <if test="address != null">address,</if>
+            <if test="code != null">code,</if>
+            <if test="codeType != null">code_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="orderAddress != null">order_address,</if>
+            <if test="fwStatus != null">fw_status,</if>
+            <if test="pdCode != null">pd_code,</if>
+            <if test="pdName != null">pd_name,</if>
+            <if test="organCode != null">organ_code,</if>
+            <if test="organName != null">organ_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="scanTime != null">#{scanTime},</if>
+            <if test="openId != null">#{openId},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="address != null">#{address},</if>
+            <if test="code != null">#{code},</if>
+            <if test="codeType != null">#{codeType},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="orderAddress != null">#{orderAddress},</if>
+            <if test="fwStatus != null">#{fwStatus},</if>
+            <if test="pdCode != null">#{pdCode},</if>
+            <if test="pdName != null">#{pdName},</if>
+            <if test="organCode != null">#{organCode},</if>
+            <if test="organName != null">#{organName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateConsumerLog" parameterType="ConsumerLog">
+        update consumer_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="scanTime != null">scan_time = #{scanTime},</if>
+            <if test="openId != null">open_id = #{openId},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="codeType != null">code_type = #{codeType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="orderAddress != null">order_address = #{orderAddress},</if>
+            <if test="fwStatus != null">fw_status = #{fwStatus},</if>
+            <if test="pdCode != null">pd_code = #{pdCode},</if>
+            <if test="pdName != null">pd_name = #{pdName},</if>
+            <if test="organCode != null">organ_code = #{organCode},</if>
+            <if test="organName != null">organ_name = #{organName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteConsumerLogById" parameterType="Long">
+        delete from consumer_log where id = #{id}
+    </delete>
+
+    <delete id="deleteConsumerLogByIds" parameterType="String">
+        delete from consumer_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+        <insert id="batchInsert">
+            insert into consumer_log (scan_time, open_id, phone, address, code, code_type, create_time, remark,order_address,fw_status,pd_code,pd_name,organ_code,organ_name ) values
+            <foreach item="item" index="index" collection="dataList" separator=",">
+                (#{item.scanTime},#{item.openId},#{item.phone},#{item.address},#{item.code},#{item.codeType},#{item.createTime},#{item.remark},#{item.orderAddress},#{item.fwStatus},#{item.pdCode},#{item.pdName},#{item.organCode},#{item.organName})
+            </foreach>
+        </insert>
+
+</mapper>

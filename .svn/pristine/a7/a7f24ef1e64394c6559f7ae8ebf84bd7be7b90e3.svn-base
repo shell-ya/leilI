@@ -1,0 +1,178 @@
+package com.linkwin.apply.service.impl;
+
+import java.util.*;
+
+import com.linkwin.apply.domain.*;
+import com.linkwin.apply.mapper.QrCodePreMapper;
+import com.linkwin.apply.service.IBarCodeSeedService;
+import com.linkwin.apply.service.IQrCodePreService;
+import com.linkwin.common.utils.DateUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.linkwin.common.core.text.Convert;
+
+/**
+ * 二维码预生成Service业务层处理
+ * 
+ * @author ruoyi
+ * @date 2022-07-21
+ */
+@Slf4j
+@Service
+public class QrCodePreServiceImpl implements IQrCodePreService
+{
+    @Autowired
+    private QrCodePreMapper qrCodePreMapper;
+
+
+    @Autowired
+    private IBarCodeSeedService barCodeSeedService;
+
+    /**
+     * 查询二维码预生成
+     * 
+     * @param id 二维码预生成主键
+     * @return 二维码预生成
+     */
+    @Override
+    public QrCodePre selectQrCodePreById(Long id)
+    {
+        return qrCodePreMapper.selectQrCodePreById(id);
+    }
+
+    /**
+     * 查询二维码预生成列表
+     * 
+     * @param qrCodePre 二维码预生成
+     * @return 二维码预生成
+     */
+    @Override
+    public List<QrCodePre> selectQrCodePreList(QrCodePre qrCodePre)
+    {
+        return qrCodePreMapper.selectQrCodePreList(qrCodePre);
+    }
+
+    /**
+     * 新增二维码预生成
+     * 
+     * @param qrCodePre 二维码预生成
+     * @return 结果
+     */
+    @Override
+    public int insertQrCodePre(QrCodePre qrCodePre)
+    {
+        qrCodePre.setCreateTime(DateUtils.getNowDate());
+        return qrCodePreMapper.insertQrCodePre(qrCodePre);
+    }
+
+    /**
+     * 修改二维码预生成
+     * 
+     * @param qrCodePre 二维码预生成
+     * @return 结果
+     */
+    @Override
+    public int updateQrCodePre(QrCodePre qrCodePre)
+    {
+        return qrCodePreMapper.updateQrCodePre(qrCodePre);
+    }
+
+    /**
+     * 批量删除二维码预生成
+     * 
+     * @param ids 需要删除的二维码预生成主键
+     * @return 结果
+     */
+    @Override
+    public int deleteQrCodePreByIds(String ids)
+    {
+        return qrCodePreMapper.deleteQrCodePreByIds(Convert.toStrArray(ids));
+    }
+
+    /**
+     * 删除二维码预生成信息
+     * 
+     * @param id 二维码预生成主键
+     * @return 结果
+     */
+    @Override
+    public int deleteQrCodePreById(Long id)
+    {
+        return qrCodePreMapper.deleteQrCodePreById(id);
+    }
+
+
+    @Override
+    public List<String> generateRandomCode(QrCodePre qrCodePre,int randomCodeLength, int step , int year) throws Exception {
+        List<String> randomCodes=new ArrayList<>();
+        try {
+            //获取种子
+            //
+            BarCodeSeed seedIfNullAdd = barCodeSeedService.getSeedIfNullAdd();
+            final long randomMax = (long) Math.pow(10, randomCodeLength);//随机数最大值
+            Random random = new Random();
+            int generateNum=1000;//每次生成码数量
+            StringBuilder randomVal = new StringBuilder();
+            BarCodeSeed updateSeed=new BarCodeSeed();
+            HashSet<String> set=new HashSet<>();
+            updateSeed.setId(seedIfNullAdd.getId());
+            Integer start = seedIfNullAdd.getStartNum();
+            String s=String.valueOf(year);
+             String prefix=s.substring(s.length()-1,s.length());
+            for (int i=0;i<generateNum;i++){
+                start+= random.nextInt(step);
+                if (start>=randomMax){
+                    updateSeed.setIsEnd(BoxCodeSeedEnum.IS_COMPLETED_COMPLETED.getValue());
+                    break;
+                }
+                randomVal.append(start);
+                //长度不足补0
+                while(randomVal.length() < randomCodeLength){
+                    randomVal.insert(0, "0");
+                }
+                randomVal.insert(0,seedIfNullAdd.getSeed());
+                randomVal.insert(0,prefix);
+                set.add(randomVal.toString());
+                randomVal.setLength(0);
+                start++;
+            }
+            updateSeed.setStartNum(start);
+            updateSeed.setModifyTime(new Date());
+            updateSeed.setYear(seedIfNullAdd.getYear());
+            qrCodePre.setSeed(seedIfNullAdd.getSeed());
+            int i = barCodeSeedService.updateBarCodeSeed(updateSeed);
+            randomCodes.addAll(set);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return randomCodes;
+    }
+
+    @Override
+    public int updateQrCodePreApplyId(long applyId, int year, int count) throws RuntimeException {
+        int row = qrCodePreMapper.updateQrCodePreApplyId(applyId,year,count);
+        if (row!=count){
+            log.error("标记预生成箱码异常，申请编号id="+applyId);
+            throw new RuntimeException("标记预生成箱码异常，申请编号id="+applyId);
+        }
+        return row;
+    }
+
+    @Override
+    public int insertBarCode(long applyId, int year, String tableName,String startStr,String endStr,Integer startNum,Integer endNum) {
+        return qrCodePreMapper.insertBarCode(applyId,year,tableName,startStr,endStr,startNum,endNum);
+    }
+
+    @Override
+    public int deleteByApplyId(long applyId) {
+        return qrCodePreMapper.deleteByApplyId(applyId);
+    }
+
+    @Override
+    public List<QrCodePre> selectByApplyId(Long applyId) {
+        return qrCodePreMapper.selectByApplyId(applyId);
+    }
+
+
+}

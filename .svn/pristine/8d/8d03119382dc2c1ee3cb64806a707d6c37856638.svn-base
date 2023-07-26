@@ -1,0 +1,6 @@
+login=login
+login.username=username
+login.password=password
+login.remember=remember
+index.welcome=welcome LeiLi manager system
+index.main.title=LeiLiSystem

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('防伪查询记录列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>[[#{activity.Product.Code}]]：</label>
+                                <input type="text" name="pdCode"/>
+                            </li>
+                            <li>
+                                <label>[[#{activity.Records.Code}]]：</label>
+                                <input type="text" name="code"/>
+                            </li>
+
+                            <li>
+                                <label>[[#{inventory.Batch}]]：</label>
+                                <input type="text" name="batchNo"/>
+                            </li>
+<!--                            <li>-->
+<!--                                <label>第一次查询时间：</label>-->
+<!--                                <input type="text" class="time-input" placeholder="请选择第一次查询时间" name="firstQueryTime"/>-->
+<!--                            </li>-->
+                            <li>
+                                <label>[[#{Outbound.Document.Information.Product.Name}]]：</label>
+                                <input type="text" name="pdName"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()" th:text="#{boxcode.Search}"><i class="fa fa-search"></i>&nbsp;</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()" th:text="#{boxcode.Reset}"><i class="fa fa-refresh"></i>&nbsp;</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="trace:fwquery:export">
+                    <i class="fa fa-download"></i> [[#{activity.Records.Export}]]
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var codeTypeDict = [[${@dict.getType('code_type',#locale.language+'_'+#locale.country)}]];
+        var prefix = ctx + "trace/fwQueryLog";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                // modalName: "防伪查询记录",
+                modalName: [[#{Anti-Counterfeiting.Query.Record}]],
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '${comment}',
+                    visible: false
+                },
+                {
+                    field: 'pdName',
+                    title: [[#{Outbound.Document.Information.Product.Name}]]
+                },
+                {
+                    field: 'pdCode',
+                    title: [[#{activity.Product.Code}]]
+                },
+                {
+                    field: 'code',
+                    title: [[#{activity.Records.Code}]]
+                },
+                {
+                    field: 'codeType',
+                    title: [[#{activity.Records.Code.Type}]],
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(codeTypeDict, value);
+                    }
+                },
+                {
+                    field: 'queryNum',
+                    title: [[#{query.log.Numberofqueries}]]
+                },
+                {
+                    field: 'batchNo',
+                    title: [[#{inventory.Batch}]]
+                },
+                {
+                    field: 'firstQueryTime',
+                    title: [[#{query.log.Firstquerytime}]]
+                },
+                {
+                    title: [[#{boxcode.Operate}]],
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

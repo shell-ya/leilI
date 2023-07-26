@@ -1,0 +1,554 @@
+login=login
+login.username=username
+login.password=password
+login.remember=remember
+index.welcome=welcome LeiLi manager system
+index.main.title=LeiLiSystem
+
+success = Operation succeeded
+failure = Operation failed
+login.expired = Not logged in or login timed out. Please log in again.
+login.error = Incorrect username or password.
+
+boxApply.number=Application No\uFF1A
+boxApply.search=Search
+boxApply.reset=Reset
+boxApply.add=Add
+boxApply.maxDownload=Set The Maximum Number Of Downloads
+boxApply.codepassword=Code Package Password
+
+maxdownload.select.one=Please select one record.
+maxdownload.input.maxDownloadTimes=Please input the maximum download times.
+maxdownload.input.correctNumber=Please input a correct number.
+maxdownload.maxDownloadTimes.limit=The maximum download times cannot be greater than 10.
+maxdownload.maxDownloadTimes.lessThanDownloaded=The maximum download times cannot be less than the downloaded times.
+maxdownload.update.exception=Failed to update.
+
+
+#\u7BB1\u7801\u7533\u8BF7
+boxcode.Application.No=Application No.
+boxcode.Search=Search
+boxcode.Reset=Reset
+boxcode.Add=Add
+boxcode.Modify=Modify
+boxcode.Delete=Delete
+boxcode.Code.Package.Password=Code Package Password
+bxocode.download=Download
+boxcode.Set.The.Maximum.Number.Of.Downloads=Set The Maximum Number Of Downloads
+boxcode.Creator=Creator
+boxcode.Processing.Status=Processing Status
+boxcode.Format.Of.Generated.Files=Format Of Generated Files
+boxcode.Application.Data=Application Data
+boxcode.Whether.To.Download=Whether To Download
+boxcode.Download.Times=Download Times
+boxcode.Generated.Amount=Generated Amount
+boxcode.Total.Generated.Amount=Total Generated Amount
+boxcode.Creation.Time=Creation Time
+boxcode.Modified.Time=Modified Time
+boxcode.Operate=Operate
+boxcode.Complement.Rate=Complement Rate
+boxcode.Letter.Code.Ratio=Letter Code Ratio
+boxcode.Coating.Type=Coating Type
+boxcode.Number.Of.Complements=Number Of Complements
+boxcode.Add.Application.No=Add Box Code Application
+#\u6D3B\u52A8\u7BA1\u7406
+activity.Id=Activity Id
+activity.Title=Activity Title
+activity.Type.Of.Activity=Type Of Activity
+activity.Type.All=All
+activity.Type.Rewards.Points=Rewards Points
+activity.Type.Big.Turntable=Big Turntable
+activity.Type.Coupon=Coupon
+activity.Type.Other=Other
+activity.Status=Activity Status
+activity.Remark=Remark
+activity.Description=Activity Description
+activity.Product.Code=Product Code
+activity.Product.Name=Product Name
+activity.Starting.Time=Starting Time
+activity.End.Time=End Time
+activity.Configuration=Configuration
+activity.Edit=Edit
+activity.Edit.Modify.Event.Management=Modify Event Management
+activity.Edit.Edit.Activity.Image=Edit Activity Image
+activity.Add.Event.Management=Add Event Management
+activity.Add.Event.Management.Product=Product
+activity.Add.Event.Management.Activity.Time=Activity Time
+activity.Add.Event.Management.Award.Description=Award Description
+activity.Add.Event.Management.Please.Enter.The.Announcement.Content=Please Enter The Announcement Content
+activity.confirm.enable = Are you sure you want to enable the activity?
+activity.confirm.disable = Are you sure you want to disable the activity?
+
+#\u53C2\u52A0\u6D3B\u52A8\u8BB0\u5F55
+activity.Records.Code=Code
+activity.Records.Export=Export
+activity.Records.Marketing.Code=Marketing Code
+activity.Records.Type.Of.Activity=Type Of Activity
+activity.Records.Participation.Time=Participation Time
+activity.Records.Activity.address=Activity address
+activity.Records.Code.Type=Code Type
+
+#\u5151\u5956\u6838\u9500
+redemption.Winning.Code=Winning Code
+redemption.Whether.To.Exchange=Whether To Exchange
+redemption.Whether.To.Exchange.Not.Redeemed=Not Redeemed
+redemption.Whether.To.Exchange.Redeemed=Redeemed
+redemption.Redeem.Place=Redeem Place
+redemption.Operator.Of.The.Redeem=Operator Of The Redeem
+redemption.Activity.Name=Activity Name
+redemption.Redeem.Prizes=Redeem Prizes
+redemption.WinnerS.Phone.Number=Winner'S Phone Number
+redemption.Redeem.Time=Redeem Time
+
+#\u5151\u6362\u79EF\u5206\u8BB0\u5F55
+redeem.Record.Phone.Number=Phone Number
+redeem.Record.Redeem.Time=Redeem   Time
+redeem.Record.Whether.To.Redeem.Points=Whether To Redeem Points
+redeem.Record.Redeem.Points=Redeem Points
+
+#\u79EF\u5206\u5151\u6362\u8BA2\u5355
+redemption.OrderPhone.Number=Phone Number
+redemption.OrderOrder.No=Order No.
+redemption.OrderShipping.Address=Shipping Address
+redemption.OrderReceiving.Method=Receiving Method
+redemption.OrderHome.Address=Home Address
+
+#\u8425\u9500\u7801\u72B6\u6001\u65E5\u5FD7
+marking.code.log.code.status=Code Status
+marking.code.log.state=State
+marking.code.log.scanning.time=Marketing Code Scanning Time
+marking.code.log.status.Inactivated=Activated
+marking.code.log.status.Activated=Activated
+marking.code.log.status.Used=Used
+
+#\u6D3B\u52A8\u57FA\u7840\u914D\u7F6E
+activity.Configuration.ActivityId=Activity Id
+activity.Configuration.Turntable.Angle=Turntable Angle
+activity.Configuration.Award.Level=Award Level
+activity.Configuration.Prize.Name=Prize Name
+activity.Configuration.Number.Of.Prizes=Number Of Prizes
+activity.Configuration.Remaining.Prize.Data=Remaining Prize Data
+activity.Configuration.The.Weight.Value.Of.Winning.The.Prize=The Weight Value Of Winning The Prize
+activity.Configuration.Probability.Of.Winning=Probability Of Winning(%)
+activity.Configuration.Whether.There.Is.A.Physical.Prize=Whether There Is A Physical Prize
+activity.Configuration.No.Physical.Prize=No Physical Prize
+activity.Configuration.There.Are.Physical.Prizes.Available=There Are Physical Prizes Available
+activity.Configuration.Add=Add
+prize.max_wheel_rotation_angle=Maximum rotation angle of the wheel cannot exceed 360 degrees
+prize.max_prize_level_characters=Maximum number of characters for the prize level is 3
+prize.max_prize_name_characters=Maximum number of characters for the prize quantity is 10
+prize.max_prize_quantity_characters=Maximum number of characters for the prize quantity is 10
+prize.max_winning_weight=Maximum value for the winning weight is 100
+prize.max_remaining_prize_quantity_characters=Maximum number of characters for the remaining prize quantity is 10
+
+#\u4EA7\u54C1\u4FE1\u606F
+product.information=Product Information
+product.Common.Name=Common Name
+product.Import.Data=Import Data
+product.Specification=Specification
+product.Registration.Code=Registration Code
+product.Dosage.Form=Dosage Form
+product.Main.Ingredient=Main Ingredient
+product.Performance.Factor=Performance Factor
+product.Regular.or.Custom=Regular/Custom
+product.Edit.Product.Image=Edit Product Image
+product.Box.Weight=Box Weight (Kg/L)
+product.DealerName=Dealer Name
+
+
+query.log.Numberofqueries = Number of queries
+query.log.Firstquerytime = First query time
+#\u7ECF\u9500\u5546\u4FE1\u606F
+Dealer.Information.Company.Name=Company Name
+Dealer.Information.Company.Status=Company Status
+Dealer.Information.Normal=Normal
+Dealer.Information.Disabled=Disabled
+Dealer.Information.ExpandOrCollapse=Expand/Collapse
+Dealer.Information.Institution.Code=Institution Code
+Dealer.Information.Province=Province
+Dealer.Information.City=City
+Dealer.Information.Agent.Territory=Agent Territory
+Dealer.Information.Institutional.Level=Institutional Level
+Dealer.Information.State=State
+Dealer.Information.Warehouse.Settings=Warehouse Settings
+Dealer.Information.Warehouse.Code=Warehouse Code
+Dealer.Information.Warehouse.Name=Warehouse Name
+Dealer.Information.Person.In.Charge=Person In Charge
+Dealer.Information.Agent.Products=Agent Products
+Dealer.Information.Pleaseselectaprovince=Please select a province.
+Dealer.Information.Pleaseselectacity=Please select a city.
+
+#\u51FA\u5E93\u5355\u636E\u4FE1\u606F
+Outbound.Document.Information.Stock-out.doc.No.=Stock-out doc No.
+Outbound.Document.Information.Shipping.Warehouse=Shipping Warehouse
+Outbound.Document.Information.The.NameOf.Client=The Name Of Client
+Outbound.Document.Information.The.CreatingTime.OfOrder=The Creating Time Of Order
+Outbound.Document.Information.Shipper=Shipper
+Outbound.Document.Information.Review.The.Information=Review The Information
+Outbound.Document.Information.Prepared.By=Prepared By
+Outbound.Document.Information.Product.Details=Product Details
+Outbound.Document.Information.Order.Detail.Documents=Order Detail Documents
+Outbound.Document.Information.Document.Information=Document Information
+Outbound.Document.Information.Stock-out.docNo.=Stock-out doc No.
+Outbound.Document.Information.Shipping.Agency=Shipping Agency
+Outbound.Document.Information.Document.Details=Document Details
+Outbound.Document.Information.Serial.Number=Serial Number
+Outbound.Document.Information.Product.Name=Product Name
+Outbound.Document.Information.Quantity=Quantity
+Outbound.Document.Information.Unit=Unit
+Outbound.Document.Information.Batch.Number=Batch Number
+Outbound.Document.Information.Auxiliary.Attribute=Auxiliary Attribute
+Outbound.Document.Information.Specification.Number=Specification Number
+Outbound.Document.Information.View.Barcode=View Barcode
+Outbound.Document.Information.Barcode.Details=Barcode Details
+Outbound.Document.Information.Barcode=Barcode
+Outbound.Document.Information.Start.Code=Start Code
+Outbound.Document.Information.End.Code=End Code
+Outbound.Document.Information.Number.OfBoxes=Number Of Boxes
+Outbound.Document.Information.Manual.Picking=Manual Picking
+Outbound.Document.Information.Select.Batch=Select Batch
+
+
+#\u5E93\u5B58\u4FE1\u606F
+inventory.Product.Number=Product Number
+inventory.Product.Name=Product Name
+inventory.Warehouse.Name=Warehouse Name
+inventory.Inventory.Loss=Inventory Loss
+inventory.Deficit.Preservation=Deficit Preservation	
+inventory.Inventory.Quantity=Inventory Quantity	
+inventory.Inventory.Surplus=Inventory Surplus
+inventory.Overage.Amount=Overage Amount	
+inventory.Surplus.Preservation=Surplus Preservation	
+inventory.Batch=Batch
+inventory.Stock.Quantity/Box=Stock Quantity/Box
+inventory.Weight=Weight
+inventory.Update.Time=Update Time
+inventory.In.And.Out.Signs=In And Out Signs
+inventory.Number.Of.Changes=Number Of Changes
+inventory.Current.Stock.Remaining.Quantity=Current Stock Remaining Quantity
+inventory.Reason.For.Change=Reason For Change
+inventory.Warehouse.Code=Warehouse Code
+
+
+Inventory.ReduceConfirmation=Are you sure you want to reduce inventory?
+Inventory.OneRecordAtATime=Only one record can be set at a time.
+Inventory.QuantityMaxLength=Quantity cannot exceed 10 characters.
+Inventory.QuantityNotEmpty=Quantity cannot be empty.
+Inventory.QuantityNumberFormat=Quantity must be an integer or a decimal.
+Inventory.IncreaseConfirmation=Are you sure you want to increase inventory?
+
+#\u5165\u5E93\u5355\u636E\u4FE1\u606F
+Inbound.Document.Information.Stock-in.doc.Number=Stock-in doc Number
+Inbound.Document.Information.Receiver.Code=Receiver Code
+Inbound.Document.Information.Receiving.Warehouse.Name=Receiving Warehouse Name
+
+#\u6D88\u8D39\u8005\u4FE1\u606F\u65E5\u5FD7
+Consumer.Information.Log=Consumer Information Log
+Consumer.Information.Log.Code.Scanning.Address=Code Scanning Address
+Consumer.Information.Log.Dealer=Dealer
+Consumer.Information.Log.Telephone=Telephone
+Consumer.Information.Log.Sales.Address=Sales Address
+Consumer.Information.Log.Barcode=Barcode
+Consumer.Information.Log.Scan.Time=Scan Time
+Consumer.Information.Log.Cross-Region.Sell.Status=Cross-Region Sell Status
+#\u9632\u4F2A\u67E5\u8BE2\u8BB0\u5F55
+Anti-Counterfeiting.Query.Record=Anti-Counterfeiting Query Record
+
+#\u7528\u6237\u7BA1\u7406
+user=user
+user.Organization=Organization
+user.Management.Department=Management Department
+user.Expand=Expand
+user.Collapse=Collapse
+user.Refresh.Department=Refresh Department
+user.Login.Name=Login Name
+user.enter.password=Enter Password
+user.Phone.Number=Phone Number
+user.User.Status=User Status
+user.More.Operations=More Operations
+user.Reset.Password=Reset Password
+user.Assign.Roles=Assign Roles
+user.User.Assign.Role=User Role Assignment
+user.Department.Management=Department Management
+user.User.ID=User ID
+user.Import=Import
+user.deactivate.user=Are you sure you want to deactivate the user?
+user.activate.user=Are you sure you want to activate the user?
+user.login.account = Login Account
+user.role.number = Role ID
+user.sort = Sorting
+user.role.name = Role Name
+user.permission.character = Permission Character
+user.basic.info= Basic Information
+user.Position=Position
+user.Belonging.Organization=Belonging Organization
+user.Login.Password=Login Password
+user.Role=Role
+user.Other.Information=Other Information
+user.operation=operation
+user.Selectdepartment=Select a department
+user.Chooseposition=Choose a job position
+user.Enteraccount=Enter the login account
+user.affiliatedorganization=Please select the affiliated organization
+user.Keywords=Keywords
+user.show.search=show search
+user.hide.search=hide search
+user.exist=User already exists
+
+
+#\u89D2\u8272
+role.roleStatus=Role status
+role.displayOrder=Display order
+role.dataPermissions=Data permissions
+role.assignUsers=Assign users
+role.assignDataPermissions=Assign data permissions
+role.deactivateRole=Are you sure you want to deactivate the role?
+role.activateRole=Are you sure you want to activate the role?
+role.permission.controller.char = Permission character defined in controller, such as: @RequiresRoles("")
+role.menu.permission = Menu permission
+role.parentChildLinkage=Parent-child linkage.
+role.selectAll=Select all/deselect all.
+role.user.add=Add user.
+role.user.batch.revoke.permission = Batch revoke permission
+role.user.revoke.permission = Revoke permission
+role.user.select = Select user
+role.user.confirm.revoke.role=Are you sure you want to revoke the role of this user?
+role.user.confirm.delete.data=Are you sure you want to delete the selected ${length} data?
+role.data.scope = Data scope
+role.data.scope.all = All data permission
+role.data.scope.custom = Custom data permission
+role.data.scope.department = Department data permission
+role.data.scope.department.below = Department and below data permission
+role.data.scope.personal = Personal data permission
+role.data.scope.special = Special case, set as "Custom data permission"
+
+
+boxcode.Application.Amount=Application Amount
+boxcode.Application.Coating.Type=Application Type
+activity.Management=Activity Management
+please.select=Please select
+redemption.Winner'S.Phone.Number=Winner'S Phone Number
+error.msg.usernotexist=\u7528\u6237\u4E0D\u5B58\u5728
+error.msg.tokenisempty=token parameter is empty
+error.msg.otheractivity=Other actions involving this product are currently in progress; thus, please pause them first.
+error.msg.redeemexception=Redeem exception
+error.msg.notfoundwinningcode=The winning code information was not found!
+error.msg.winningcodehasbeen=The winning code has been redeemed!
+error.msg.searchsuccess=Search successful
+error.msg.searcherror=The query is abnormal, please contact the administrator!
+error.msg.nothavepermission=You do not have permission to view the code package password
+error.msg.entercorrectrate=Please enter the correct complement rate
+error.msg.totalnumber=The total number of application barcodes cannot exceed %
+error.msg.modifyfailed=Failed to modify picture!
+error.msg.importfailed=import failed:
+error.msg.importnotempty=Import product data cannot be empty!
+error.msg.namenotempty=Name is required
+error.msg.improtsuccess=Congratulations, all of the data was successfully imported! The data, a total of %d, are as follows:
+error.msg.importerror=Sorry, a total of %d things have successfully been imported, and a total of %d items have data formats that are wrong. The errors are as follows:
+error.msg.productimprotsuccess=Product{} imported successfully
+error.msg.productupdatesuccess=Product {} updated successfully
+error.msg.nameexists=Name already exists, please try again
+error.msg.mustgreaterzero=Quantity must be greater than 0
+error.msg.inventoryquantity=Inventory quantity is greater than current inventory
+error.msg.inventorygain=Inventory gain is successful!
+error.msg.filenameforbidden=The download is prohibited because the file name ({}) is forbidden.
+error.msg.failedtodownloadfile=Failed to download file
+error.msg.resourcenotallowed=The resource ({}) is Illegal, downloading is not allowed.
+error.msg.reqtoofrequently=The same request has been made too frequently, please try again in a minute.
+error.msg.operationfail=operation failed
+error.msg.insufficientpints=Insufficient points, each redemption needs the following points:
+error.msg.redeemfailed=Redeem failed, this product cannot be redeemed, please contact the staff
+error.msg.redeempoinsproduce=Redeem points for products
+error.msg.exchangefailed=Exchange failed, please contact the developer
+error.msg.cannotforcelogout=The currently logged in user cannot force logout
+error.msg.useroffline=\u7528\u6237\u5DF2\u4E0B\u7EBF
+error.msg.correntparameters=Please pass in correct parameters
+error.msg.openidempty=openId Is empty
+error.msg.queryexception=Query exception
+error.msg.winningcodeabnoraml=The winning code being obtained is abnormal
+error.msg.bingingwinningcode=Binding winning code information is abnormal
+error.msg.documentDetails=Document details cannot be empty!
+error.msg.agentproduct=The product in the document does not fall within the scope of the %s's agency!
+error.msg.queryabnormal=The query is abnormal, please scan the code again
+error.msg.handleexception=handle exception
+error.msg.redemptioncode=The redemption code does not exist
+error.msg.codehasredeemed=The code has already been redeemed, the redemption time:
+error.msg.redeemsuccessful=Redeem successful
+error.msg.failedredeem=Redeem failed
+error.msg.markgeneratedbox=Mark pre-generated box code abnormality, application numberid=
+error.msg.seedacquisition=Seed acquisition exception
+error.msg.notstock=There is no stock for this batch
+error.msg.warehousecurrently=The warehouse currently has inadequate stock of this batch of items.
+error.msg.productnotexist=The product does not exist, product number:
+error.msg.inventoryhandling=Exceptions in abnormal inventory handling
+error.msg.noinventory=There is no inventory of this batch of products in the current warehouse!!
+error.msg.inadequatestock=The warehouse currently has inadequate stock of this batch of items.
+error.msg.codenotexistsystem=The code does not exist in the system, please scan the correct code
+error.msg.uploadconsumer=Uploading consumer information is abnormal
+error.msg.correctbarcode=Please upload the correct barcode
+error.msg.barcodenotexistsystem=The barcode does not exist in the system
+error.msg.participatedintheactivity=This code has already participated in the activity
+error.msg.anti-counterfeitinginquiry=The marketing code is not activated, please activate it at the anti-counterfeiting inquiry
+error.msg.participatedintheactivity=This marketing code has participated in the activity
+error.msg.barcodeparticipatedintheactivity=This barcode has participated in the activity
+error.msg.barcodenotparticipatedactivity=This barcode has not participated in the activity
+error.msg.winningcodeuploaded=The winning code has been uploaded
+error.msg.uploadfail=Upload failed, data wasn't successfully saved
+error.msg.uploadabnormal=The upload is abnormal, please contact the administrator
+error.msg.winningcodeexception=Winning code acquisition exception
+error.msg.codehasredeenmed=The winning code has been redeemed
+error.msg.winningcodeboundinformation=The winning code has been bound to the winning information
+error.msg.quantityremaining=Insufficient quantity remaining
+error.msg.bindinformation=Bind the winning information successfully
+error.msg.noactivity=There is currently no activity of this type for this product, please keep checking back
+error.msg.productcodenotexist=The product corresponding to this code does not exist
+error.msg.gotactivity=Got activity successfully
+error.msg.cannotempty=barcode cannot be empty
+error.msg.custmoerempty=customer cannot be empty
+error.msg.noshippingagency=The stock-out is uploaded without a document and there is no shipping agency
+error.msg.misscode=The\u00A0 stock-out is uploaded without a document and the product code is missing
+error.msg.misswarehouse=The  stock-out is uploaded without a document and the shipping warehouse is missing
+error.msg.distributedtotheorganization=The organization does not have the agency right for the product {%s}, so it cannot be distributed to the organization
+error.msg.documentdetailsnotexist=The document or document details do not exist
+error.msg.multipledocumentdetails=There are multiple entries in the document or document details
+error.msg.documentissued=The document has been issued
+error.msg.maximum1000=A maximum of 1,000 barcodes can be scanned at once.
+error.msg.beenscanned=%s barcodes have been scanned for outbound delivery among them, please do not submit them again:
+error.msg.barcodenotsystem=Some barcodes do not exist in the system
+error.msg.barcodeuploadsystem=Some barcodes are not uploaded in the system:
+error.msg.codematchproduct=Part of the barcode does not match the product
+error.msg.cannotclose=The barcode has been uploaded, and the order cannot be temporarily terminated since the number of barcodes does not match the amount indicated in the document.
+error.msg.Successfulinventoryloss=Successful inventory loss!
+error.msg.Failedtoinventoryloss=Failed to inventory loss!
+error.msg.Uploadsuccess=Upload success
+error.msg.Uploadfailed=Upload failed
+error.msg.Thebarcodehasalreadybeencheckedoutinthesystem=The barcode has already been checked out in the system
+error.msg.Thedocumentismissingthecurrentorganization=The document is missing the current organization
+error.msg.Failedtosendemailpleasetryagainlater=Failed to send email, please try again later
+error.msg.Queryexception=Query exception
+error.msg.Successfullyobtained=Successfully obtained
+error.msg.Thewinningcodedoesnotexist
+error.msg.Themarketingcodedoesnotexistinthesystem
+error.msg.Themarketingcodehasparticipatedinth activity
+error.msg.Theprizeitemdoesnotexist=The winning code does not exist
+error.msg.Bindingexception=Binding exception
+error.msg.Themarketingcodedoesnotexist=The marketing code does not exist
+error.msg.Activityacquisitionexception=Activity acquisition exception
+error.msg.Thedocumentisanuploadwithoutadocument,butthereceivingorganizationismissing=The document is an upload without a document, but the receiving organization is missing
+error.msg.Thedocumentisanuploadwithoutadocument,butthereceivingwarehouseismissing=The document is an upload without a document, but the receiving warehouse is missing
+
+
+
+report.warehouse=Warehouse
+report.totalInventory=Total Inventory (Box)
+report.selectWareHouse=Please Select A Warehouse
+report.Physical.Inventory=Warehouse Physical Inventory Report
+report.OutboundQuantity=Outbound Quantity (Box)
+report.InboundQuantity=Inbound Quantity (Box)
+redemption.from.title=IntegralOrder
+qr.code.applicationrecord=Qr Code Application Record
+Inbound.Document.Information.Receiving.Warehouse=Receiving Warehouse
+Inbound.Document.Information.Receiver=Receiver 
+product.DepartmentStatus=Department status
+product.DisplayOrder=Display order
+product.SuperiorDepartment=Superior department
+product.RegistrationAddress=Registration address
+product.ModifyLogo=Modify logo
+product.ModifyProductIntroductionImage=Modify product introduction image
+product.ModifyProductReportImage=Modify product report image
+product.ParticipateInActivities=Participate in activities or not
+product.PointsRequiredForRedemption=Points required for redemption
+product.ProductIntroduction=Product description
+product.ProductRedeemablePoints=Product redeemable points
+product.ExecutionStandard=Execution standard
+product.UsageMethod=Usage mode
+product.ReceivingWarehouse=Receiving warehouse
+product.ShippingWarehouse=Shipping warehouse
+product.ReceivingOrganization=Receiving organization
+product.IsClosedOrNot=Closed or not
+product.specification=Product Specification
+index.PersonalCente=Personal Cente
+index.online=online
+index.refresh=refresh
+index.changepassword=Change Password
+index.logout=Log out
+index.homepage=Home Page
+index.resetpassword=Reset Password
+
+reset.changeUserPassword = Change User Password
+reset.loginName = Login Name
+reset.oldPassword = Old Password
+reset.newPassword = New Password
+reset.confirmPassword = Confirm Again
+reset.requiredOldPassword = Please enter the original password
+reset.invalidOldPassword = The original password is incorrect
+reset.minPasswordLength = Password cannot be less than 5 characters
+reset.maxPasswordLength = Password cannot be more than 20 characters
+reset.confirmNewPassword = Please enter your password again
+reset.mismatchedPasswords = The two passwords entered do not match
+
+reset.password.enter.again=Please enter your password again
+reset.password.enter.new=Please enter a new password
+reset.password.enter.new.again=Please enter the new password again
+reset.passwordDigitsOnly=Password can only be 0-9 digits
+reset.passwordLettersOnly=Password can only be letters a-z and A-Z
+reset.passwordAlphanumeric=Password must contain (letters, digits)
+reset.passwordSpecialChars=Password must contain (letters, digits, special characters! @ # $% ^ & * () - = _ +)
+
+
+
+
+person.Personal.Data=Personal Data
+person.Change.Avatar=Change Avatar
+person.Login.Name=Login Name
+person.Phone.Number=Phone Number
+person.Department=Department
+person.Email.Address=Email Address
+person.Create.Time=Create Time
+person.Basic.Info=Basic Info
+person.Change.Password=Change Password
+person.User.Name=User Name
+person.Enter.User.Name=Enter User Name
+person.Enter.Phone.Number=Enter Phone Number
+person.Email=Email
+person.Gender=Gender
+person.Male=Male
+person.Female=Female
+person.Save=Save
+person.Close=Close
+person.Old.Password=Old Password
+person.Enter.Old.Password=Enter Old Password
+person.New.Password=New Password
+person.Enter.New.Password=Enter New Password
+person.Password.Only.Digits=Password only contains digits 0-9.
+person.Password.Only.Letters=Password only contains letters a-z and A-Z.
+person.Password.Contains.Letter.And.Number=Password must contain at least one letter and one number.
+person.Password.Contains.Special.Character=Password must contain at least one letter, one number, and one special character from !@#$%^&*()-=_+.
+person.Confirm.Password=Confirm Password
+person.Enter.Confirm.Password=Enter Confirm Password
+person.Change.Avatar=Change Avatar
+person.Confirm=Confirm
+person.Cancel=Cancel
+person.Enter.User.Name=Enter User Name
+person.Enter.Email=Enter Email
+person.Email.Exists=Email already exists.
+person.Enter.Phone.Number=Enter Phone Number
+person.Phone.Number.Exists=Phone number already exists.
+person.Enter.Old.Password=Enter Old Password
+person.Incorrect.Old.Password=Incorrect old password.
+person.Enter.New.Password=Enter New Password
+person.Password.Too.Short=Password cannot be shorter than 6 characters.
+person.Password.Too.Long=Password cannot be longer than 20 characters.
+person.Reenter.New.Password=Re-enter New Password
+person.Passwords.Do.Not.Match=Passwords do not match.
+person.uploadImage=Upload Image
+activity.records=Participate In Event Records
+redeem.Record=Redeem Points Record
+redemption=Redemption
+marking.code.log=Marketing Code Status Log
+activity.configuration=Activity Configuration
+Dealer.Information.Company=Company
+Dealer.Information.Add.Agent.Products=Add Agent Products
+Dealer.Information.AddProduct=Please select the products to add.
+inventory.Stock=Stock
+required=required

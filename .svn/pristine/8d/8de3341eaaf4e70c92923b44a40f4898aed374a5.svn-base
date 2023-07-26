@@ -1,0 +1,126 @@
+package com.linkwin.order.mapper;
+
+import java.util.List;
+
+import com.linkwin.basedata.domain.Warehouse;
+import com.linkwin.order.domain.BillOrder;
+import com.linkwin.order.domain.BillOrderDetail;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
+/**
+ * 单据Mapper接口
+ * 
+ * @author ruoyi
+ * @date 2022-05-25
+ */
+@Repository
+public interface BillOrderMapper 
+{
+    /**
+     * 查询单据
+     * 
+     * @param id 单据主键
+     * @return 单据
+     */
+    public BillOrder selectBillOrderById(Long id);
+
+    /**
+     * 查询单据列表
+     * 
+     * @param billOrder 单据
+     * @return 单据集合
+     */
+    public List<BillOrder> selectBillOrderList(BillOrder billOrder);
+
+    /**
+     * 新增单据
+     * 
+     * @param billOrder 单据
+     * @return 结果
+     */
+    public int insertBillOrder(BillOrder billOrder);
+
+    /**
+     * 修改单据
+     * 
+     * @param billOrder 单据
+     * @return 结果
+     */
+    public int updateBillOrder(BillOrder billOrder);
+
+
+
+    /**
+     * 删除单据
+     * 
+     * @param id 单据主键
+     * @return 结果
+     */
+    public int deleteBillOrderById(Long id);
+
+    /**
+     * 批量删除单据
+     * 
+     * @param ids 需要删除的数据主键集合
+     * @return 结果
+     */
+    public int deleteBillOrderByIds(String[] ids);
+
+    /**
+     * 批量删除单据明细
+     * 
+     * @param ids 需要删除的数据主键集合
+     * @return 结果
+     */
+    public int deleteBillOrderDetailByOrderNos(String[] ids);
+    
+    /**
+     * 批量新增单据明细
+     * 
+     * @param billOrderDetailList 单据明细列表
+     * @return 结果
+     */
+    public int batchBillOrderDetail(List<BillOrderDetail> billOrderDetailList);
+    
+
+    /**
+     * 通过单据主键删除单据明细信息
+     * 
+     * @param id 单据ID
+     * @return 结果
+     */
+    public int deleteBillOrderDetailByOrderNo(String id);
+
+    public List<BillOrder> getOrderList(BillOrder billOrder);
+    List<Warehouse> selectByOrganCode(String organCode);
+
+    public List<BillOrder> selectBillOrderByorderNoAnddetailID(BillOrder billOrder);
+
+    /**
+     * 根据单据号查单据明细
+     * @param orderNo
+     * @return
+     */
+    public  List<BillOrderDetail> selectByOrderNo(String orderNo);
+    public BillOrderDetail selectBillOrderDetailById(Long id);
+
+
+
+    public int updateBillOrderclose(@Param("orderNo") String  orderNo);
+
+    BillOrderDetail selectByOrderNoAndPdCode(@Param("orderNo") String orderNo, @Param("pdCode") String pdCode);
+
+    List<BillOrder> selectOrderNoList(BillOrder billOrder);
+
+    int updateBillOrderDetail(BillOrderDetail billOrderDetail);
+
+    public BillOrder selectBillOrderByOrderNo(String orderNo);
+
+    public  List<BillOrder> selectImBillOrderByPdCodeAndRceiveWarehouseCode(@Param("customer")String customer,@Param("rceiveWarehouseCode") String rceiveWarehouseCode, @Param("pdCode") String pdCode);
+    int updateBillOrderPicked(@Param("orderNo") String orderNo );
+
+
+
+
+}

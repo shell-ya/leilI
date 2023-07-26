@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkwin.activity.mapper.IntegralCodeStatusMapper">
+
+    <resultMap type="IntegralCodeStatus" id="IntegralCodeStatusResult">
+        <result property="id"    column="id"    />
+        <result property="markCode"    column="mark_code"    />
+        <result property="status"    column="status"    />
+        <result property="scanTime"    column="scan_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="activityType"    column="activity_type"    />
+    </resultMap>
+
+    <sql id="selectIntegralCodeStatusVo">
+        select id, mark_code, status, scan_time, create_time,activity_type from integral_code_status
+    </sql>
+
+    <select id="selectIntegralCodeStatusList" parameterType="IntegralCodeStatus" resultMap="IntegralCodeStatusResult">
+        <include refid="selectIntegralCodeStatusVo"/>
+        <where>
+            <if test="markCode != null  and markCode != ''"> and mark_code = #{markCode}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="scanTime != null "> and scan_time = #{scanTime}</if>
+            <if test="activityType != null and activityType !='' "> and activity_type = #{activityType}</if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectIntegralCodeStatusById" parameterType="Long" resultMap="IntegralCodeStatusResult">
+        <include refid="selectIntegralCodeStatusVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertIntegralCodeStatus" parameterType="IntegralCodeStatus">
+        insert into integral_code_status
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="markCode != null">mark_code,</if>
+            <if test="status != null">status,</if>
+            <if test="scanTime != null">scan_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="activityType != null">activity_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="markCode != null">#{markCode},</if>
+            <if test="status != null">#{status},</if>
+            <if test="scanTime != null">#{scanTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="activityType != null">#{activityType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIntegralCodeStatus" parameterType="IntegralCodeStatus">
+        update integral_code_status
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="markCode != null">mark_code = #{markCode},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="scanTime != null">scan_time = #{scanTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="activityType != null and activityType != '' ">activity_type = #{activityType},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteIntegralCodeStatusById" parameterType="Long">
+        delete from integral_code_status where id = #{id}
+    </delete>
+
+    <delete id="deleteIntegralCodeStatusByIds" parameterType="String">
+        delete from integral_code_status where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectByMarkCode" resultMap="IntegralCodeStatusResult">
+        <include refid="selectIntegralCodeStatusVo"></include>
+        where mark_code = #{markCode}
+    </select>
+
+</mapper>

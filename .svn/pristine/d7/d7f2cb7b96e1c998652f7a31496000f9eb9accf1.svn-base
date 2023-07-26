@@ -1,0 +1,165 @@
+package com.linkwin.web.controller.face;
+
+
+
+import com.alibaba.fastjson.JSONObject;
+import com.linkwin.basedata.domain.ManageOrganizations;
+import com.linkwin.basedata.domain.Product;
+import com.linkwin.basedata.service.IProductService;
+import com.linkwin.common.annotation.Log;
+import com.linkwin.common.annotation.RepeatSubmit;
+import com.linkwin.common.core.controller.BaseController;
+import com.linkwin.common.core.domain.AjaxResult;
+import com.linkwin.common.enums.BusinessType;
+
+
+import com.linkwin.log.domain.UploadLog;
+import com.linkwin.log.service.IUploadLogService;
+import com.linkwin.log.service.impl.UploadLogServiceImpl;
+import com.linkwin.order.domain.BillOrder;
+import com.linkwin.order.mapper.BillOrderMapper;
+import com.linkwin.order.mapper.InterfaceBillOrderMapper;
+import com.linkwin.order.service.IBillOrderService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 系统机构Controller
+ *
+ * @author ruoyi
+ * @date 2021-09-24
+ */
+@RestController
+@RequestMapping("/interface")
+@Slf4j
+public class SysInterfaceController extends BaseController {
+
+
+    @Autowired
+    private IProductService productService;
+    @Autowired
+    private  IBillOrderService billOrderService;
+    @Autowired
+    private BillOrderMapper billOrderMapper;
+    @Autowired
+    private InterfaceBillOrderMapper interfaceBillOrderMapper;
+    @Autowired
+    private IUploadLogService uploadLogService;
+
+
+    /**
+     * 入库上传
+     *
+     * @return
+     */
+    @Log(title = "入库上传", businessType = BusinessType.UPDATE)
+    @PostMapping("/inUploadCodeFile")
+    @ResponseBody
+    @RepeatSubmit(interval = 60000, message = "同一请求过于频繁，请在1分钟后重试")
+    public AjaxResult inUploadCodeFile(@RequestBody List<Map<String, Object>> map) {
+        AjaxResult a = billOrderService.dealInBillUpload(map);
+        if(!"0".equals(a.get("code").toString())){
+            UploadLog uploadLog = new UploadLog();
+            uploadLog.setJson(JSONObject.toJSONString(map));
+            uploadLog.setResponse(a.get("msg").toString());
+            uploadLogService.insertUploadLog(uploadLog);
+        }
+        return a;
+    }
+    /**
+     * 出库上传
+     *
+     * @return
+     */
+    @Log(title = "出库上传", businessType = BusinessType.UPDATE)
+    @PostMapping("/outUploadCodeFile")
+    @ResponseBody
+    @RepeatSubmit(interval = 60000, message = "同一请求过于频繁，请在1分钟后重试")
+    public AjaxResult outBillUpload(@RequestBody List<Map<String, Object>> map) {
+        try{
+            AjaxResult a = billOrderService.dealOutBillUpload(map);
+            if(!"0".equals(a.get("code").toString())){
+                UploadLog uploadLog = new UploadLog();
+                uploadLog.setJson(JSONObject.toJSONString(map));
+                uploadLog.setResponse(a.get("msg").toString());
+                uploadLogService.insertUploadLog(uploadLog);
+            }
+            return a;
+        }catch (RuntimeException e){
+            return AjaxResult.error("上传失败" + e.getMessage());
+
+        }
+    }
+
+
+    /**
+     * 出库上传
+     *
+     * @return
+     */
+    @Log(title = "作废上传", businessType = BusinessType.UPDATE)
+    @PostMapping("/cancelUploadCodeFile")
+    @ResponseBody
+    public AjaxResult cancelUploadCodeFile(@RequestBody List<Map<String, Object>> map) {
+        return billOrderService.cancelUploadCodeFile(map);
+    }
+
+
+    @GetMapping("/GetManageOrganizations")
+    public AjaxResult getManageOrganizations() {
+        ManageOrganizations sysDept = new ManageOrganizations();
+        AjaxResult r = new AjaxResult();
+        try {
+//            SysUser sysUser = ShiroUtils.getSysUser();
+
+            return r.success(productService.selectManageOrganizationList(sysDept));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return  r.error("操作失败");
+        }
+    }
+
+    @GetMapping("/GetAllProducts")
+    public AjaxResult getAllProducts() {
+        AjaxResult r = new AjaxResult();
+        try {
+            Product productData = new Product();
+
+            return r.success(productService.selectAllProductList(productData));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return r.error("操作失败");
+         }
+    }
+
+    /**
+     * 根据类型获取单据
+     *
+     * @param orderType 单据类型
+     * @return
+     */
+    @Log(title = "单据", businessType = BusinessType.UPDATE)
+    @PostMapping("/GetOrder")
+    @ResponseBody
+    public AjaxResult GetOrder(@RequestParam("orderType") Integer orderType) {
+
+        try {
+            BillOrder billOrder = new BillOrder();
+            billOrder.setIsChecked(0);// 为关单的单据可以下载
+            List<BillOrder>  b=interfaceBillOrderMapper.getOrderListIF(billOrder);
+            return AjaxResult.success(b);
+//            return AjaxResult.success(billOrderMapper.getOrderList(billOrder));
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return  AjaxResult.error("操作失败");
+
+        }
+    }
+}
